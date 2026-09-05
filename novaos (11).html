@@ -1,0 +1,8223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NovaOS</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif}
+body{
+ color:white;
+ background:linear-gradient(135deg,#172554,#312e81 45%,#0f172a);
+ --accent:#2563eb;
+ --task:rgba(10,15,30,.88);
+ transition:.25s;
+}
+
+body.light{
+ color:#111827;
+ background:linear-gradient(135deg,#dbeafe,#e0e7ff,#f8fafc);
+ --task:rgba(255,255,255,.88);
+}
+
+button,input,textarea,select{font-family:inherit}
+button{cursor:pointer}
+
+.icon,.tbbtn,.appbtn,.winbtn,.store-card,.gamecard,.switch,.calc-grid button,.song{
+ transition:background .15s ease, transform .12s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+.appbtn:active,.tbbtn:active,.gamecard:active,.calc-grid button:active{
+ transform:scale(.96);
+}
+
+.icon:active{
+ transform:scale(.95);
+}
+
+#desktop{
+ position:absolute;
+ inset:0;
+ padding:18px;
+}
+
+.icon{
+ position:absolute;
+ width:82px;
+ height:82px;
+ text-align:center;
+ user-select:none;
+ border-radius:10px;
+ padding:4px;
+ cursor:pointer;
+}
+
+.icon:hover{background:#ffffff18}
+.icon .emoji{font-size:38px;display:block}
+.icon span{font-size:13px;text-shadow:0 2px 4px #000}
+body.light .icon span{text-shadow:0 1px 3px #fff}
+
+#taskbar{
+ position:absolute;
+ left:0;
+ right:0;
+ bottom:0;
+ height:54px;
+ background:var(--task);
+ backdrop-filter:blur(18px);
+ display:flex;
+ align-items:center;
+ padding:6px 10px;
+ gap:7px;
+ border-top:1px solid #ffffff22;
+ z-index:10000;
+}
+
+.tbbtn{
+ height:42px;
+ min-width:42px;
+ border:0;
+ border-radius:9px;
+ background:#ffffff12;
+ color:inherit;
+ font-size:20px;
+}
+
+.tbbtn:hover{background:#ffffff25}
+
+.tbbtn-running{position:relative}
+
+.tbbtn-running:after{
+ content:"";
+ position:absolute;
+ bottom:3px;
+ left:50%;
+ transform:translateX(-50%);
+ width:5px;
+ height:5px;
+ border-radius:50%;
+ background:var(--accent);
+}
+
+body.compact-mode .content{padding:10px}
+body.compact-mode .settings-row{padding:8px}
+
+body.reduce-motion *{
+ animation:none!important;
+ transition:none!important;
+}
+
+body.autohide-taskbar #taskbar{
+ transform:translateY(46px);
+ transition:.25s;
+}
+
+body.autohide-taskbar #taskbar:hover{
+ transform:translateY(0);
+}
+
+.contextmenu{
+ position:fixed;
+ display:none;
+ background:#1e293bf5;
+ backdrop-filter:blur(18px);
+ border:1px solid #ffffff22;
+ border-radius:10px;
+ padding:6px;
+ min-width:200px;
+ box-shadow:0 15px 40px #0008;
+ z-index:70000;
+}
+
+body.light .contextmenu{
+ background:#ffffffee;
+ color:#111827;
+ border:1px solid #00000012;
+}
+
+.contextmenu button{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ width:100%;
+ text-align:left;
+ border:0;
+ background:transparent;
+ color:inherit;
+ padding:10px 12px;
+ border-radius:7px;
+ font-size:14px;
+}
+
+.contextmenu button:hover{
+ background:#ffffff18;
+}
+
+body.light .contextmenu button:hover{
+ background:#00000010;
+}
+
+#clock{
+ margin-left:auto;
+ text-align:right;
+ font-size:13px;
+ line-height:17px;
+ padding:0 8px;
+}
+
+#start{
+ position:absolute;
+ left:10px;
+ bottom:62px;
+ width:430px;
+ max-height:calc(100vh - 90px);
+ overflow-y:auto;
+ background:rgba(18,24,45,.97);
+ backdrop-filter:blur(25px);
+ border:1px solid #ffffff22;
+ border-radius:16px;
+ padding:18px;
+ z-index:9999;
+ box-shadow:0 20px 60px #0008;
+ opacity:0;
+ transform:translateY(14px) scale(.97);
+ pointer-events:none;
+ transition:opacity .18s ease, transform .18s ease;
+}
+
+#start.show{
+ opacity:1;
+ transform:translateY(0) scale(1);
+ pointer-events:auto;
+}
+
+body.light #start{
+ background:rgba(248,250,252,.97);
+ color:#111827;
+}
+
+#startSearch{
+ width:100%;
+ margin-bottom:12px;
+}
+
+.apps{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:8px;
+}
+
+.appbtn{
+ border:0;
+ background:#ffffff10;
+ color:inherit;
+ border-radius:10px;
+ padding:12px;
+ text-align:left;
+ font-size:14px;
+}
+
+.appbtn:hover{background:#ffffff20}
+
+.window{
+ position:absolute;
+ left:180px;
+ top:80px;
+ width:680px;
+ height:480px;
+ background:#111827f5;
+ color:white;
+ border:1px solid #ffffff25;
+ border-radius:12px;
+ box-shadow:0 25px 70px #0009;
+ overflow:hidden;
+ display:none;
+ z-index:100;
+ animation:windowFadeIn .16s ease;
+}
+
+.window.closing{
+ animation:windowFadeOut .14s ease forwards;
+}
+
+@keyframes windowFadeIn{
+ from{opacity:0;transform:scale(.96) translateY(6px)}
+ to{opacity:1;transform:scale(1) translateY(0)}
+}
+
+@keyframes windowFadeOut{
+ from{opacity:1;transform:scale(1)}
+ to{opacity:0;transform:scale(.97)}
+}
+
+body.light .window{
+ background:#f8fafcf5;
+ color:#111827;
+}
+
+.titlebar{
+ height:42px;
+ background:#ffffff0b;
+ display:flex;
+ align-items:center;
+ padding:0 10px;
+ cursor:move;
+ user-select:none;
+}
+
+.title{font-weight:bold;flex:1}
+
+.winbtn{
+ width:30px;
+ height:28px;
+ border:0;
+ background:transparent;
+ color:inherit;
+ border-radius:6px;
+ font-size:16px;
+}
+
+.winbtn:hover{background:#ffffff20}
+.close:hover{background:#ef4444;color:white}
+
+.content{
+ height:calc(100% - 42px);
+ overflow:auto;
+ padding:18px;
+}
+
+.maximized{
+ left:0!important;
+ top:0!important;
+ width:100%!important;
+ height:calc(100% - 54px)!important;
+ border-radius:0!important;
+}
+
+.resize-handle{
+ position:absolute;
+ width:18px;
+ height:18px;
+ right:2px;
+ bottom:2px;
+ cursor:nwse-resize;
+ background:linear-gradient(135deg,transparent 50%,#ffffff55 50%);
+ border-bottom-right-radius:10px;
+ z-index:5;
+}
+
+body.light .resize-handle{
+ background:linear-gradient(135deg,transparent 50%,#00000030 50%);
+}
+
+.maximized .resize-handle{
+ display:none;
+}
+
+input,select{
+ background:#0f172a;
+ color:white;
+ border:1px solid #475569;
+ border-radius:7px;
+ padding:9px;
+}
+
+body.light input,
+body.light select{
+ background:white;
+ color:#111827;
+}
+
+textarea{
+ width:100%;
+ background:#020617;
+ color:white;
+ border:1px solid #334155;
+ border-radius:8px;
+ padding:12px;
+ resize:none;
+}
+
+body.light textarea{
+ background:white;
+ color:#111827;
+}
+
+.settings-row{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:15px;
+ padding:13px;
+ background:#ffffff0d;
+ border-radius:9px;
+ margin-bottom:8px;
+}
+
+.settings-row small{
+ opacity:.65;
+ display:block;
+}
+
+.switch{
+ width:45px;
+ height:24px;
+ border-radius:20px;
+ background:#475569;
+ cursor:pointer;
+ position:relative;
+ flex-shrink:0;
+}
+
+.switch.on{background:var(--accent)}
+
+.switch:after{
+ content:"";
+ width:18px;
+ height:18px;
+ background:white;
+ border-radius:50%;
+ position:absolute;
+ top:3px;
+ left:3px;
+ transition:.2s;
+}
+
+.switch.on:after{left:24px}
+
+.progress{
+ height:10px;
+ background:#334155;
+ border-radius:10px;
+ overflow:hidden;
+}
+
+.progress div{
+ height:100%;
+ background:var(--accent);
+}
+
+.store-card{
+ background:#ffffff0d;
+ border:1px solid #ffffff12;
+ border-radius:12px;
+ padding:14px;
+ margin-bottom:10px;
+ display:flex;
+ align-items:center;
+ gap:12px;
+}
+
+.store-icon{font-size:35px}
+.store-info{flex:1}
+.store-info b{font-size:16px}
+.store-info small{display:block;opacity:.7;margin-top:4px}
+
+.store-card button{
+ border:0;
+ border-radius:8px;
+ padding:9px 14px;
+ background:var(--accent);
+ color:white;
+}
+
+.notification{
+ position:absolute;
+ right:18px;
+ bottom:70px;
+ width:310px;
+ background:rgba(15,23,42,.96);
+ border:1px solid #ffffff22;
+ border-radius:12px;
+ padding:14px;
+ box-shadow:0 10px 35px #0008;
+ z-index:30000;
+ animation:notificationIn .25s;
+}
+
+@keyframes notificationIn{
+ from{transform:translateX(350px);opacity:0}
+ to{transform:translateX(0);opacity:1}
+}
+
+.calc-display{
+ width:100%;
+ height:55px;
+ font-size:25px;
+ text-align:right;
+ margin-bottom:10px;
+}
+
+.calc-grid{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:7px;
+}
+
+.calc-grid button{
+ height:50px;
+ border:0;
+ border-radius:8px;
+ background:#ffffff12;
+ color:inherit;
+ font-size:18px;
+}
+
+.terminal{
+ background:#020617;
+ color:#22c55e;
+ height:320px;
+ border-radius:8px;
+ padding:12px;
+ overflow:auto;
+ font-family:monospace;
+}
+
+.term-input{
+ width:100%;
+ background:#020617!important;
+ color:#22c55e!important;
+ border:0!important;
+ outline:0;
+ font-family:monospace;
+}
+
+.browserbar{
+ display:flex;
+ gap:6px;
+}
+
+.browserbar input{flex:1}
+
+.browserpage{
+ background:white;
+ color:#111827;
+ border-radius:8px;
+ min-height:330px;
+ padding:20px;
+ margin-top:10px;
+}
+
+.paintcanvas{
+ background:white;
+ border:1px solid #475569;
+ cursor:crosshair;
+ max-width:100%;
+}
+
+.song{
+ padding:11px;
+ background:#ffffff0d;
+ border-radius:8px;
+ margin-bottom:6px;
+ cursor:pointer;
+}
+
+.song:hover{background:#ffffff20}
+
+#gameCanvas{
+ background:#020617;
+ border:2px solid #334155;
+ border-radius:8px;
+ display:block;
+ margin:auto;
+}
+
+.gamecenter{text-align:center}
+
+.cardgrid{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:8px;
+}
+
+.gamecard{
+ height:75px;
+ border:0;
+ border-radius:10px;
+ background:#ffffff12;
+ color:inherit;
+ font-size:24px;
+}
+
+.note{
+ background:#facc15;
+ color:#111827;
+ border-radius:8px;
+ padding:15px;
+}
+
+.big{
+ font-size:45px;
+ font-weight:bold;
+ text-align:center;
+ margin:20px;
+}
+
+.statgrid{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:10px;
+}
+
+.stat{
+ padding:18px;
+ border-radius:10px;
+ background:#ffffff0d;
+ text-align:center;
+}
+
+.stat b{
+ font-size:25px;
+ display:block;
+}
+
+#launcher{
+ position:fixed;
+ inset:0;
+ background:radial-gradient(circle at 50% 30%,#1e3a8a,#020617 70%);
+ z-index:60000;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ text-align:center;
+ padding:20px;
+}
+
+#launcherLogo{
+ font-size:80px;
+ margin-bottom:10px;
+}
+
+#launcherTitle{
+ font-size:30px;
+ font-weight:bold;
+ margin-bottom:8px;
+}
+
+#launcherSub{
+ opacity:.75;
+ margin-bottom:30px;
+ max-width:420px;
+}
+
+#launcherBtn{
+ border:0;
+ border-radius:12px;
+ padding:18px 34px;
+ font-size:18px;
+ font-weight:bold;
+ background:var(--accent);
+ color:white;
+ box-shadow:0 15px 40px #0007;
+}
+
+#launcherBtn:hover{
+ filter:brightness(1.1);
+}
+
+#boot{
+ position:fixed;
+ inset:0;
+ background:#020617;
+ z-index:50000;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+}
+
+#bootLogo{
+ font-size:65px;
+}
+
+#bootText{
+ font-size:25px;
+ margin-top:15px;
+}
+
+body.hide-icons .icon{display:none}
+
+body.small-icons .icon{
+ transform:scale(.8);
+ transform-origin:top left;
+}
+
+body.large-icons .icon{
+ transform:scale(1.2);
+ transform-origin:top left;
+}
+
+body.transparent-windows .window{
+ background:#111827c9;
+}
+
+body.no-animations *{
+ animation:none!important;
+ transition:none!important;
+}
+
+body.high-contrast{
+ filter:contrast(1.25);
+}
+
+body.big-cursor,
+body.big-cursor *{
+ cursor:default!important;
+}
+
+body.big-cursor button,
+body.big-cursor .icon,
+body.big-cursor select,
+body.big-cursor input{
+ cursor:pointer!important;
+}
+</style>
+</head>
+
+<body>
+
+<div id="launcher">
+<div id="launcherLogo">🚀</div>
+<div id="launcherTitle">NovaOS</div>
+<div id="launcherSub">Click below to install NovaOS onto your computer.</div>
+<button id="launcherBtn" onclick="launcherClick()">🚀 Click Here To Install NovaOS Onto Your Computer</button>
+<div id="installProgressWrap" style="display:none;width:320px;margin-top:25px">
+<div class="progress"><div id="installProgressBar" style="width:1%"></div></div>
+<div id="installProgressText" style="margin-top:8px;font-size:14px">1%</div>
+</div>
+</div>
+
+<div id="boot">
+<div id="bootLogo">🚀</div>
+<div id="bootText">Starting NovaOS...</div>
+</div>
+
+<div id="desktop">
+
+<div class="icon" style="left:18px;top:18px" ondblclick="openApp('files')" oncontextmenu="showAppContextMenu(event,'files')"><div class="emoji">📁</div><span>Files</span></div>
+<div class="icon" style="left:18px;top:110px" ondblclick="openApp('notepad')" oncontextmenu="showAppContextMenu(event,'notepad')"><div class="emoji">📝</div><span>Notepad</span></div>
+<div class="icon" style="left:18px;top:202px" ondblclick="openApp('terminal')" oncontextmenu="showAppContextMenu(event,'terminal')"><div class="emoji">💻</div><span>Terminal</span></div>
+<div class="icon" style="left:18px;top:294px" ondblclick="openApp('calculator')" oncontextmenu="showAppContextMenu(event,'calculator')"><div class="emoji">🧮</div><span>Calculator</span></div>
+<div class="icon" style="left:18px;top:386px" ondblclick="openApp('browser')" oncontextmenu="showAppContextMenu(event,'browser')"><div class="emoji">🌐</div><span>Browser</span></div>
+
+<div class="icon" style="left:110px;top:18px" ondblclick="openApp('paint')" oncontextmenu="showAppContextMenu(event,'paint')"><div class="emoji">🎨</div><span>Paint</span></div>
+<div class="icon" style="left:110px;top:110px" ondblclick="openApp('calendar')" oncontextmenu="showAppContextMenu(event,'calendar')"><div class="emoji">📅</div><span>Calendar</span></div>
+<div class="icon" style="left:110px;top:202px" ondblclick="openApp('music')" oncontextmenu="showAppContextMenu(event,'music')"><div class="emoji">🎵</div><span>Music</span></div>
+<div class="icon" style="left:110px;top:294px" ondblclick="openApp('settings')" oncontextmenu="showAppContextMenu(event,'settings')"><div class="emoji">⚙️</div><span>Settings</span></div>
+<div class="icon" style="left:110px;top:386px" ondblclick="openApp('store')" oncontextmenu="showAppContextMenu(event,'store')"><div class="emoji">🛒</div><span>App Store</span></div>
+
+</div>
+
+<div id="start">
+<h2>⊞ NovaOS</h2>
+<input id="startSearch" placeholder="Search apps..." oninput="searchStart()">
+<div class="apps" id="startApps"></div>
+</div>
+
+
+<!-- FILES -->
+
+<div class="window" id="files">
+<div class="titlebar">
+<span class="title">📁 File Explorer</span>
+<button class="winbtn" onclick="minimize('files')">—</button>
+<button class="winbtn" onclick="maximize('files')">□</button>
+<button class="winbtn close" onclick="closeApp('files')">×</button>
+</div>
+<div class="content">
+<h2>📁 This PC</h2>
+
+<div class="store-card"><div class="store-icon">💽</div><div class="store-info"><b>Local Disk (C:)</b><small>NovaOS System Drive</small><div class="progress"><div style="width:42%"></div></div></div></div>
+<div class="store-card"><div class="store-icon">📂</div><div class="store-info"><b>Documents</b><small>Your documents</small></div></div>
+<div class="store-card"><div class="store-icon">🖼️</div><div class="store-info"><b>Pictures</b><small>Your pictures</small></div></div>
+<div class="store-card"><div class="store-icon">🎵</div><div class="store-info"><b>Music</b><small>Your music files</small></div></div>
+</div>
+</div>
+
+
+<!-- NOTEPAD -->
+
+<div class="window" id="notepad">
+<div class="titlebar">
+<span class="title">📝 Notepad</span>
+<button class="winbtn" onclick="minimize('notepad')">—</button>
+<button class="winbtn" onclick="maximize('notepad')">□</button>
+<button class="winbtn close" onclick="closeApp('notepad')">×</button>
+</div>
+<div class="content">
+<h2>📝 Nova Notepad</h2>
+<textarea id="notes" style="height:320px"></textarea>
+<br><br>
+<button class="appbtn" onclick="saveNotes()">💾 Save</button>
+<button class="appbtn" onclick="clearNotes()">🗑️ Clear</button>
+</div>
+</div>
+
+
+<!-- TERMINAL -->
+
+<div class="window" id="terminal">
+<div class="titlebar">
+<span class="title">💻 Nova Terminal</span>
+<button class="winbtn" onclick="minimize('terminal')">—</button>
+<button class="winbtn" onclick="maximize('terminal')">□</button>
+<button class="winbtn close" onclick="closeApp('terminal')">×</button>
+</div>
+<div class="content">
+<div class="terminal" id="terminalOutput">
+NovaOS Terminal v3.0<br>
+Type <b>help</b> for commands.<br><br>
+</div>
+<input class="term-input" id="termInput" placeholder="Type a command..." onkeydown="terminalCommand(event)">
+</div>
+</div>
+
+
+<!-- CALCULATOR -->
+
+<div class="window" id="calculator">
+<div class="titlebar">
+<span class="title">🧮 Calculator</span>
+<button class="winbtn" onclick="minimize('calculator')">—</button>
+<button class="winbtn" onclick="maximize('calculator')">□</button>
+<button class="winbtn close" onclick="closeApp('calculator')">×</button>
+</div>
+<div class="content">
+
+<input id="calcDisplay" class="calc-display" readonly>
+
+<div class="calc-grid">
+<button onclick="calc('7')">7</button>
+<button onclick="calc('8')">8</button>
+<button onclick="calc('9')">9</button>
+<button onclick="calc('/')">÷</button>
+
+<button onclick="calc('4')">4</button>
+<button onclick="calc('5')">5</button>
+<button onclick="calc('6')">6</button>
+<button onclick="calc('*')">×</button>
+
+<button onclick="calc('1')">1</button>
+<button onclick="calc('2')">2</button>
+<button onclick="calc('3')">3</button>
+<button onclick="calc('-')">−</button>
+
+<button onclick="calc('0')">0</button>
+<button onclick="calc('.')">.</button>
+<button onclick="calculate()">=</button>
+<button onclick="calc('+')">+</button>
+
+<button onclick="clearCalc()" style="grid-column:span 4">CLEAR</button>
+</div>
+</div>
+</div>
+
+
+<!-- BROWSER -->
+
+<div class="window" id="browser">
+<div class="titlebar">
+<span class="title">🌐 Nova Browser</span>
+<button class="winbtn" onclick="minimize('browser')">—</button>
+<button class="winbtn" onclick="maximize('browser')">□</button>
+<button class="winbtn close" onclick="closeApp('browser')">×</button>
+</div>
+<div class="content">
+
+<div class="browserbar">
+<button class="appbtn" id="browserBackBtn" onclick="goBrowserBack()" style="flex:0 0 auto;width:44px;text-align:center" disabled>←</button>
+<button class="appbtn" id="browserForwardBtn" onclick="goBrowserForward()" style="flex:0 0 auto;width:44px;text-align:center" disabled>→</button>
+<button class="appbtn" onclick="reloadBrowser()" style="flex:0 0 auto;width:44px;text-align:center">⟳</button>
+<input id="browserInput" value="nova://home">
+<button class="appbtn" onclick="browse()" style="flex:0 0 auto">Go</button>
+</div>
+
+<div class="browserpage" id="browserPage">
+<h1>🌐 Nova Browser</h1>
+<p>Welcome to Nova Browser.</p>
+<p>Try <b>nova://home</b>, <b>nova://news</b>, <b>nova://system</b> or <b>nova://about</b> — or type a real website address, like <b>wikipedia.org</b> or <b>example.com</b>, to load it right here.</p>
+<p style="opacity:.7">Note: search engines and some sites (Google, YouTube, etc.) block being embedded anywhere on the web — that's their own security setting, not something NovaOS can override.</p>
+</div>
+
+</div>
+</div>
+
+
+<!-- PAINT -->
+
+<div class="window" id="paint">
+<div class="titlebar">
+<span class="title">🎨 Nova Paint</span>
+<button class="winbtn" onclick="minimize('paint')">—</button>
+<button class="winbtn" onclick="maximize('paint')">□</button>
+<button class="winbtn close" onclick="closeApp('paint')">×</button>
+</div>
+<div class="content">
+
+<h2>🎨 Nova Paint</h2>
+
+<input type="color" id="paintColor" value="#000000">
+<input type="range" id="paintSize" min="1" max="30" value="5">
+<button class="appbtn" onclick="clearPaint()">Clear</button>
+
+<br><br>
+
+<canvas id="paintCanvas" class="paintcanvas" width="580" height="290"></canvas>
+
+</div>
+</div>
+
+
+<!-- CALENDAR -->
+
+<div class="window" id="calendar">
+<div class="titlebar">
+<span class="title">📅 Calendar</span>
+<button class="winbtn" onclick="minimize('calendar')">—</button>
+<button class="winbtn" onclick="maximize('calendar')">□</button>
+<button class="winbtn close" onclick="closeApp('calendar')">×</button>
+</div>
+<div class="content">
+
+<h2 id="calendarTitle">📅 Calendar</h2>
+<div class="cardgrid" id="calendarGrid"></div>
+
+</div>
+</div>
+
+
+<!-- MUSIC -->
+
+<div class="window" id="music">
+<div class="titlebar">
+<span class="title">🎵 Nova Music</span>
+<button class="winbtn" onclick="minimize('music')">—</button>
+<button class="winbtn" onclick="maximize('music')">□</button>
+<button class="winbtn close" onclick="closeApp('music')">×</button>
+</div>
+<div class="content">
+
+<h2>🎵 Nova Music</h2>
+
+<input type="file" id="musicFiles" accept="audio/*" multiple style="display:none" onchange="loadMusicFiles(event)">
+
+<button class="appbtn" onclick="document.getElementById('musicFiles').click()">
+📂 Choose Music From Computer
+</button>
+
+<div id="musicPlayer" style="display:none">
+<h3 id="nowPlaying"></h3>
+<audio id="audioPlayer" controls style="width:100%"></audio>
+</div>
+
+<h3>Your Music</h3>
+<div id="songList">No music selected.</div>
+
+</div>
+</div>
+
+
+<!-- SETTINGS -->
+
+<div class="window" id="settings">
+<div class="titlebar">
+<span class="title">⚙️ Settings</span>
+<button class="winbtn" onclick="minimize('settings')">—</button>
+<button class="winbtn" onclick="maximize('settings')">□</button>
+<button class="winbtn close" onclick="closeApp('settings')">×</button>
+</div>
+
+<div class="content">
+
+<h2>⚙️ NovaOS Settings</h2>
+
+<h3>🎨 Appearance</h3>
+
+<div class="settings-row">
+<div>🌙 Dark Mode<small>Change the NovaOS theme</small></div>
+<div id="darkSwitch" class="switch on" onclick="toggleSetting('dark')"></div>
+</div>
+
+<div class="settings-row">
+<div>🔆 Screen Brightness<small>Dim or brighten the whole screen</small></div>
+<input type="range" id="brightness" min="40" max="150" value="100" oninput="changeBrightness()">
+</div>
+
+<div class="settings-row">
+<div>🖥️ Desktop Icons<small>Show or hide desktop icons</small></div>
+<div id="iconsSwitch" class="switch on" onclick="toggleSetting('icons')"></div>
+</div>
+
+<div class="settings-row">
+<div>🪟 Transparent Windows<small>Make windows translucent</small></div>
+<div id="transSwitch" class="switch" onclick="toggleSetting('trans')"></div>
+</div>
+
+<div class="settings-row">
+<div>✨ Animations<small>Window and notification animations</small></div>
+<div id="animSwitch" class="switch on" onclick="toggleSetting('anim')"></div>
+</div>
+
+<div class="settings-row">
+<div>🌈 High Contrast<small>Increase interface contrast</small></div>
+<div id="contrastSwitch" class="switch" onclick="toggleSetting('contrast')"></div>
+</div>
+
+<div class="settings-row">
+<div>🖱️ Large Cursor<small>Increase cursor visibility</small></div>
+<div id="cursorSwitch" class="switch" onclick="toggleSetting('cursor')"></div>
+</div>
+
+<div class="settings-row">
+<div>📐 Icon Size</div>
+<select id="iconSize" onchange="changeIconSize()">
+<option value="normal">Normal</option>
+<option value="small">Small</option>
+<option value="large">Large</option>
+</select>
+</div>
+
+<div class="settings-row">
+<div>🎨 Accent Colour</div>
+<select id="accent" onchange="changeAccent()">
+<option value="#2563eb">Blue</option>
+<option value="#7c3aed">Purple</option>
+<option value="#16a34a">Green</option>
+<option value="#dc2626">Red</option>
+<option value="#ea580c">Orange</option>
+<option value="#db2777">Pink</option>
+<option value="#0891b2">Cyan</option>
+</select>
+</div>
+
+<div class="settings-row">
+<div>🖼️ Wallpaper</div>
+<select id="wallpaper" onchange="changeWallpaper()">
+<option value="blue">Nova Blue</option>
+<option value="purple">Purple Space</option>
+<option value="green">Emerald</option>
+<option value="red">Red Planet</option>
+<option value="black">Midnight</option>
+<option value="light">Light Sky</option>
+</select>
+</div>
+
+
+<h3>🔔 Notifications</h3>
+
+<div class="settings-row">
+<div>🔔 Notifications</div>
+<div id="notifySwitch" class="switch on" onclick="toggleSetting('notify')"></div>
+</div>
+
+<div class="settings-row">
+<div>🔊 Notification Sounds</div>
+<div id="soundSwitch" class="switch on" onclick="toggleSetting('sound')"></div>
+</div>
+
+<div class="settings-row">
+<div>📌 Notification Position</div>
+<select id="notifyPosition" onchange="saveSetting('notifyPosition',this.value)">
+<option value="bottom">Bottom</option>
+<option value="top">Top</option>
+</select>
+</div>
+
+
+<h3>🔊 Sound</h3>
+
+<div class="settings-row">
+<div>🔊 Master Volume</div>
+<input type="range" id="volume" min="0" max="100" value="70" onchange="saveSetting('volume',this.value)">
+</div>
+
+
+<h3>🕐 Time & Date</h3>
+
+<div class="settings-row">
+<div>🕐 24 Hour Clock</div>
+<div id="clockSwitch" class="switch" onclick="toggleSetting('clock')"></div>
+</div>
+
+<div class="settings-row">
+<div>📅 Show Seconds</div>
+<div id="secondsSwitch" class="switch" onclick="toggleSetting('seconds')"></div>
+</div>
+
+
+<h3>⚡ Performance</h3>
+
+<div class="settings-row">
+<div>🚀 Hardware Acceleration</div>
+<div id="hardwareSwitch" class="switch on" onclick="toggleSetting('hardware')"></div>
+</div>
+
+<div class="settings-row">
+<div>🧹 Automatic Cleanup</div>
+<div id="cleanupSwitch" class="switch on" onclick="toggleSetting('cleanup')"></div>
+</div>
+
+<div class="settings-row">
+<div>💾 Save Window Positions</div>
+<div id="windowSaveSwitch" class="switch on" onclick="toggleSetting('windowSave')"></div>
+</div>
+
+
+<h3>🔐 Security</h3>
+
+<div class="settings-row">
+<div>🔒 Lock Screen</div>
+<div id="lockSwitch" class="switch" onclick="toggleSetting('lock')"></div>
+</div>
+
+<div class="settings-row">
+<div>⏰ Auto Lock</div>
+<select id="autoLock" onchange="saveSetting('autoLock',this.value)">
+<option value="never">Never</option>
+<option value="1">1 minute</option>
+<option value="5">5 minutes</option>
+<option value="10">10 minutes</option>
+</select>
+</div>
+
+
+<h3>💽 Storage</h3>
+
+<p>NovaOS storage usage</p>
+
+<div class="progress">
+<div id="storageBar" style="width:42%"></div>
+</div>
+
+<p id="storageText">54 GB used of 128 GB</p>
+
+<button class="appbtn" onclick="scanStorage()">🔍 Scan Storage</button>
+<button class="appbtn" onclick="clearCache()">🧹 Clear Cache</button>
+
+
+<h3>🔋 Power</h3>
+
+<div class="settings-row">
+<div>🌙 Battery Saver</div>
+<div id="batterySwitch" class="switch" onclick="toggleSetting('battery')"></div>
+</div>
+
+<div class="settings-row">
+<div>💤 Sleep Timer</div>
+<select id="sleepTimer" onchange="saveSetting('sleepTimer',this.value)">
+<option value="never">Never</option>
+<option value="5">5 minutes</option>
+<option value="15">15 minutes</option>
+<option value="30">30 minutes</option>
+</select>
+</div>
+
+
+<h3>🛠️ System</h3>
+
+<div class="settings-row">
+<div>🚀 Boot Animation</div>
+<div id="bootSwitch" class="switch on" onclick="toggleSetting('boot')"></div>
+</div>
+
+<div class="settings-row">
+<div>🧪 Developer Mode</div>
+<div id="developerSwitch" class="switch" onclick="toggleSetting('developer')"></div>
+</div>
+
+
+<h3>🖥️ Taskbar & Desktop</h3>
+
+<div class="settings-row">
+<div>📌 App Badges<small>Show a dot on running taskbar apps</small></div>
+<div id="badgesSwitch" class="switch on" onclick="toggleSetting('badges')"></div>
+</div>
+
+<div class="settings-row">
+<div>🙈 Auto-hide Taskbar<small>Hide the taskbar until you hover it</small></div>
+<div id="autohideTaskbarSwitch" class="switch" onclick="toggleSetting('autohideTaskbar')"></div>
+</div>
+
+<div class="settings-row">
+<div>🧲 Snap Icons to Grid<small>Keep desktop icons aligned</small></div>
+<div id="snapGridSwitch" class="switch" onclick="toggleSetting('snapGrid')"></div>
+</div>
+
+<div class="settings-row">
+<div>🗜️ Compact Mode<small>Reduce padding in windows and settings</small></div>
+<div id="compactSwitch" class="switch" onclick="toggleSetting('compact')"></div>
+</div>
+
+
+<h3>🔕 Notifications & Focus</h3>
+
+<div class="settings-row">
+<div>🌙 Do Not Disturb<small>Silence all notifications</small></div>
+<div id="dndSwitch" class="switch" onclick="toggleSetting('dnd')"></div>
+</div>
+
+
+<h3>🕵️ Privacy</h3>
+
+<div class="settings-row">
+<div>🕘 Activity History<small>Let NovaOS remember recently used apps</small></div>
+<div id="historySwitch" class="switch on" onclick="toggleSetting('history')"></div>
+</div>
+
+<div class="settings-row">
+<div>📍 Location Services<small>Allow apps to use your location</small></div>
+<div id="locationSwitch" class="switch" onclick="toggleSetting('location')"></div>
+</div>
+
+<div class="settings-row">
+<div>📊 Send Diagnostics<small>Share crash and usage data</small></div>
+<div id="diagnosticsSwitch" class="switch on" onclick="toggleSetting('diagnostics')"></div>
+</div>
+
+<div class="settings-row">
+<div>👪 Family Safety<small>Restrict certain apps and content</small></div>
+<div id="familySafetySwitch" class="switch" onclick="toggleSetting('familySafety')"></div>
+</div>
+
+<div class="settings-row">
+<div>👤 Guest Mode<small>Run NovaOS without saving data</small></div>
+<div id="guestModeSwitch" class="switch" onclick="toggleSetting('guestMode')"></div>
+</div>
+
+
+<h3>♿ Accessibility</h3>
+
+<div class="settings-row">
+<div>🎞️ Reduce Motion<small>Minimise on-screen movement</small></div>
+<div id="reduceMotionSwitch" class="switch" onclick="toggleSetting('reduceMotion')"></div>
+</div>
+
+<div class="settings-row">
+<div>🗣️ Screen Reader Hints<small>Announce app names on focus</small></div>
+<div id="screenReaderSwitch" class="switch" onclick="toggleSetting('screenReader')"></div>
+</div>
+
+<div class="settings-row">
+<div>🔠 Text Size</div>
+<select id="textSize" onchange="saveSetting('textSize',this.value)">
+<option value="small">Small</option>
+<option value="normal">Normal</option>
+<option value="large">Large</option>
+</select>
+</div>
+
+
+<h3>🌍 Language & Region</h3>
+
+<div class="settings-row">
+<div>🗨️ Language</div>
+<select id="language" onchange="saveSetting('language',this.value)">
+<option value="en">English</option>
+<option value="es">Español</option>
+<option value="fr">Français</option>
+<option value="de">Deutsch</option>
+<option value="ja">日本語</option>
+</select>
+</div>
+
+<div class="settings-row">
+<div>🗺️ Region</div>
+<select id="region" onchange="saveSetting('region',this.value)">
+<option value="au">Australia</option>
+<option value="us">United States</option>
+<option value="uk">United Kingdom</option>
+<option value="jp">Japan</option>
+<option value="de">Germany</option>
+</select>
+</div>
+
+<div class="settings-row">
+<div>🕰️ Timezone</div>
+<select id="timezoneSetting" onchange="saveSetting('timezoneSetting',this.value)">
+<option value="auto">Automatic</option>
+<option value="melbourne">Melbourne</option>
+<option value="london">London</option>
+<option value="newyork">New York</option>
+<option value="tokyo">Tokyo</option>
+</select>
+</div>
+
+
+<h3>🔄 Updates & Backup</h3>
+
+<div class="settings-row">
+<div>⬇️ Automatic Updates</div>
+<div id="autoUpdateSwitch" class="switch on" onclick="toggleSetting('autoUpdate')"></div>
+</div>
+
+<div class="settings-row">
+<div>🧵 Update Channel</div>
+<select id="updateChannel" onchange="saveSetting('updateChannel',this.value)">
+<option value="stable">Stable</option>
+<option value="beta">Beta</option>
+</select>
+</div>
+
+<div class="settings-row">
+<div>🚦 Launch Apps on Startup</div>
+<div id="startupAppsSwitch" class="switch" onclick="toggleSetting('startupApps')"></div>
+</div>
+
+<div class="settings-row">
+<div>💽 Backup Frequency</div>
+<select id="backupFrequency" onchange="saveSetting('backupFrequency',this.value)">
+<option value="never">Never</option>
+<option value="daily">Daily</option>
+<option value="weekly">Weekly</option>
+<option value="monthly">Monthly</option>
+</select>
+</div>
+
+<br>
+
+<button class="appbtn" onclick="resetSettings()">↩ Reset Settings</button>
+<button class="appbtn" onclick="clearNovaData()">🗑️ Clear NovaOS Data</button>
+
+</div>
+</div>
+
+
+<!-- APP STORE -->
+
+<div class="window" id="store">
+<div class="titlebar">
+<span class="title">🛒 Nova App Store</span>
+<button class="winbtn" onclick="minimize('store')">—</button>
+<button class="winbtn" onclick="maximize('store')">□</button>
+<button class="winbtn close" onclick="closeApp('store')">×</button>
+</div>
+
+<div class="content">
+
+<h2>🛒 Nova App Store</h2>
+<p>Browse everything you can add to NovaOS.</p>
+
+<input id="storeSearch" placeholder="Search the store..." oninput="renderStore()" style="width:100%;margin-bottom:12px">
+
+<div id="storeCategories" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"></div>
+
+<div id="storeList"></div>
+
+</div>
+</div>
+
+
+<!-- TASKBAR -->
+
+<div id="taskbar">
+<button class="tbbtn" onclick="toggleStart()">⊞</button>
+<div id="taskbarApps" style="display:flex;gap:7px"></div>
+<div id="clock"></div>
+</div>
+
+<div id="appContextMenu" class="contextmenu"></div>
+
+
+<script>
+
+let zIndex=1000;
+let notificationsEnabled=true;
+let soundsEnabled=true;
+let is24Hour=false;
+let showSeconds=false;
+let dndEnabled=false;
+let badgesEnabled=true;
+
+let pinnedApps=JSON.parse(
+ localStorage.getItem("novaPinned")||
+ '["files","notepad","terminal","calculator","browser","store"]'
+);
+
+let runningApps=new Set();
+
+
+/* BUILT-IN APPS */
+
+const builtInApps=[
+ {id:"files",icon:"📁",name:"Files"},
+ {id:"notepad",icon:"📝",name:"Notepad"},
+ {id:"terminal",icon:"💻",name:"Terminal"},
+ {id:"calculator",icon:"🧮",name:"Calculator"},
+ {id:"browser",icon:"🌐",name:"Browser"},
+ {id:"paint",icon:"🎨",name:"Paint"},
+ {id:"calendar",icon:"📅",name:"Calendar"},
+ {id:"music",icon:"🎵",name:"Music"},
+ {id:"settings",icon:"⚙️",name:"Settings"},
+ {id:"store",icon:"🛒",name:"App Store"}
+];
+
+
+/* STORE APPS */
+
+const novaStoreApps=[
+
+{id:"novaDodge",icon:"🎮",name:"Nova Dodge",description:"Dodge falling blocks.",type:"game",category:"Games"},
+{id:"spaceClicker",icon:"🚀",name:"Space Clicker",description:"Build your space empire.",type:"game",category:"Games"},
+{id:"blockBuilder",icon:"🧱",name:"Block Builder",description:"Build a pixel world.",type:"game",category:"Games"},
+{id:"novaRacing",icon:"🏎️",name:"Nova Racing",description:"Arcade racing game.",type:"game",category:"Games"},
+{id:"snake",icon:"🐍",name:"Snake",description:"Classic Snake.",type:"game",category:"Games"},
+{id:"memory",icon:"🧠",name:"Memory Match",description:"Match the cards.",type:"game",category:"Games"},
+{id:"galaxyExplorer",icon:"🌌",name:"Galaxy Explorer",description:"Explore the galaxy.",type:"game",category:"Games"},
+{id:"targetMaster",icon:"🎯",name:"Target Master",description:"Hit targets quickly.",type:"game",category:"Games"},
+{id:"spaceShooter",icon:"🛸",name:"Space Shooter",description:"Defend your spaceship.",type:"game",category:"Games"},
+{id:"novaFarm",icon:"🌳",name:"Nova Farm",description:"Build your farm.",type:"game",category:"Games"},
+{id:"puzzle",icon:"🧩",name:"Nova Puzzles",description:"Solve puzzles.",type:"game",category:"Games"},
+{id:"towerDefense",icon:"🏰",name:"Tower Defense",description:"Defend your base.",type:"game",category:"Games"},
+{id:"novaTetris",icon:"🟦",name:"Nova Tetris",description:"Stack falling blocks and clear lines.",type:"game",category:"Games"},
+{id:"nova2048",icon:"🔷",name:"Nova 2048",description:"Slide and merge tiles to reach 2048.",type:"game",category:"Games"},
+{id:"novaFlappy",icon:"🐤",name:"Nova Flap",description:"Flap through the gaps without crashing.",type:"game",category:"Games"},
+{id:"novaBreakout",icon:"🧱",name:"Nova Breakout",description:"Smash every brick with the bouncing ball.",type:"game",category:"Games"},
+{id:"novaMinesweeper",icon:"💣",name:"Nova Sweeper",description:"Clear the board without hitting a mine.",type:"game",category:"Games"},
+{id:"novaTicTacToe",icon:"❌",name:"Nova Tac-Toe",description:"Beat a smart computer opponent.",type:"game",category:"Games"},
+{id:"novaConnectFour",icon:"🔴",name:"Nova Connect Four",description:"Line up four in a row to win.",type:"game",category:"Games"},
+{id:"novaTrivia",icon:"❓",name:"Nova Trivia",description:"Test your knowledge across 8 questions.",type:"game",category:"Games"},
+{id:"novaSimon",icon:"🔴",name:"Nova Simon",description:"Repeat the growing colour and sound sequence.",type:"game",category:"Games"},
+{id:"novaWhack",icon:"🔨",name:"Whack-a-Mole",description:"Whack as many moles as you can in 20 seconds.",type:"game",category:"Games"},
+{id:"novaScramble",icon:"🔤",name:"Word Scramble",description:"Unscramble the letters to find the word.",type:"game",category:"Games"},
+{id:"novaHangman",icon:"🪢",name:"Nova Hangman",description:"Guess the word before you run out of tries.",type:"game",category:"Games"},
+{id:"novaReversi",icon:"⚫",name:"Nova Reversi",description:"Flank and flip your opponent's discs to win.",type:"game",category:"Games"},
+{id:"novaSudoku",icon:"🔢",name:"Mini Sudoku",description:"Fill the 4x4 grid — every row, column and box unique.",type:"game",category:"Games"},
+
+{id:"pixelStudio",icon:"🎨",name:"Pixel Studio",description:"Create pixel art.",type:"app",category:"Creativity"},
+{id:"novaRadio",icon:"📻",name:"Nova Radio",description:"Play radio stations.",type:"app",category:"Entertainment"},
+{id:"photoEditor",icon:"📸",name:"Photo Editor",description:"Load and preview pictures.",type:"app",category:"Creativity"},
+{id:"novaNews",icon:"📰",name:"Nova News",description:"Read live top headlines.",type:"app",category:"Entertainment"},
+{id:"novaBooks",icon:"📚",name:"Nova Books",description:"Digital bookshelf.",type:"app",category:"Productivity"},
+{id:"soundboard",icon:"🔊",name:"Soundboard",description:"Play built-in sounds.",type:"app",category:"Entertainment"},
+{id:"novaLab",icon:"🧪",name:"Nova Lab",description:"Run virtual experiments.",type:"app",category:"Utilities"},
+{id:"unitConverter",icon:"🔢",name:"Unit Converter",description:"Convert measurements.",type:"app",category:"Utilities"},
+{id:"worldClock",icon:"🌍",name:"World Clock",description:"World time zones.",type:"app",category:"Utilities"},
+{id:"passwordGenerator",icon:"🔐",name:"Password Generator",description:"Generate passwords.",type:"app",category:"Utilities"},
+{id:"colorPicker",icon:"🌈",name:"Color Picker",description:"Pick and copy colours.",type:"app",category:"Creativity"},
+{id:"textCounter",icon:"🔤",name:"Text Counter",description:"Count words and characters.",type:"app",category:"Utilities"},
+{id:"randomizer",icon:"🎲",name:"Randomizer",description:"Generate random numbers.",type:"app",category:"Utilities"},
+{id:"todo",icon:"✅",name:"Nova Tasks",description:"Manage a task list.",type:"app",category:"Productivity"},
+{id:"timer",icon:"⏲️",name:"Nova Timer",description:"Countdown timer.",type:"app",category:"Utilities"},
+
+{id:"novaWeather",icon:"🌤️",name:"Nova Weather",description:"Check the forecast for cities around the world.",type:"app",category:"Utilities"},
+{id:"novaStickyNotes",icon:"📌",name:"Sticky Notes",description:"Jot down quick colourful notes.",type:"app",category:"Productivity"},
+{id:"novaCurrency",icon:"💱",name:"Currency Converter",description:"Convert between world currencies.",type:"app",category:"Utilities"},
+{id:"novaHabits",icon:"📅",name:"Habit Tracker",description:"Build streaks on your daily habits.",type:"app",category:"Productivity"},
+{id:"novaJournal",icon:"📔",name:"Nova Journal",description:"Write and keep dated journal entries.",type:"app",category:"Productivity"},
+{id:"novaFlashcards",icon:"🗂️",name:"Nova Flashcards",description:"Make flip-to-reveal study cards.",type:"app",category:"Productivity"},
+{id:"novaStopwatch",icon:"⏱️",name:"Nova Stopwatch",description:"Time yourself with lap tracking.",type:"app",category:"Utilities"},
+{id:"novaBMI",icon:"⚖️",name:"BMI Calculator",description:"Estimate your body mass index.",type:"app",category:"Utilities"},
+{id:"novaTip",icon:"🧾",name:"Tip Calculator",description:"Split a bill and calculate the tip.",type:"app",category:"Utilities"},
+{id:"novaAge",icon:"🎂",name:"Age Calculator",description:"Work out an exact age from a birth date.",type:"app",category:"Utilities"},
+{id:"novaDice",icon:"🎲",name:"Dice Roller",description:"Roll a set of virtual dice.",type:"app",category:"Entertainment"},
+{id:"novaCoinFlip",icon:"🪙",name:"Coin Flip",description:"Flip a virtual coin.",type:"app",category:"Entertainment"},
+{id:"novaWallpaperMaker",icon:"🖼️",name:"Wallpaper Creator",description:"Design and apply a custom gradient wallpaper.",type:"app",category:"Creativity"},
+{id:"novaRecipe",icon:"🍳",name:"Recipe of the Day",description:"Shuffle through simple recipe ideas.",type:"app",category:"Entertainment"}
+
+];
+
+
+/* WINDOW FUNCTIONS */
+
+function openApp(id){
+
+ let el=document.getElementById(id);
+
+ if(!el){
+
+  let app=novaStoreApps.find(a=>a.id===id);
+
+  if(app){
+   if(localStorage.getItem("novaInstalled_"+id)==="true"){
+    createStoreWindow(app);
+   }else{
+    notify("Install "+app.name+" from the App Store first.");
+   }
+  }
+
+  return;
+ }
+
+ el.classList.remove("closing");
+ el.style.display="block";
+ el.style.zIndex=++zIndex;
+
+ markRunning(id);
+
+ if(id==="store")renderStore();
+ if(id==="calendar")createCalendar();
+
+}
+
+function closeApp(id){
+
+ const el=document.getElementById(id);
+
+ if(el){
+
+  el.classList.add("closing");
+
+  setTimeout(()=>{
+
+   el.style.display="none";
+   el.classList.remove("closing");
+
+  },140);
+
+ }
+
+ markClosed(appIdFromWindowId(id));
+
+}
+
+function minimize(id){
+
+ const el=document.getElementById(id);
+
+ if(el){
+
+  el.classList.add("closing");
+
+  setTimeout(()=>{
+
+   el.style.display="none";
+   el.classList.remove("closing");
+
+  },140);
+
+ }
+
+}
+
+function maximize(id){
+
+ const el=document.getElementById(id);
+
+ if(el)el.classList.toggle("maximized");
+
+}
+
+function toggleStart(){
+
+ const s=document.getElementById("start");
+
+ if(s.classList.contains("show")){
+
+  closeStartMenu();
+
+ }else{
+
+  s.classList.add("show");
+  renderStart();
+
+ }
+
+}
+
+function closeStartMenu(){
+
+ document.getElementById("start").classList.remove("show");
+
+}
+
+
+/* START MENU */
+
+function getInstalledApps(){
+
+ return novaStoreApps.filter(a=>
+ localStorage.getItem("novaInstalled_"+a.id)==="true"
+ );
+
+}
+
+function renderStart(){
+
+ const box=document.getElementById("startApps");
+
+ box.innerHTML="";
+
+ [...builtInApps,...getInstalledApps()].forEach(app=>{
+
+  const b=document.createElement("button");
+
+  b.className="appbtn";
+  b.dataset.name=app.name.toLowerCase();
+  b.innerHTML=app.icon+" "+app.name;
+
+  b.onclick=()=>{
+   closeStartMenu();
+   openApp(app.id);
+  };
+
+  b.oncontextmenu=e=>{
+   showAppContextMenu(e,app.id);
+  };
+
+  box.appendChild(b);
+
+ });
+
+}
+
+function searchStart(){
+
+ const q=document.getElementById("startSearch").value.toLowerCase();
+
+ document.querySelectorAll("#startApps .appbtn").forEach(b=>{
+  b.style.display=b.dataset.name.includes(q)?"block":"none";
+ });
+
+}
+
+
+/* STORE */
+
+let storeCategory="All";
+
+const STORE_CATEGORIES=["All","Games","Productivity","Utilities","Creativity","Entertainment"];
+
+function renderStoreCategories(){
+
+ const box=document.getElementById("storeCategories");
+
+ if(!box)return;
+
+ box.innerHTML="";
+
+ STORE_CATEGORIES.forEach(cat=>{
+
+  const b=document.createElement("button");
+
+  b.className="appbtn";
+  b.textContent=cat;
+  b.style.padding="8px 14px";
+
+  if(cat===storeCategory)b.style.background="var(--accent)";
+
+  b.onclick=()=>{
+   storeCategory=cat;
+   renderStore();
+  };
+
+  box.appendChild(b);
+
+ });
+
+}
+
+function renderStore(){
+
+ renderStoreCategories();
+
+ const list=document.getElementById("storeList");
+
+ if(!list)return;
+
+ const searchEl=document.getElementById("storeSearch");
+ const query=searchEl?searchEl.value.toLowerCase():"";
+
+ list.innerHTML="";
+
+ novaStoreApps
+ .filter(app=>storeCategory==="All"||app.category===storeCategory)
+ .filter(app=>
+  app.name.toLowerCase().includes(query)||
+  app.description.toLowerCase().includes(query)
+ )
+ .forEach(app=>{
+
+  const installed=
+  localStorage.getItem("novaInstalled_"+app.id)==="true";
+
+  const card=document.createElement("div");
+
+  card.className="store-card";
+
+  card.innerHTML=`
+   <div class="store-icon">${app.icon}</div>
+   <div class="store-info">
+    <b>${escapeHTML(app.name)}</b>
+    <small>${escapeHTML(app.description)}</small>
+    <small style="opacity:.5">${escapeHTML(app.category||"")}</small>
+   </div>
+   <button onclick="storeAction('${app.id}')">
+    ${installed?"Open":"Install"}
+   </button>
+  `;
+
+  list.appendChild(card);
+
+ });
+
+ if(!list.innerHTML)
+  list.innerHTML="<p style='opacity:.6'>No apps match your search.</p>";
+
+}
+
+function storeAction(id){
+
+ const app=novaStoreApps.find(a=>a.id===id);
+
+ if(!app)return;
+
+ if(localStorage.getItem("novaInstalled_"+id)!=="true"){
+
+  localStorage.setItem("novaInstalled_"+id,"true");
+
+  notify(app.name+" installed.");
+
+  renderStore();
+  renderStart();
+  renderDesktopIcons();
+  renderTaskbar();
+
+ }else{
+
+  openApp(id);
+
+ }
+
+}
+
+
+/* CREATE STORE WINDOWS */
+
+function createStoreWindow(app){
+
+ let existing=document.getElementById("store_"+app.id);
+
+ if(existing){
+
+  existing.classList.remove("closing");
+  existing.style.display="block";
+  existing.style.zIndex=++zIndex;
+  markRunning(app.id);
+  return;
+
+ }
+
+ existing=document.createElement("div");
+
+ existing.className="window";
+ existing.id="store_"+app.id;
+
+ existing.innerHTML=`
+ <div class="titlebar">
+ <span class="title">${app.icon} ${escapeHTML(app.name)}</span>
+ <button class="winbtn" onclick="minimize('store_${app.id}')">—</button>
+ <button class="winbtn" onclick="maximize('store_${app.id}')">□</button>
+ <button class="winbtn close" onclick="closeApp('store_${app.id}')">×</button>
+ </div>
+ <div class="content" id="content_${app.id}"></div>
+ `;
+
+ document.body.appendChild(existing);
+
+ existing.style.display="block";
+ existing.style.zIndex=++zIndex;
+
+ markRunning(app.id);
+
+ buildStoreApp(app,document.getElementById("content_"+app.id));
+
+ makeDraggable(existing);
+ makeResizable(existing);
+
+}
+
+
+/* TASKBAR PIN / RUNNING MANAGEMENT */
+
+function appIdFromWindowId(winId){
+
+ return winId.startsWith("store_")?winId.slice(6):winId;
+
+}
+
+function getAppMeta(id){
+
+ return [...builtInApps,...novaStoreApps].find(a=>a.id===id)||null;
+
+}
+
+function markRunning(id){
+
+ runningApps.add(id);
+
+ renderTaskbar();
+
+}
+
+function markClosed(id){
+
+ runningApps.delete(id);
+
+ renderTaskbar();
+
+}
+
+function togglePin(id){
+
+ const idx=pinnedApps.indexOf(id);
+
+ if(idx===-1){
+
+  pinnedApps.push(id);
+  notify("Pinned to taskbar.");
+
+ }else{
+
+  pinnedApps.splice(idx,1);
+  notify("Unpinned from taskbar.");
+
+ }
+
+ localStorage.setItem("novaPinned",JSON.stringify(pinnedApps));
+
+ renderTaskbar();
+
+}
+
+function renderTaskbar(){
+
+ const box=document.getElementById("taskbarApps");
+
+ if(!box)return;
+
+ const ids=[...pinnedApps];
+
+ runningApps.forEach(id=>{
+  if(!ids.includes(id))ids.push(id);
+ });
+
+ box.innerHTML="";
+
+ ids.forEach(id=>{
+
+  const app=getAppMeta(id);
+
+  if(!app)return;
+
+  const b=document.createElement("button");
+
+  b.className="tbbtn"+(runningApps.has(id)&&badgesEnabled?" tbbtn-running":"");
+  b.textContent=app.icon;
+  b.title=app.name;
+
+  b.onclick=()=>openApp(id);
+
+  b.oncontextmenu=e=>{
+   showAppContextMenu(e,id);
+  };
+
+  box.appendChild(b);
+
+ });
+
+}
+
+
+/* APP CONTEXT MENU (taskbar, start menu, desktop) */
+
+let contextMenuAppId=null;
+
+function isStoreApp(id){
+
+ return novaStoreApps.some(a=>a.id===id);
+
+}
+
+function isAppInstalled(id){
+
+ return !isStoreApp(id)||localStorage.getItem("novaInstalled_"+id)==="true";
+
+}
+
+function showAppContextMenu(e,id){
+
+ e.preventDefault();
+ e.stopPropagation();
+
+ contextMenuAppId=id;
+
+ const menu=document.getElementById("appContextMenu");
+
+ if(!menu)return;
+
+ const pinned=pinnedApps.includes(id);
+ const running=runningApps.has(id);
+ const store=isStoreApp(id);
+ const installed=isAppInstalled(id);
+
+ let html="";
+
+ if(installed){
+
+  html+=`<button onclick="contextOpenApp()">📂 Open</button>`;
+
+  html+=`<button onclick="contextTogglePin()">`+
+   (pinned?"📌 Unpin from taskbar":"📌 Pin to taskbar")+
+   `</button>`;
+
+  if(running){
+
+   html+=`<button onclick="contextCloseWindow()">✕ Close window</button>`;
+
+  }
+
+ }
+
+ if(store&&installed){
+
+  html+=`<button onclick="contextUninstall()" style="color:#ef4444">🗑️ Uninstall</button>`;
+
+ }
+
+ if(store&&!installed){
+
+  html+=`<button onclick="contextInstallApp()">⬇️ Install</button>`;
+
+ }
+
+ menu.innerHTML=html;
+
+ menu.style.display="block";
+
+ const rect=menu.getBoundingClientRect();
+
+ let left=e.clientX;
+ let top=e.clientY;
+
+ if(left+rect.width>window.innerWidth-10)left=window.innerWidth-rect.width-10;
+ if(top+rect.height>window.innerHeight-10)top=window.innerHeight-rect.height-10;
+
+ menu.style.left=Math.max(10,left)+"px";
+ menu.style.top=Math.max(10,top)+"px";
+
+}
+
+function hideAppContextMenu(){
+
+ const menu=document.getElementById("appContextMenu");
+
+ if(menu)menu.style.display="none";
+
+ contextMenuAppId=null;
+
+}
+
+function contextOpenApp(){
+
+ if(contextMenuAppId)openApp(contextMenuAppId);
+
+ hideAppContextMenu();
+
+}
+
+function contextTogglePin(){
+
+ if(contextMenuAppId)togglePin(contextMenuAppId);
+
+ hideAppContextMenu();
+
+}
+
+function contextCloseWindow(){
+
+ if(contextMenuAppId){
+
+  const winId=
+   document.getElementById(contextMenuAppId)?
+   contextMenuAppId:
+   "store_"+contextMenuAppId;
+
+  closeApp(winId);
+
+ }
+
+ hideAppContextMenu();
+
+}
+
+function contextInstallApp(){
+
+ if(contextMenuAppId)storeAction(contextMenuAppId);
+
+ hideAppContextMenu();
+
+}
+
+function contextUninstall(){
+
+ if(contextMenuAppId)uninstallApp(contextMenuAppId);
+
+ hideAppContextMenu();
+
+}
+
+function uninstallApp(id){
+
+ const app=novaStoreApps.find(a=>a.id===id);
+
+ if(!app)return;
+
+ const winId=document.getElementById(id)?id:"store_"+id;
+ const winEl=document.getElementById(winId);
+
+ if(winEl){
+
+  winEl.style.display="none";
+
+  if(winId.startsWith("store_"))winEl.remove();
+
+ }
+
+ runningApps.delete(id);
+
+ localStorage.removeItem("novaInstalled_"+id);
+
+ const pinIdx=pinnedApps.indexOf(id);
+
+ if(pinIdx!==-1){
+
+  pinnedApps.splice(pinIdx,1);
+
+  localStorage.setItem("novaPinned",JSON.stringify(pinnedApps));
+
+ }
+
+ renderStore();
+ renderStart();
+ renderTaskbar();
+ renderDesktopIcons();
+
+ notify(app.name+" uninstalled.");
+
+}
+
+document.addEventListener("click",hideAppContextMenu);
+document.addEventListener("contextmenu",e=>{
+ if(!e.target.closest(".icon")&&!e.target.closest("#taskbarApps")&&!e.target.closest("#startApps"))
+  hideAppContextMenu();
+});
+
+
+/* REAL STORE APPS */
+
+function buildStoreApp(app,c){
+
+ if(app.id==="novaDodge"){
+  c.innerHTML=`
+  <h2>🎮 Nova Dodge</h2>
+  <p>Use A/D or the arrow keys.</p>
+  <canvas id="storeDodgeCanvas" width="580" height="280" style="background:#020617;border-radius:8px"></canvas>
+  <p style="text-align:center">Score: <b id="dodgeScore">0</b></p>
+  <button class="appbtn" onclick="startStoreDodge()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="spaceClicker"){
+  c.innerHTML=`
+  <h2>🚀 Space Clicker</h2>
+  <div class="big">⭐ <span id="spaceCoins">0</span></div>
+  <button class="appbtn" style="width:100%;height:80px;text-align:center" onclick="spaceClick()">🚀 LAUNCH!</button>
+  <p>Every click earns 1 Space Credit.</p>`;
+  return;
+ }
+
+ if(app.id==="blockBuilder"){
+  c.innerHTML=`
+  <h2>🧱 Block Builder</h2>
+  <p>Click the grid to place blocks.</p>
+  <div id="blockGrid" class="cardgrid"></div>
+  <button class="appbtn" onclick="clearBlocks()">🗑️ Clear</button>`;
+  createBlockGrid();
+  return;
+ }
+
+ if(app.id==="novaRacing"){
+  c.innerHTML=`
+  <h2>🏎️ Nova Racing</h2>
+  <p>Use ← and → to change lanes and dodge oncoming traffic.</p>
+  <canvas id="racingCanvas" width="240" height="400" style="background:#1e293b;border-radius:8px;display:block;margin:0 auto"></canvas>
+  <p style="text-align:center">Score: <b id="racingScore">0</b></p>
+  <button class="appbtn" onclick="startRacing()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="snake"){
+  c.innerHTML=`
+  <h2>🐍 Snake</h2>
+  <canvas id="snakeCanvas" width="400" height="300" style="background:#020617"></canvas>
+  <p>Use arrow keys.</p>
+  <button class="appbtn" onclick="startSnake()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="memory"){
+  c.innerHTML=`
+  <h2>🧠 Memory Match</h2>
+  <div id="memoryGrid" class="cardgrid"></div>
+  <button class="appbtn" onclick="startMemory()">🔄 New Game</button>`;
+  startMemory();
+  return;
+ }
+
+ if(app.id==="galaxyExplorer"){
+  c.innerHTML=`
+  <h2>🌌 Galaxy Explorer</h2>
+  <p>Every click discovers a brand new, randomly generated planet.</p>
+  <div id="galaxyInfo" class="statgrid"></div>
+  <button class="appbtn" onclick="exploreGalaxy()">🔭 Explore</button>`;
+  renderGalaxy();
+  return;
+ }
+
+ if(app.id==="targetMaster"){
+  c.innerHTML=`
+  <h2>🎯 Target Master</h2>
+  <p>Hit the target as many times as you can in 15 seconds.</p>
+  <div id="targetArena" style="position:relative;width:100%;height:260px;background:#0f172a;border-radius:8px;overflow:hidden">
+  <button id="target" style="position:absolute;border:0;background:transparent;font-size:50px;cursor:pointer;display:none" onclick="hitTarget()">🎯</button>
+  </div>
+  <p style="text-align:center">Score: <b id="targetScore">0</b> &nbsp; Time left: <b id="targetTime">15</b>s</p>
+  <button class="appbtn" onclick="startTargetMaster()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="spaceShooter"){
+  c.innerHTML=`
+  <h2>🛸 Space Shooter</h2>
+  <p>← → to move, Space to fire.</p>
+  <canvas id="shooterCanvas" width="300" height="380" style="background:#020617;border-radius:8px;display:block;margin:0 auto"></canvas>
+  <p style="text-align:center">Score: <b id="shooterScore">0</b></p>
+  <button class="appbtn" onclick="startShooter()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="novaFarm"){
+  c.innerHTML=`
+  <h2>🌳 Nova Farm</h2>
+  <div class="statgrid">
+  <div class="stat">🌾<b id="farmCrops">0</b>Crops</div>
+  <div class="stat">💰<b id="farmCoins">0</b>Coins</div>
+  <div class="stat">💧<b id="farmWater">10</b>Water</div>
+  </div>
+  <br>
+  <button class="appbtn" onclick="plantCrop()">🌱 Plant</button>
+  <button class="appbtn" onclick="waterFarm()">💧 Water</button>
+  <button class="appbtn" onclick="harvestFarm()">🌾 Harvest</button>`;
+  return;
+ }
+
+ if(app.id==="puzzle"){
+  c.innerHTML=`
+  <h2>🧩 Nova Puzzles</h2>
+  <p id="puzzleQuestion"></p>
+  <div id="puzzleButtons"></div>`;
+  newPuzzle();
+  return;
+ }
+
+ if(app.id==="towerDefense"){
+  c.innerHTML=`
+  <h2>🏰 Tower Defense</h2>
+  <p>Build towers to defeat incoming enemies.</p>
+  <div class="statgrid">
+  <div class="stat">👾<b id="tdEnemies">10</b>Enemies</div>
+  <div class="stat">🏰<b id="tdTowers">0</b>Towers</div>
+  <div class="stat">💰<b id="tdMoney">100</b>Money</div>
+  </div>
+  <button class="appbtn" onclick="buildTower()">🏰 Build Tower</button>
+  <button class="appbtn" onclick="attackWave()">⚔️ Attack</button>`;
+  return;
+ }
+
+ if(app.id==="novaTetris"){
+  c.innerHTML=`
+  <h2>🟦 Nova Tetris</h2>
+  <p>Arrow keys to move and rotate, Down to drop faster.</p>
+  <canvas id="tetrisCanvas" width="240" height="400" style="background:#020617;border-radius:8px;display:block;margin:0 auto"></canvas>
+  <p style="text-align:center">Score: <b id="tetrisScore">0</b></p>
+  <button class="appbtn" onclick="startTetris()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="nova2048"){
+  c.innerHTML=`
+  <h2>🔷 Nova 2048</h2>
+  <p>Use the arrow keys. Merge matching tiles to reach 2048.</p>
+  <p>Score: <b id="game2048Score">0</b></p>
+  <div id="game2048Grid" class="cardgrid" style="grid-template-columns:repeat(4,1fr);max-width:340px;margin:auto"></div>
+  <br>
+  <button class="appbtn" onclick="start2048()">🔄 New Game</button>`;
+  start2048();
+  return;
+ }
+
+ if(app.id==="novaFlappy"){
+  c.innerHTML=`
+  <h2>🐤 Nova Flap</h2>
+  <p>Click the bird or press Space to flap.</p>
+  <canvas id="flappyCanvas" width="340" height="340" style="background:#0f172a;border-radius:8px;display:block;margin:0 auto;cursor:pointer" onclick="flappyFlap()"></canvas>
+  <p style="text-align:center">Score: <b id="flappyScore">0</b></p>
+  <button class="appbtn" onclick="startFlappy()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="novaBreakout"){
+  c.innerHTML=`
+  <h2>🧱 Nova Breakout</h2>
+  <p>Move your mouse over the canvas to steer the paddle.</p>
+  <canvas id="breakoutCanvas" width="360" height="300" style="background:#0f172a;border-radius:8px;display:block;margin:0 auto" onmousemove="breakoutMove(event)"></canvas>
+  <p style="text-align:center">Score: <b id="breakoutScore">0</b></p>
+  <button class="appbtn" onclick="startBreakout()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="novaMinesweeper"){
+  c.innerHTML=`
+  <h2>💣 Nova Sweeper</h2>
+  <p>Left-click to reveal a cell, right-click to flag a suspected mine.</p>
+  <div id="mineGridBox" class="cardgrid" style="grid-template-columns:repeat(8,1fr);max-width:340px;margin:auto"></div>
+  <br>
+  <button class="appbtn" onclick="startMinesweeper()">🔄 New Game</button>`;
+  startMinesweeper();
+  return;
+ }
+
+ if(app.id==="novaTicTacToe"){
+  c.innerHTML=`
+  <h2>❌ Nova Tac-Toe</h2>
+  <p>You're X, the computer is O. Good luck beating it!</p>
+  <div id="tttGrid" class="cardgrid" style="grid-template-columns:repeat(3,1fr);max-width:270px;margin:auto"></div>
+  <br>
+  <button class="appbtn" onclick="startTicTacToe()">🔄 New Game</button>`;
+  startTicTacToe();
+  return;
+ }
+
+ if(app.id==="novaConnectFour"){
+  c.innerHTML=`
+  <h2>🔴 Nova Connect Four</h2>
+  <p id="c4Turn">🔴 Red's turn</p>
+  <div id="c4Grid"></div>
+  <br>
+  <button class="appbtn" onclick="startConnectFour()">🔄 New Game</button>`;
+  startConnectFour();
+  return;
+ }
+
+ if(app.id==="novaTrivia"){
+  c.innerHTML=`
+  <h2>❓ Nova Trivia</h2>
+  <p>Score: <b id="triviaScore">0</b>/8</p>
+  <p id="triviaQuestion"></p>
+  <div id="triviaButtons"></div>
+  <br>
+  <button class="appbtn" onclick="startTrivia()">🔄 New Quiz</button>`;
+  startTrivia();
+  return;
+ }
+
+ if(app.id==="novaSimon"){
+  c.innerHTML=`
+  <h2>🔴 Nova Simon</h2>
+  <p>Watch the sequence, then repeat it by clicking the pads in order.</p>
+  <div id="simonBoard" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:260px;margin:auto"></div>
+  <p style="text-align:center">Round: <b id="simonRound">0</b></p>
+  <button class="appbtn" onclick="startSimon()">▶ Start</button>`;
+  buildSimonBoard();
+  return;
+ }
+
+ if(app.id==="novaWhack"){
+  c.innerHTML=`
+  <h2>🔨 Whack-a-Mole</h2>
+  <p>Click the moles before they disappear. 20 seconds on the clock.</p>
+  <div id="whackGrid" class="cardgrid" style="max-width:340px;margin:auto"></div>
+  <p style="text-align:center">Score: <b id="whackScore">0</b> &nbsp; Time: <b id="whackTime">20</b>s</p>
+  <button class="appbtn" onclick="startWhack()">▶ Start</button>`;
+  buildWhackGrid();
+  return;
+ }
+
+ if(app.id==="novaScramble"){
+  c.innerHTML=`
+  <h2>🔤 Word Scramble</h2>
+  <p>Unscramble the letters below:</p>
+  <div class="big" id="scrambleWord">------</div>
+  <input id="scrambleInput" placeholder="Your guess..." onkeydown="if(event.key==='Enter')checkScramble()">
+  <button class="appbtn" onclick="checkScramble()">Check</button>
+  <button class="appbtn" onclick="newScramble()">🔀 New Word</button>
+  <p id="scrambleFeedback"></p>
+  <p>Score: <b id="scrambleScore">0</b></p>`;
+  newScramble();
+  return;
+ }
+
+ if(app.id==="novaHangman"){
+  c.innerHTML=`
+  <h2>🪢 Nova Hangman</h2>
+  <div class="big" id="hangmanStage">🪢</div>
+  <div class="big" id="hangmanWord" style="font-size:30px;letter-spacing:8px">_ _ _ _ _</div>
+  <p style="text-align:center">Wrong guesses: <b id="hangmanWrong">0</b>/6</p>
+  <div id="hangmanLetters" style="text-align:center"></div>
+  <br>
+  <button class="appbtn" onclick="startHangman()">🔄 New Word</button>`;
+  startHangman();
+  return;
+ }
+
+ if(app.id==="novaReversi"){
+  c.innerHTML=`
+  <h2>⚫ Nova Reversi</h2>
+  <p id="reversiTurn">⚫ Black's turn</p>
+  <div id="reversiBoard" style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:320px;margin:auto"></div>
+  <p style="text-align:center">⚫ <b id="reversiBlackCount">2</b> &nbsp; ⚪ <b id="reversiWhiteCount">2</b></p>
+  <button class="appbtn" onclick="startReversi()">🔄 New Game</button>`;
+  startReversi();
+  return;
+ }
+
+ if(app.id==="novaSudoku"){
+  c.innerHTML=`
+  <h2>🔢 Mini Sudoku</h2>
+  <p>Fill the 4x4 grid so every row, column, and 2x2 box has 1-4 exactly once.</p>
+  <div id="sudokuGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:220px;margin:auto"></div>
+  <p id="sudokuFeedback" style="text-align:center"></p>
+  <button class="appbtn" onclick="checkSudoku()">✓ Check</button>
+  <button class="appbtn" onclick="startSudoku()">🔄 New Puzzle</button>`;
+  startSudoku();
+  return;
+ }
+
+ if(app.id==="pixelStudio"){
+  c.innerHTML=`
+  <h2>🎨 Pixel Studio</h2>
+  <input type="color" id="pixelColor" value="#ff0000">
+  <div id="pixelGrid" class="cardgrid" style="grid-template-columns:repeat(12,1fr);margin-top:10px"></div>
+  <button class="appbtn" onclick="clearPixelStudio()">Clear</button>`;
+  createPixelGrid();
+  return;
+ }
+
+ if(app.id==="novaRadio"){
+  c.innerHTML=`
+  <h2>📻 Nova Radio</h2>
+  <p>Real internet radio streams — needs an internet connection.</p>
+  <button class="appbtn" onclick="radioPlay('Nova Hits')">▶ Nova Hits</button>
+  <button class="appbtn" onclick="radioPlay('Nova Chill')">▶ Nova Chill</button>
+  <button class="appbtn" onclick="radioPlay('Nova Rock')">▶ Nova Rock</button>
+  <button class="appbtn" onclick="radioStop()">⏹ Stop</button>
+  <h3 id="radioNow">Radio stopped</h3>
+  <div>🔊 Volume</div>
+  <input type="range" id="radioVolume" min="0" max="100" value="70" oninput="setRadioVolume(this.value)">`;
+  return;
+ }
+
+ if(app.id==="photoEditor"){
+  c.innerHTML=`
+  <h2>📸 Photo Editor</h2>
+  <input type="file" accept="image/*" onchange="loadPhotoForEditing(event)">
+  <br><br>
+  <canvas id="photoCanvas" style="max-width:100%;border-radius:8px;display:none;background:#111"></canvas>
+  <div id="photoControls" style="display:none;margin-top:15px">
+
+  <div class="settings-row">
+  <div>☀️ Brightness</div>
+  <input type="range" id="photoBrightness" min="0" max="200" value="100" oninput="applyPhotoFilters()">
+  </div>
+
+  <div class="settings-row">
+  <div>◐ Contrast</div>
+  <input type="range" id="photoContrast" min="0" max="200" value="100" oninput="applyPhotoFilters()">
+  </div>
+
+  <div class="settings-row">
+  <div>🎨 Saturation</div>
+  <input type="range" id="photoSaturation" min="0" max="200" value="100" oninput="applyPhotoFilters()">
+  </div>
+
+  <div class="settings-row">
+  <div>🌫️ Blur</div>
+  <input type="range" id="photoBlur" min="0" max="10" value="0" oninput="applyPhotoFilters()">
+  </div>
+
+  <button class="appbtn" onclick="togglePhotoGrayscale()">⚫⚪ Grayscale</button>
+  <button class="appbtn" onclick="togglePhotoInvert()">🔄 Invert</button>
+  <button class="appbtn" onclick="rotatePhoto(90)">↻ Rotate</button>
+  <button class="appbtn" onclick="flipPhoto('h')">↔ Flip H</button>
+  <button class="appbtn" onclick="flipPhoto('v')">↕ Flip V</button>
+  <button class="appbtn" onclick="resetPhotoEdits()">↩ Reset</button>
+  <button class="appbtn" onclick="downloadPhoto()">💾 Download</button>
+
+  </div>`;
+  return;
+ }
+
+ if(app.id==="novaNews"){
+  c.innerHTML=`
+  <h2>📰 Nova News</h2>
+  <p>Live top headlines — needs an internet connection.</p>
+  <div id="newsList"><p style="opacity:.6">Loading headlines…</p></div>
+  <button class="appbtn" onclick="loadNovaNews()">🔄 Refresh</button>`;
+  loadNovaNews();
+  return;
+ }
+
+ if(app.id==="novaBooks"){
+  c.innerHTML=`
+  <h2>📚 Nova Books</h2>
+  <input id="bookInput" placeholder="Add a book..." style="width:70%">
+  <button class="appbtn" onclick="addBook()">Add</button>
+  <div id="books" style="margin-top:15px"></div>`;
+  renderBooks();
+  return;
+ }
+
+ if(app.id==="soundboard"){
+  c.innerHTML=`
+  <h2>🔊 Soundboard</h2>
+  <button class="appbtn" onclick="beep(440)">🔔 Beep</button>
+  <button class="appbtn" onclick="beep(220)">🔊 Low</button>
+  <button class="appbtn" onclick="beep(880)">✨ High</button>
+  <button class="appbtn" onclick="beep(1200)">🚨 Alert</button>`;
+  return;
+ }
+
+ if(app.id==="novaLab"){
+  c.innerHTML=`
+  <h2>🧪 Nova Lab</h2>
+  <p>Mix two virtual chemicals.</p>
+  <select id="chemA">
+  <option>Water</option>
+  <option>Acid</option>
+  <option>Metal</option>
+  </select>
+  +
+  <select id="chemB">
+  <option>Water</option>
+  <option>Base</option>
+  <option>Oxygen</option>
+  </select>
+  <br><br>
+  <button class="appbtn" onclick="mixChemicals()">🧪 Mix</button>
+  <h2 id="labResult"></h2>`;
+  return;
+ }
+
+ if(app.id==="unitConverter"){
+  c.innerHTML=`
+  <h2>🔢 Unit Converter</h2>
+  <input id="meters" type="number" placeholder="Metres">
+  <button class="appbtn" onclick="convertUnits()">Convert</button>
+  <p id="conversionResult"></p>`;
+  return;
+ }
+
+ if(app.id==="worldClock"){
+  c.innerHTML=`
+  <h2>🌍 World Clock</h2>
+  <div id="worldClockDisplay"></div>`;
+  updateWorldClock();
+  return;
+ }
+
+ if(app.id==="passwordGenerator"){
+  c.innerHTML=`
+  <h2>🔐 Password Generator</h2>
+  <input id="generatedPassword" readonly style="width:100%">
+  <br><br>
+  <button class="appbtn" onclick="generatePassword()">Generate</button>`;
+  generatePassword();
+  return;
+ }
+
+ if(app.id==="colorPicker"){
+  c.innerHTML=`
+  <h2>🌈 Color Picker</h2>
+  <input type="color" id="pickerColor" value="#2563eb" oninput="updateColorPicker()">
+  <h2 id="pickedColor">#2563EB</h2>
+  <button class="appbtn" onclick="copyColor()">📋 Copy</button>`;
+  return;
+ }
+
+ if(app.id==="textCounter"){
+  c.innerHTML=`
+  <h2>🔤 Text Counter</h2>
+  <textarea id="counterText" style="height:220px" oninput="countText()"></textarea>
+  <p>Characters: <b id="charCount">0</b></p>
+  <p>Words: <b id="wordCount">0</b></p>
+  <p>Lines: <b id="lineCount">0</b></p>`;
+  return;
+ }
+
+ if(app.id==="randomizer"){
+  c.innerHTML=`
+  <h2>🎲 Randomizer</h2>
+  <input id="minRandom" type="number" value="1">
+  <input id="maxRandom" type="number" value="100">
+  <button class="appbtn" onclick="randomNumber()">🎲 Generate</button>
+  <div class="big" id="randomResult">?</div>`;
+  return;
+ }
+
+ if(app.id==="todo"){
+  c.innerHTML=`
+  <h2>✅ Nova Tasks</h2>
+  <input id="todoInput" placeholder="New task..." style="width:70%">
+  <button class="appbtn" onclick="addTodo()">Add</button>
+  <div id="todoList"></div>`;
+  renderTodos();
+  return;
+ }
+
+ if(app.id==="timer"){
+  c.innerHTML=`
+  <h2>⏲️ Nova Timer</h2>
+  <input id="timerSeconds" type="number" value="60">
+  <button class="appbtn" onclick="startTimer()">▶ Start</button>
+  <div class="big" id="timerDisplay">60</div>`;
+  return;
+ }
+
+ if(app.id==="novaWeather"){
+  c.innerHTML=`
+  <h2>🌤️ Nova Weather</h2>
+  <select id="weatherCity" onchange="showWeather()">
+  <option>Melbourne</option>
+  <option>London</option>
+  <option>New York</option>
+  <option>Tokyo</option>
+  <option>Los Angeles</option>
+  <option>Cairo</option>
+  <option>Moscow</option>
+  </select>
+  <div id="weatherResult" style="margin-top:15px"></div>`;
+  showWeather();
+  return;
+ }
+
+ if(app.id==="novaStickyNotes"){
+  c.innerHTML=`
+  <h2>📌 Sticky Notes</h2>
+  <textarea id="stickyNoteInput" style="height:80px" placeholder="Write a quick note..."></textarea>
+  <br><br>
+  <button class="appbtn" onclick="addStickyNote()">📌 Add Note</button>
+  <div id="stickyNotesList" style="margin-top:15px"></div>`;
+  renderStickyNotes();
+  return;
+ }
+
+ if(app.id==="novaCurrency"){
+  c.innerHTML=`
+  <h2>💱 Currency Converter</h2>
+  <input id="currencyAmount" type="number" value="100">
+  <select id="currencyFrom">
+  <option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option><option>AUD</option><option>CAD</option>
+  </select>
+  →
+  <select id="currencyTo">
+  <option>EUR</option><option>USD</option><option>GBP</option><option>JPY</option><option>AUD</option><option>CAD</option>
+  </select>
+  <br><br>
+  <button class="appbtn" onclick="convertCurrency()">Convert</button>
+  <p id="currencyResult"></p>
+  <p style="opacity:.6;font-size:12px">Uses live exchange rates when online, with an offline fallback to sample rates.</p>`;
+  return;
+ }
+
+ if(app.id==="novaHabits"){
+  c.innerHTML=`
+  <h2>📅 Habit Tracker</h2>
+  <input id="habitInput" placeholder="New habit..." style="width:70%">
+  <button class="appbtn" onclick="addHabit()">Add</button>
+  <div id="habitsList" style="margin-top:15px"></div>`;
+  renderHabits();
+  return;
+ }
+
+ if(app.id==="novaJournal"){
+  c.innerHTML=`
+  <h2>📔 Nova Journal</h2>
+  <textarea id="journalInput" style="height:100px" placeholder="What's on your mind today?"></textarea>
+  <br><br>
+  <button class="appbtn" onclick="addJournalEntry()">📔 Save Entry</button>
+  <div id="journalList" style="margin-top:15px"></div>`;
+  renderJournal();
+  return;
+ }
+
+ if(app.id==="novaFlashcards"){
+  c.innerHTML=`
+  <h2>🗂️ Nova Flashcards</h2>
+  <div id="flashcardView" class="note" style="min-height:100px;display:flex;align-items:center;justify-content:center;cursor:pointer;text-align:center" onclick="flipFlashcard()"></div>
+  <p style="text-align:center" id="flashcardCount">0 / 0</p>
+  <button class="appbtn" onclick="nextFlashcard()">➡ Next Card</button>
+  <h3>Add a Card</h3>
+  <input id="flashFront" placeholder="Front (question)">
+  <input id="flashBack" placeholder="Back (answer)">
+  <button class="appbtn" onclick="addFlashcard()">➕ Add</button>`;
+  loadFlashcards();
+  return;
+ }
+
+ if(app.id==="novaStopwatch"){
+  c.innerHTML=`
+  <h2>⏱️ Nova Stopwatch</h2>
+  <div class="big" id="stopwatchDisplay">0m 0.0s</div>
+  <div style="text-align:center">
+  <button class="appbtn" onclick="toggleStopwatch()">▶ Start/Stop</button>
+  <button class="appbtn" onclick="lapStopwatch()">🚩 Lap</button>
+  <button class="appbtn" onclick="resetStopwatch()">🔄 Reset</button>
+  </div>
+  <div id="stopwatchLaps" style="margin-top:15px"></div>`;
+  resetStopwatch();
+  return;
+ }
+
+ if(app.id==="novaBMI"){
+  c.innerHTML=`
+  <h2>⚖️ BMI Calculator</h2>
+  <input id="bmiHeight" type="number" placeholder="Height (cm)">
+  <input id="bmiWeight" type="number" placeholder="Weight (kg)">
+  <button class="appbtn" onclick="calculateBMI()">Calculate</button>
+  <p id="bmiResult"></p>
+  <p style="opacity:.6;font-size:12px">A general reference only — not medical advice.</p>`;
+  return;
+ }
+
+ if(app.id==="novaTip"){
+  c.innerHTML=`
+  <h2>🧾 Tip Calculator</h2>
+  <input id="tipBill" type="number" placeholder="Bill amount">
+  <input id="tipPercent" type="number" placeholder="Tip %" value="15">
+  <input id="tipPeople" type="number" placeholder="Number of people" value="1">
+  <button class="appbtn" onclick="calculateTip()">Calculate</button>
+  <p id="tipResult"></p>`;
+  return;
+ }
+
+ if(app.id==="novaAge"){
+  c.innerHTML=`
+  <h2>🎂 Age Calculator</h2>
+  <input id="ageBirthdate" type="date">
+  <button class="appbtn" onclick="calculateAge()">Calculate</button>
+  <p id="ageResult"></p>`;
+  return;
+ }
+
+ if(app.id==="novaDice"){
+  c.innerHTML=`
+  <h2>🎲 Dice Roller</h2>
+  <input id="diceCount" type="number" value="2" min="1" max="6">
+  <button class="appbtn" onclick="rollDice()">🎲 Roll</button>
+  <div id="diceResult" style="text-align:center;margin-top:15px"></div>`;
+  return;
+ }
+
+ if(app.id==="novaCoinFlip"){
+  c.innerHTML=`
+  <h2>🪙 Coin Flip</h2>
+  <div id="coinFace" class="big">🪙</div>
+  <div style="text-align:center">
+  <button class="appbtn" onclick="flipCoin()">🪙 Flip</button>
+  <button class="appbtn" onclick="resetCoinFlip()">↩ Reset Stats</button>
+  </div>
+  <div class="statgrid" style="margin-top:15px">
+  <div class="stat">🪙<b id="coinHeadsCount">0</b>Heads</div>
+  <div class="stat">🪙<b id="coinTailsCount">0</b>Tails</div>
+  <div class="stat">#️⃣<b id="coinTotalCount">0</b>Total flips</div>
+  </div>
+  <p style="text-align:center;opacity:.7">Last 20: <span id="coinHistory">—</span></p>`;
+  resetCoinFlip();
+  return;
+ }
+
+ if(app.id==="novaWallpaperMaker"){
+  c.innerHTML=`
+  <h2>🖼️ Wallpaper Creator</h2>
+  <input type="color" id="wallpaperColor1" value="#172554" oninput="updateWallpaperPreview()">
+  <input type="color" id="wallpaperColor2" value="#312e81" oninput="updateWallpaperPreview()">
+  <div id="wallpaperPreview" style="height:150px;border-radius:10px;margin-top:15px;background:linear-gradient(135deg,#172554,#312e81)"></div>
+  <br>
+  <button class="appbtn" onclick="applyCustomWallpaper()">🖼️ Apply to Desktop</button>`;
+  return;
+ }
+
+ if(app.id==="novaRecipe"){
+  c.innerHTML=`
+  <h2>🍳 Recipe of the Day</h2>
+  <div id="recipeView"></div>
+  <br>
+  <button class="appbtn" onclick="shuffleRecipe()">🔀 Shuffle Recipe</button>`;
+  shuffleRecipe();
+  return;
+ }
+
+}
+
+
+/* SPACE CLICKER */
+
+let spaceCoins=0;
+
+function spaceClick(){
+
+ spaceCoins++;
+
+ const el=document.getElementById("spaceCoins");
+
+ if(el)el.textContent=spaceCoins;
+
+}
+
+
+/* BLOCK BUILDER */
+
+function createBlockGrid(){
+
+ const grid=document.getElementById("blockGrid");
+
+ if(!grid)return;
+
+ grid.innerHTML="";
+
+ for(let i=0;i<32;i++){
+
+  const b=document.createElement("button");
+
+  b.className="gamecard";
+  b.textContent="";
+
+  b.onclick=()=>{
+   b.textContent="🧱";
+  };
+
+  grid.appendChild(b);
+
+ }
+
+}
+
+function clearBlocks(){
+
+ document.querySelectorAll("#blockGrid .gamecard")
+ .forEach(b=>b.textContent="");
+
+}
+
+
+/* RACING */
+
+let racingCanvas,racingCtx;
+let racingActive=false;
+let racingLane=1;
+let racingObstacles=[];
+let racingScore=0;
+let racingSpeed=3;
+let racingFrame=0;
+
+const RACING_LANES=[40,120,200];
+
+function startRacing(){
+
+ racingCanvas=document.getElementById("racingCanvas");
+
+ if(!racingCanvas)return;
+
+ racingCtx=racingCanvas.getContext("2d");
+
+ racingLane=1;
+ racingObstacles=[];
+ racingScore=0;
+ racingSpeed=3;
+ racingFrame=0;
+ racingActive=true;
+
+ const scoreEl=document.getElementById("racingScore");
+
+ if(scoreEl)scoreEl.textContent="0";
+
+ racingLoop();
+
+}
+
+function racingLoop(){
+
+ if(!racingActive)return;
+
+ racingFrame++;
+
+ if(racingFrame%Math.max(20,60-Math.floor(racingSpeed*3))===0){
+
+  racingObstacles.push({
+   lane:Math.floor(Math.random()*3),
+   y:-40
+  });
+
+ }
+
+ racingObstacles.forEach(o=>o.y+=racingSpeed);
+
+ racingObstacles=racingObstacles.filter(o=>{
+
+  if(o.y>420){
+
+   racingScore++;
+
+   const scoreEl=document.getElementById("racingScore");
+
+   if(scoreEl)scoreEl.textContent=racingScore;
+
+   return false;
+
+  }
+
+  return true;
+
+ });
+
+ racingSpeed=3+racingScore*0.15;
+
+ let collided=false;
+
+ racingObstacles.forEach(o=>{
+
+  if(o.lane===racingLane&&o.y>300&&o.y<360){
+
+   collided=true;
+
+  }
+
+ });
+
+ racingCtx.fillStyle="#1e293b";
+ racingCtx.fillRect(0,0,240,400);
+
+ racingCtx.strokeStyle="#475569";
+ racingCtx.setLineDash([10,10]);
+
+ racingCtx.beginPath();
+ racingCtx.moveTo(80,0);
+ racingCtx.lineTo(80,400);
+ racingCtx.moveTo(160,0);
+ racingCtx.lineTo(160,400);
+ racingCtx.stroke();
+
+ racingCtx.setLineDash([]);
+
+ racingCtx.fillStyle="#ef4444";
+
+ racingObstacles.forEach(o=>{
+
+  racingCtx.fillRect(RACING_LANES[o.lane]-20,o.y,40,50);
+
+ });
+
+ racingCtx.fillStyle="#22c55e";
+ racingCtx.fillRect(RACING_LANES[racingLane]-20,330,40,50);
+
+ if(collided){
+
+  racingActive=false;
+  notify("Nova Racing crash! Score: "+racingScore);
+  return;
+
+ }
+
+ requestAnimationFrame(racingLoop);
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(!racingActive)return;
+
+ if(e.key==="ArrowLeft"){
+
+  e.preventDefault();
+  racingLane=Math.max(0,racingLane-1);
+
+ }
+
+ if(e.key==="ArrowRight"){
+
+  e.preventDefault();
+  racingLane=Math.min(2,racingLane+1);
+
+ }
+
+});
+
+
+/* DODGE */
+
+let dodgeRunning=false;
+let dodgeX=270;
+let dodgeBlocks=[];
+let dodgeFrame;
+
+function startStoreDodge(){
+
+ const canvas=document.getElementById("storeDodgeCanvas");
+
+ if(!canvas)return;
+
+ const ctx=canvas.getContext("2d");
+
+ dodgeRunning=true;
+ dodgeX=270;
+ dodgeBlocks=[];
+ let score=0;
+
+ function loop(){
+
+  if(!dodgeRunning)return;
+
+  ctx.clearRect(0,0,580,280);
+
+  ctx.fillStyle="#2563eb";
+  ctx.fillRect(dodgeX,245,40,25);
+
+  if(Math.random()<.035){
+
+   dodgeBlocks.push({
+    x:Math.random()*550,
+    y:-30,
+    speed:2+Math.random()*3
+   });
+
+  }
+
+  for(const b of dodgeBlocks){
+
+   b.y+=b.speed;
+
+   ctx.fillStyle="#ef4444";
+   ctx.fillRect(b.x,b.y,30,30);
+
+  }
+
+  dodgeBlocks=dodgeBlocks.filter(b=>{
+
+   if(b.y>280){
+
+    score++;
+
+    const s=document.getElementById("dodgeScore");
+
+    if(s)s.textContent=score;
+
+    return false;
+
+   }
+
+   return true;
+
+  });
+
+  for(const b of dodgeBlocks){
+
+   if(
+    dodgeX<b.x+30 &&
+    dodgeX+40>b.x &&
+    245<b.y+30 &&
+    270>b.y
+   ){
+
+    dodgeRunning=false;
+    notify("Nova Dodge game over. Score: "+score);
+    return;
+
+   }
+
+  }
+
+  dodgeFrame=requestAnimationFrame(loop);
+
+ }
+
+ loop();
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(!dodgeRunning)return;
+
+ if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")
+  dodgeX=Math.max(0,dodgeX-9);
+
+ if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")
+  dodgeX=Math.min(540,dodgeX+9);
+
+});
+
+
+/* SNAKE */
+
+let snakeTimer;
+
+function startSnake(){
+
+ clearInterval(snakeTimer);
+
+ const canvas=document.getElementById("snakeCanvas");
+
+ if(!canvas)return;
+
+ const ctx=canvas.getContext("2d");
+
+ let snake=[{x:200,y:150}];
+ let food={x:100,y:100};
+ let dir={x:20,y:0};
+
+ document.onkeydown=function(e){
+
+  if(e.key==="ArrowUp"&&dir.y===0)dir={x:0,y:-20};
+  if(e.key==="ArrowDown"&&dir.y===0)dir={x:0,y:20};
+  if(e.key==="ArrowLeft"&&dir.x===0)dir={x:-20,y:0};
+  if(e.key==="ArrowRight"&&dir.x===0)dir={x:20,y:0};
+
+ };
+
+ snakeTimer=setInterval(()=>{
+
+  const head={
+   x:snake[0].x+dir.x,
+   y:snake[0].y+dir.y
+  };
+
+  if(
+   head.x<0||head.x>=400||
+   head.y<0||head.y>=300
+  ){
+
+   clearInterval(snakeTimer);
+   notify("Snake game over.");
+   return;
+
+  }
+
+  snake.unshift(head);
+
+  if(
+   head.x===food.x&&
+   head.y===food.y
+  ){
+
+   food={
+    x:Math.floor(Math.random()*20)*20,
+    y:Math.floor(Math.random()*15)*20
+   };
+
+  }else{
+
+   snake.pop();
+
+  }
+
+  ctx.clearRect(0,0,400,300);
+
+  ctx.fillStyle="#22c55e";
+
+  snake.forEach(p=>
+   ctx.fillRect(p.x,p.y,19,19)
+  );
+
+  ctx.fillStyle="#ef4444";
+  ctx.fillRect(food.x,food.y,19,19);
+
+ },120);
+
+}
+
+
+/* MEMORY */
+
+let memoryFirst=null;
+let memoryLock=false;
+
+function startMemory(){
+
+ const grid=document.getElementById("memoryGrid");
+
+ if(!grid)return;
+
+ grid.innerHTML="";
+
+ memoryFirst=null;
+ memoryLock=false;
+
+ const icons=["🚀","🌎","⭐","🎮","🐍","🏎️","🚀","🌎","⭐","🎮","🐍","🏎️"];
+
+ icons.sort(()=>Math.random()-.5);
+
+ icons.forEach(icon=>{
+
+  const b=document.createElement("button");
+
+  b.className="gamecard";
+  b.dataset.icon=icon;
+  b.textContent="❓";
+
+  b.onclick=()=>{
+
+   if(memoryLock||b.textContent!=="❓")return;
+
+   b.textContent=icon;
+
+   if(!memoryFirst){
+
+    memoryFirst=b;
+
+   }else{
+
+    if(memoryFirst.dataset.icon===icon){
+
+     memoryFirst=null;
+
+    }else{
+
+     memoryLock=true;
+
+     setTimeout(()=>{
+
+      memoryFirst.textContent="❓";
+      b.textContent="❓";
+
+      memoryFirst=null;
+      memoryLock=false;
+
+     },700);
+
+    }
+
+   }
+
+  };
+
+  grid.appendChild(b);
+
+ });
+
+}
+
+
+/* GALAXY */
+
+const GALAXY_PREFIXES=["Nova","Kepler","Xylo","Vex","Orin","Zeta","Lyra","Thal","Quor","Mira","Solan","Draxis"];
+
+const GALAXY_TYPES=[
+ {icon:"🌎",name:"Habitable"},
+ {icon:"🔴",name:"Desert"},
+ {icon:"🪐",name:"Gas Giant"},
+ {icon:"❄️",name:"Frozen"},
+ {icon:"🌋",name:"Volcanic"},
+ {icon:"🌊",name:"Ocean World"},
+ {icon:"☄️",name:"Rocky"},
+ {icon:"🌌",name:"Nebula-Wrapped"}
+];
+
+let galaxyDiscoveries=[];
+
+function exploreGalaxy(){
+
+ const prefix=GALAXY_PREFIXES[Math.floor(Math.random()*GALAXY_PREFIXES.length)];
+ const number=Math.floor(Math.random()*900)+100;
+ const type=GALAXY_TYPES[Math.floor(Math.random()*GALAXY_TYPES.length)];
+ const distance=(Math.random()*4000+10).toFixed(1);
+
+ galaxyDiscoveries.unshift({
+  icon:type.icon,
+  name:prefix+"-"+number,
+  type:type.name,
+  distance
+ });
+
+ if(galaxyDiscoveries.length>12)galaxyDiscoveries.pop();
+
+ renderGalaxy();
+
+}
+
+function renderGalaxy(){
+
+ const el=document.getElementById("galaxyInfo");
+
+ if(!el)return;
+
+ if(galaxyDiscoveries.length===0){
+
+  el.innerHTML="<p>No planets discovered yet — click Explore.</p>";
+  return;
+
+ }
+
+ el.innerHTML=galaxyDiscoveries.map(p=>
+  `<div class="stat">${p.icon}<b>${p.name}</b>${p.type}<br><small style="opacity:.6">${p.distance} ly away</small></div>`
+ ).join("");
+
+}
+
+
+/* TARGET */
+
+let targetScore=0;
+let targetTimeLeft=15;
+let targetInterval=null;
+let targetActive=false;
+
+function startTargetMaster(){
+
+ clearInterval(targetInterval);
+
+ targetScore=0;
+ targetTimeLeft=15;
+ targetActive=true;
+
+ const scoreEl=document.getElementById("targetScore");
+ const timeEl=document.getElementById("targetTime");
+
+ if(scoreEl)scoreEl.textContent="0";
+ if(timeEl)timeEl.textContent="15";
+
+ moveTarget();
+
+ targetInterval=setInterval(()=>{
+
+  targetTimeLeft--;
+
+  if(timeEl)timeEl.textContent=targetTimeLeft;
+
+  if(targetTimeLeft<=0){
+
+   clearInterval(targetInterval);
+
+   targetActive=false;
+
+   const target=document.getElementById("target");
+
+   if(target)target.style.display="none";
+
+   notify("Target Master finished! Score: "+targetScore);
+
+  }
+
+ },1000);
+
+}
+
+function hitTarget(){
+
+ if(!targetActive)return;
+
+ targetScore++;
+
+ const scoreEl=document.getElementById("targetScore");
+
+ if(scoreEl)scoreEl.textContent=targetScore;
+
+ moveTarget();
+
+}
+
+function moveTarget(){
+
+ const arena=document.getElementById("targetArena");
+ const target=document.getElementById("target");
+
+ if(!arena||!target)return;
+
+ const size=30+Math.random()*30;
+
+ target.style.fontSize=size+"px";
+ target.style.display="block";
+
+ const maxX=Math.max(0,arena.clientWidth-size);
+ const maxY=Math.max(0,arena.clientHeight-size);
+
+ target.style.left=(Math.random()*maxX)+"px";
+ target.style.top=(Math.random()*maxY)+"px";
+
+}
+
+
+/* SHOOTER */
+
+let shooterCanvas,shooterCtx;
+let shooterActive=false;
+let shooterShipX=140;
+let shooterBullets=[];
+let shooterEnemies=[];
+let shooterScore=0;
+let shooterFrame=0;
+
+function startShooter(){
+
+ shooterCanvas=document.getElementById("shooterCanvas");
+
+ if(!shooterCanvas)return;
+
+ shooterCtx=shooterCanvas.getContext("2d");
+
+ shooterShipX=140;
+ shooterBullets=[];
+ shooterEnemies=[];
+ shooterScore=0;
+ shooterFrame=0;
+ shooterActive=true;
+
+ const scoreEl=document.getElementById("shooterScore");
+
+ if(scoreEl)scoreEl.textContent="0";
+
+ shooterLoop();
+
+}
+
+function shooterFire(){
+
+ if(!shooterActive)return;
+
+ shooterBullets.push({x:shooterShipX+14,y:340});
+
+}
+
+function shooterLoop(){
+
+ if(!shooterActive)return;
+
+ shooterFrame++;
+
+ if(shooterFrame%50===0){
+
+  shooterEnemies.push({
+   x:Math.random()*270,
+   y:-20,
+   hit:false
+  });
+
+ }
+
+ shooterBullets.forEach(b=>b.y-=6);
+
+ shooterBullets=shooterBullets.filter(b=>b.y>-10);
+
+ shooterEnemies.forEach(en=>en.y+=1.2+shooterScore*0.01);
+
+ let gameOver=false;
+
+ shooterEnemies.forEach(en=>{
+
+  if(en.y>360)gameOver=true;
+
+ });
+
+ shooterBullets.forEach(b=>{
+
+  shooterEnemies.forEach(en=>{
+
+   if(!en.hit&&Math.abs(b.x-(en.x+12))<15&&Math.abs(b.y-(en.y+12))<15){
+
+    en.hit=true;
+    b.y=-100;
+    shooterScore+=10;
+
+    const scoreEl=document.getElementById("shooterScore");
+
+    if(scoreEl)scoreEl.textContent=shooterScore;
+
+   }
+
+  });
+
+ });
+
+ shooterEnemies=shooterEnemies.filter(en=>!en.hit);
+
+ shooterCtx.fillStyle="#020617";
+ shooterCtx.fillRect(0,0,300,380);
+
+ shooterCtx.fillStyle="#3b82f6";
+ shooterCtx.fillRect(shooterShipX,345,28,20);
+
+ shooterCtx.fillStyle="#facc15";
+
+ shooterBullets.forEach(b=>{
+  shooterCtx.fillRect(b.x-2,b.y,4,10);
+ });
+
+ shooterCtx.fillStyle="#ef4444";
+
+ shooterEnemies.forEach(en=>{
+  shooterCtx.fillRect(en.x,en.y,24,24);
+ });
+
+ if(gameOver){
+
+  shooterActive=false;
+  notify("Space Shooter game over. Score: "+shooterScore);
+  return;
+
+ }
+
+ requestAnimationFrame(shooterLoop);
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(!shooterActive)return;
+
+ if(e.key==="ArrowLeft"){
+
+  e.preventDefault();
+  shooterShipX=Math.max(0,shooterShipX-8);
+
+ }
+
+ if(e.key==="ArrowRight"){
+
+  e.preventDefault();
+  shooterShipX=Math.min(270,shooterShipX+8);
+
+ }
+
+ if(e.key===" "){
+
+  e.preventDefault();
+  shooterFire();
+
+ }
+
+});
+
+
+/* FARM */
+
+let farmCrops=0;
+let farmCoins=0;
+let farmWater=10;
+
+function plantCrop(){
+
+ if(farmCoins>=2){
+
+  farmCoins-=2;
+  farmCrops++;
+
+ }
+
+ updateFarm();
+
+}
+
+function waterFarm(){
+
+ farmWater++;
+
+ updateFarm();
+
+}
+
+function harvestFarm(){
+
+ if(farmCrops>0){
+
+  farmCrops--;
+  farmCoins+=5;
+
+ }
+
+ updateFarm();
+
+}
+
+function updateFarm(){
+
+ const a=document.getElementById("farmCrops");
+ const b=document.getElementById("farmCoins");
+ const c=document.getElementById("farmWater");
+
+ if(a)a.textContent=farmCrops;
+ if(b)b.textContent=farmCoins;
+ if(c)c.textContent=farmWater;
+
+}
+
+
+/* PUZZLE */
+
+function newPuzzle(){
+
+ const questions=[
+  {
+   q:"What is 5 + 7?",
+   a:["10","12","14"],
+   c:"12"
+  },
+  {
+   q:"What is 6 × 6?",
+   a:["30","36","42"],
+   c:"36"
+  },
+  {
+   q:"Which planet do we live on?",
+   a:["Mars","Earth","Venus"],
+   c:"Earth"
+  }
+ ];
+
+ const p=questions[Math.floor(Math.random()*questions.length)];
+
+ document.getElementById("puzzleQuestion").textContent=p.q;
+
+ document.getElementById("puzzleButtons").innerHTML=
+ p.a.map(x=>
+ `<button class="appbtn" onclick="checkPuzzle('${x}','${p.c}')">${x}</button>`
+ ).join("");
+
+}
+
+function checkPuzzle(a,c){
+
+ if(a===c)notify("Correct! 🧠");
+ else notify("Not quite.");
+
+}
+
+
+/* TOWER DEFENSE */
+
+let tdMoney=100;
+let tdTowers=0;
+let tdEnemies=10;
+
+function buildTower(){
+
+ if(tdMoney>=20){
+
+  tdMoney-=20;
+  tdTowers++;
+
+ }
+
+ updateTD();
+
+}
+
+function attackWave(){
+
+ tdEnemies=Math.max(0,tdEnemies-tdTowers*2);
+
+ if(tdEnemies===0){
+
+  tdMoney+=50;
+  tdEnemies=10;
+  notify("Wave defeated!");
+
+ }
+
+ updateTD();
+
+}
+
+function updateTD(){
+
+ document.getElementById("tdMoney").textContent=tdMoney;
+ document.getElementById("tdTowers").textContent=tdTowers;
+ document.getElementById("tdEnemies").textContent=tdEnemies;
+
+}
+
+
+/* TETRIS */
+
+const TETROMINOES={
+ I:[[1,1,1,1]],
+ O:[[1,1],[1,1]],
+ T:[[0,1,0],[1,1,1]],
+ S:[[0,1,1],[1,1,0]],
+ Z:[[1,1,0],[0,1,1]],
+ J:[[1,0,0],[1,1,1]],
+ L:[[0,0,1],[1,1,1]]
+};
+
+const TETRIS_COLORS={
+ I:"#22d3ee",O:"#facc15",T:"#a855f7",
+ S:"#22c55e",Z:"#ef4444",J:"#3b82f6",L:"#f97316"
+};
+
+const TETRIS_COLS=12;
+const TETRIS_ROWS=20;
+const TETRIS_SIZE=20;
+
+let tetrisGrid=[];
+let tetrisPiece=null;
+let tetrisInterval=null;
+let tetrisScore=0;
+let tetrisActive=false;
+
+function tetrisEmptyGrid(){
+
+ return Array.from({length:TETRIS_ROWS},()=>
+  Array(TETRIS_COLS).fill(null)
+ );
+
+}
+
+function tetrisRotate(shape){
+
+ const rows=shape.length;
+ const cols=shape[0].length;
+ const result=Array.from({length:cols},()=>Array(rows).fill(0));
+
+ for(let r=0;r<rows;r++)
+  for(let cIdx=0;cIdx<cols;cIdx++)
+   result[cIdx][rows-1-r]=shape[r][cIdx];
+
+ return result;
+
+}
+
+function tetrisCollision(shape,px,py){
+
+ for(let r=0;r<shape.length;r++){
+  for(let cIdx=0;cIdx<shape[r].length;cIdx++){
+
+   if(!shape[r][cIdx])continue;
+
+   const x=px+cIdx;
+   const y=py+r;
+
+   if(x<0||x>=TETRIS_COLS||y>=TETRIS_ROWS)return true;
+
+   if(y>=0&&tetrisGrid[y][x])return true;
+
+  }
+ }
+
+ return false;
+
+}
+
+function tetrisSpawn(){
+
+ const keys=Object.keys(TETROMINOES);
+ const key=keys[Math.floor(Math.random()*keys.length)];
+ const shape=TETROMINOES[key];
+
+ tetrisPiece={
+  shape,
+  color:TETRIS_COLORS[key],
+  x:Math.floor((TETRIS_COLS-shape[0].length)/2),
+  y:0
+ };
+
+ if(tetrisCollision(tetrisPiece.shape,tetrisPiece.x,tetrisPiece.y)){
+
+  tetrisActive=false;
+
+  clearInterval(tetrisInterval);
+
+  notify("Tetris game over. Score: "+tetrisScore);
+
+ }
+
+}
+
+function tetrisMerge(){
+
+ tetrisPiece.shape.forEach((row,r)=>{
+  row.forEach((cell,cIdx)=>{
+
+   if(cell){
+
+    const y=tetrisPiece.y+r;
+    const x=tetrisPiece.x+cIdx;
+
+    if(y>=0)tetrisGrid[y][x]=tetrisPiece.color;
+
+   }
+
+  });
+ });
+
+}
+
+function tetrisClearLines(){
+
+ let cleared=0;
+
+ tetrisGrid=tetrisGrid.filter(row=>{
+
+  const full=row.every(cell=>cell);
+
+  if(full)cleared++;
+
+  return !full;
+
+ });
+
+ while(tetrisGrid.length<TETRIS_ROWS)
+  tetrisGrid.unshift(Array(TETRIS_COLS).fill(null));
+
+ if(cleared>0){
+
+  tetrisScore+=cleared*100;
+
+  const el=document.getElementById("tetrisScore");
+
+  if(el)el.textContent=tetrisScore;
+
+ }
+
+}
+
+function tetrisDraw(){
+
+ const canvas=document.getElementById("tetrisCanvas");
+
+ if(!canvas)return;
+
+ const ctx=canvas.getContext("2d");
+
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ for(let y=0;y<TETRIS_ROWS;y++){
+  for(let x=0;x<TETRIS_COLS;x++){
+
+   if(tetrisGrid[y][x]){
+
+    ctx.fillStyle=tetrisGrid[y][x];
+    ctx.fillRect(x*TETRIS_SIZE,y*TETRIS_SIZE,TETRIS_SIZE-1,TETRIS_SIZE-1);
+
+   }
+
+  }
+ }
+
+ if(tetrisPiece){
+
+  ctx.fillStyle=tetrisPiece.color;
+
+  tetrisPiece.shape.forEach((row,r)=>{
+   row.forEach((cell,cIdx)=>{
+
+    if(cell){
+
+     ctx.fillRect(
+      (tetrisPiece.x+cIdx)*TETRIS_SIZE,
+      (tetrisPiece.y+r)*TETRIS_SIZE,
+      TETRIS_SIZE-1,
+      TETRIS_SIZE-1
+     );
+
+    }
+
+   });
+  });
+
+ }
+
+}
+
+function tetrisDrop(){
+
+ if(!tetrisActive)return;
+
+ if(!tetrisCollision(tetrisPiece.shape,tetrisPiece.x,tetrisPiece.y+1)){
+
+  tetrisPiece.y++;
+
+ }else{
+
+  tetrisMerge();
+  tetrisClearLines();
+  tetrisSpawn();
+
+ }
+
+ tetrisDraw();
+
+}
+
+function startTetris(){
+
+ clearInterval(tetrisInterval);
+
+ tetrisGrid=tetrisEmptyGrid();
+ tetrisScore=0;
+ tetrisActive=true;
+
+ const scoreEl=document.getElementById("tetrisScore");
+
+ if(scoreEl)scoreEl.textContent="0";
+
+ tetrisSpawn();
+ tetrisDraw();
+
+ tetrisInterval=setInterval(tetrisDrop,500);
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(!tetrisActive||!tetrisPiece)return;
+
+ if(e.key==="ArrowLeft"){
+
+  e.preventDefault();
+
+  if(!tetrisCollision(tetrisPiece.shape,tetrisPiece.x-1,tetrisPiece.y))
+   tetrisPiece.x--;
+
+  tetrisDraw();
+
+ }
+
+ if(e.key==="ArrowRight"){
+
+  e.preventDefault();
+
+  if(!tetrisCollision(tetrisPiece.shape,tetrisPiece.x+1,tetrisPiece.y))
+   tetrisPiece.x++;
+
+  tetrisDraw();
+
+ }
+
+ if(e.key==="ArrowDown"){
+
+  e.preventDefault();
+  tetrisDrop();
+
+ }
+
+ if(e.key==="ArrowUp"){
+
+  e.preventDefault();
+
+  const rotated=tetrisRotate(tetrisPiece.shape);
+
+  if(!tetrisCollision(rotated,tetrisPiece.x,tetrisPiece.y))
+   tetrisPiece.shape=rotated;
+
+  tetrisDraw();
+
+ }
+
+});
+
+
+/* 2048 */
+
+let game2048Grid=[];
+let game2048Score=0;
+let game2048Active=false;
+
+function game2048EmptyGrid(){
+
+ return Array.from({length:4},()=>Array(4).fill(0));
+
+}
+
+function game2048AddTile(){
+
+ const empty=[];
+
+ for(let r=0;r<4;r++)
+  for(let cIdx=0;cIdx<4;cIdx++)
+   if(game2048Grid[r][cIdx]===0)empty.push([r,cIdx]);
+
+ if(empty.length===0)return;
+
+ const pick=empty[Math.floor(Math.random()*empty.length)];
+
+ game2048Grid[pick[0]][pick[1]]=Math.random()<0.9?2:4;
+
+}
+
+function game2048Render(){
+
+ const box=document.getElementById("game2048Grid");
+
+ if(!box)return;
+
+ box.innerHTML="";
+
+ const colors={
+  2:"#334155",4:"#475569",8:"#f59e0b",16:"#f97316",
+  32:"#ef4444",64:"#dc2626",128:"#eab308",256:"#facc15",
+  512:"#22c55e",1024:"#3b82f6",2048:"#a855f7"
+ };
+
+ for(let r=0;r<4;r++){
+  for(let cIdx=0;cIdx<4;cIdx++){
+
+   const val=game2048Grid[r][cIdx];
+
+   const cell=document.createElement("div");
+
+   cell.className="gamecard";
+   cell.style.background=val?(colors[val]||"#7c3aed"):"#ffffff10";
+   cell.style.fontSize=val>512?"16px":"22px";
+   cell.style.display="flex";
+   cell.style.alignItems="center";
+   cell.style.justifyContent="center";
+   cell.textContent=val||"";
+
+   box.appendChild(cell);
+
+  }
+ }
+
+ const scoreEl=document.getElementById("game2048Score");
+
+ if(scoreEl)scoreEl.textContent=game2048Score;
+
+}
+
+function game2048Slide(row){
+
+ let arr=row.filter(v=>v!==0);
+
+ for(let i=0;i<arr.length-1;i++){
+
+  if(arr[i]===arr[i+1]){
+
+   arr[i]*=2;
+   game2048Score+=arr[i];
+   arr.splice(i+1,1);
+
+  }
+
+ }
+
+ while(arr.length<4)arr.push(0);
+
+ return arr;
+
+}
+
+function game2048Move(direction){
+
+ if(!game2048Active)return;
+
+ const before=JSON.stringify(game2048Grid);
+
+ if(direction==="left"){
+
+  game2048Grid=game2048Grid.map(row=>game2048Slide(row));
+
+ }
+
+ if(direction==="right"){
+
+  game2048Grid=game2048Grid.map(row=>
+   game2048Slide(row.slice().reverse()).reverse()
+  );
+
+ }
+
+ if(direction==="up"){
+
+  for(let cIdx=0;cIdx<4;cIdx++){
+
+   const col=[0,1,2,3].map(r=>game2048Grid[r][cIdx]);
+   const newCol=game2048Slide(col);
+
+   for(let r=0;r<4;r++)game2048Grid[r][cIdx]=newCol[r];
+
+  }
+
+ }
+
+ if(direction==="down"){
+
+  for(let cIdx=0;cIdx<4;cIdx++){
+
+   const col=[3,2,1,0].map(r=>game2048Grid[r][cIdx]);
+   const newCol=game2048Slide(col);
+
+   for(let r=0;r<4;r++)game2048Grid[3-r][cIdx]=newCol[r];
+
+  }
+
+ }
+
+ const moved=JSON.stringify(game2048Grid)!==before;
+
+ if(moved){
+
+  game2048AddTile();
+  game2048Render();
+
+  if(game2048IsGameOver()){
+
+   game2048Active=false;
+   notify("2048 game over. Score: "+game2048Score);
+
+  }
+
+ }
+
+}
+
+function game2048IsGameOver(){
+
+ for(let r=0;r<4;r++)
+  for(let cIdx=0;cIdx<4;cIdx++){
+
+   if(game2048Grid[r][cIdx]===0)return false;
+
+   if(cIdx<3&&game2048Grid[r][cIdx]===game2048Grid[r][cIdx+1])return false;
+
+   if(r<3&&game2048Grid[r][cIdx]===game2048Grid[r+1][cIdx])return false;
+
+  }
+
+ return true;
+
+}
+
+function start2048(){
+
+ game2048Grid=game2048EmptyGrid();
+ game2048Score=0;
+ game2048Active=true;
+
+ game2048AddTile();
+ game2048AddTile();
+
+ game2048Render();
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(!game2048Active)return;
+
+ if(e.key==="ArrowLeft"){e.preventDefault();game2048Move("left");}
+ if(e.key==="ArrowRight"){e.preventDefault();game2048Move("right");}
+ if(e.key==="ArrowUp"){e.preventDefault();game2048Move("up");}
+ if(e.key==="ArrowDown"){e.preventDefault();game2048Move("down");}
+
+});
+
+
+/* FLAPPY */
+
+let flappyCanvas,flappyCtx;
+let flappyActive=false;
+let flappyBirdY,flappyVelocity,flappyPipes,flappyScore;
+
+function startFlappy(){
+
+ flappyCanvas=document.getElementById("flappyCanvas");
+
+ if(!flappyCanvas)return;
+
+ flappyCtx=flappyCanvas.getContext("2d");
+
+ flappyBirdY=140;
+ flappyVelocity=0;
+ flappyPipes=[{x:300,gapY:120}];
+ flappyScore=0;
+ flappyActive=true;
+
+ const scoreEl=document.getElementById("flappyScore");
+
+ if(scoreEl)scoreEl.textContent="0";
+
+ flappyLoop();
+
+}
+
+function flappyFlap(){
+
+ if(!flappyActive)return;
+
+ flappyVelocity=-6;
+
+}
+
+function flappyLoop(){
+
+ if(!flappyActive)return;
+
+ const gapHeight=110;
+
+ flappyVelocity+=0.4;
+ flappyBirdY+=flappyVelocity;
+
+ flappyPipes.forEach(p=>p.x-=2.5);
+
+ if(flappyPipes[flappyPipes.length-1].x<160){
+
+  flappyPipes.push({
+   x:340,
+   gapY:60+Math.random()*180
+  });
+
+ }
+
+ if(flappyPipes[0].x<-40){
+
+  flappyPipes.shift();
+  flappyScore++;
+
+  const scoreEl=document.getElementById("flappyScore");
+
+  if(scoreEl)scoreEl.textContent=flappyScore;
+
+ }
+
+ let collided=flappyBirdY<0||flappyBirdY>340;
+
+ flappyPipes.forEach(p=>{
+
+  if(
+   60>p.x&&60<p.x+40&&
+   (flappyBirdY<p.gapY-gapHeight/2||flappyBirdY>p.gapY+gapHeight/2)
+  ){
+
+   collided=true;
+
+  }
+
+ });
+
+ flappyCtx.fillStyle="#0f172a";
+ flappyCtx.fillRect(0,0,340,340);
+
+ flappyCtx.fillStyle="#22c55e";
+
+ flappyPipes.forEach(p=>{
+
+  flappyCtx.fillRect(p.x,0,40,p.gapY-gapHeight/2);
+  flappyCtx.fillRect(p.x,p.gapY+gapHeight/2,40,340-(p.gapY+gapHeight/2));
+
+ });
+
+ flappyCtx.fillStyle="#facc15";
+ flappyCtx.beginPath();
+ flappyCtx.arc(60,flappyBirdY,10,0,Math.PI*2);
+ flappyCtx.fill();
+
+ if(collided){
+
+  flappyActive=false;
+  notify("Nova Flap game over. Score: "+flappyScore);
+  return;
+
+ }
+
+ requestAnimationFrame(flappyLoop);
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(e.key===" "&&flappyActive){
+
+  e.preventDefault();
+  flappyFlap();
+
+ }
+
+});
+
+
+/* BREAKOUT */
+
+let breakoutCanvas,breakoutCtx,breakoutActive=false;
+let breakoutPaddleX,breakoutBallX,breakoutBallY,breakoutVX,breakoutVY,breakoutBricks,breakoutScore;
+
+function startBreakout(){
+
+ breakoutCanvas=document.getElementById("breakoutCanvas");
+
+ if(!breakoutCanvas)return;
+
+ breakoutCtx=breakoutCanvas.getContext("2d");
+
+ breakoutPaddleX=150;
+ breakoutBallX=180;
+ breakoutBallY=260;
+ breakoutVX=3;
+ breakoutVY=-3;
+ breakoutScore=0;
+ breakoutActive=true;
+
+ breakoutBricks=[];
+
+ for(let r=0;r<4;r++){
+  for(let cIdx=0;cIdx<8;cIdx++){
+
+   breakoutBricks.push({
+    x:cIdx*44+4,
+    y:r*20+10,
+    alive:true
+   });
+
+  }
+ }
+
+ const scoreEl=document.getElementById("breakoutScore");
+
+ if(scoreEl)scoreEl.textContent="0";
+
+ breakoutLoop();
+
+}
+
+function breakoutMove(e){
+
+ if(!breakoutActive||!breakoutCanvas)return;
+
+ const rect=breakoutCanvas.getBoundingClientRect();
+
+ breakoutPaddleX=e.clientX-rect.left-40;
+ breakoutPaddleX=Math.max(0,Math.min(280,breakoutPaddleX));
+
+}
+
+function breakoutLoop(){
+
+ if(!breakoutActive)return;
+
+ breakoutBallX+=breakoutVX;
+ breakoutBallY+=breakoutVY;
+
+ if(breakoutBallX<6||breakoutBallX>354)breakoutVX*=-1;
+
+ if(breakoutBallY<6)breakoutVY*=-1;
+
+ if(
+  breakoutBallY>280&&breakoutBallY<292&&
+  breakoutBallX>breakoutPaddleX&&breakoutBallX<breakoutPaddleX+80
+ ){
+
+  breakoutVY=-Math.abs(breakoutVY);
+
+ }
+
+ breakoutBricks.forEach(b=>{
+
+  if(!b.alive)return;
+
+  if(
+   breakoutBallX>b.x&&breakoutBallX<b.x+40&&
+   breakoutBallY>b.y&&breakoutBallY<b.y+16
+  ){
+
+   b.alive=false;
+   breakoutVY*=-1;
+   breakoutScore+=10;
+
+   const scoreEl=document.getElementById("breakoutScore");
+
+   if(scoreEl)scoreEl.textContent=breakoutScore;
+
+  }
+
+ });
+
+ breakoutCtx.fillStyle="#0f172a";
+ breakoutCtx.fillRect(0,0,360,300);
+
+ breakoutCtx.fillStyle="#2563eb";
+ breakoutCtx.fillRect(breakoutPaddleX,285,80,10);
+
+ breakoutCtx.fillStyle="#facc15";
+ breakoutCtx.beginPath();
+ breakoutCtx.arc(breakoutBallX,breakoutBallY,6,0,Math.PI*2);
+ breakoutCtx.fill();
+
+ breakoutCtx.fillStyle="#ef4444";
+
+ breakoutBricks.forEach(b=>{
+  if(b.alive)breakoutCtx.fillRect(b.x,b.y,40,16);
+ });
+
+ if(breakoutBallY>310){
+
+  breakoutActive=false;
+  notify("Nova Breakout game over. Score: "+breakoutScore);
+  return;
+
+ }
+
+ if(breakoutBricks.every(b=>!b.alive)){
+
+  breakoutActive=false;
+  notify("You cleared every brick! Score: "+breakoutScore);
+  return;
+
+ }
+
+ requestAnimationFrame(breakoutLoop);
+
+}
+
+
+/* MINESWEEPER */
+
+let mineGrid=[];
+let mineRevealed=[];
+let mineFlagged=[];
+let mineActive=false;
+
+const MINE_SIZE=8;
+const MINE_COUNT=10;
+
+function startMinesweeper(){
+
+ mineGrid=Array.from({length:MINE_SIZE},()=>Array(MINE_SIZE).fill(0));
+ mineRevealed=Array.from({length:MINE_SIZE},()=>Array(MINE_SIZE).fill(false));
+ mineFlagged=Array.from({length:MINE_SIZE},()=>Array(MINE_SIZE).fill(false));
+ mineActive=true;
+
+ let placed=0;
+
+ while(placed<MINE_COUNT){
+
+  const r=Math.floor(Math.random()*MINE_SIZE);
+  const cIdx=Math.floor(Math.random()*MINE_SIZE);
+
+  if(mineGrid[r][cIdx]!==-1){
+
+   mineGrid[r][cIdx]=-1;
+   placed++;
+
+  }
+
+ }
+
+ for(let r=0;r<MINE_SIZE;r++){
+  for(let cIdx=0;cIdx<MINE_SIZE;cIdx++){
+
+   if(mineGrid[r][cIdx]===-1)continue;
+
+   let count=0;
+
+   for(let dr=-1;dr<=1;dr++){
+    for(let dc=-1;dc<=1;dc++){
+
+     const nr=r+dr;
+     const nc=cIdx+dc;
+
+     if(
+      nr>=0&&nr<MINE_SIZE&&
+      nc>=0&&nc<MINE_SIZE&&
+      mineGrid[nr][nc]===-1
+     )count++;
+
+    }
+   }
+
+   mineGrid[r][cIdx]=count;
+
+  }
+ }
+
+ renderMinesweeper();
+
+}
+
+function mineReveal(r,cIdx){
+
+ if(!mineActive)return;
+
+ if(mineRevealed[r][cIdx]||mineFlagged[r][cIdx])return;
+
+ mineRevealed[r][cIdx]=true;
+
+ if(mineGrid[r][cIdx]===-1){
+
+  mineActive=false;
+
+  for(let rr=0;rr<MINE_SIZE;rr++)
+   for(let cc=0;cc<MINE_SIZE;cc++)
+    mineRevealed[rr][cc]=true;
+
+  renderMinesweeper();
+
+  notify("💥 You hit a mine!");
+
+  return;
+
+ }
+
+ if(mineGrid[r][cIdx]===0){
+
+  for(let dr=-1;dr<=1;dr++){
+   for(let dc=-1;dc<=1;dc++){
+
+    const nr=r+dr;
+    const nc=cIdx+dc;
+
+    if(nr>=0&&nr<MINE_SIZE&&nc>=0&&nc<MINE_SIZE)
+     mineReveal(nr,nc);
+
+   }
+  }
+
+ }
+
+ renderMinesweeper();
+
+ checkMinesweeperWin();
+
+}
+
+function mineFlag(r,cIdx,e){
+
+ e.preventDefault();
+
+ if(!mineActive||mineRevealed[r][cIdx])return;
+
+ mineFlagged[r][cIdx]=!mineFlagged[r][cIdx];
+
+ renderMinesweeper();
+
+}
+
+function checkMinesweeperWin(){
+
+ let allSafeRevealed=true;
+
+ for(let r=0;r<MINE_SIZE;r++)
+  for(let cIdx=0;cIdx<MINE_SIZE;cIdx++)
+   if(mineGrid[r][cIdx]!==-1&&!mineRevealed[r][cIdx])
+    allSafeRevealed=false;
+
+ if(allSafeRevealed){
+
+  mineActive=false;
+  notify("🎉 You cleared the minefield!");
+
+ }
+
+}
+
+function renderMinesweeper(){
+
+ const box=document.getElementById("mineGridBox");
+
+ if(!box)return;
+
+ box.innerHTML="";
+
+ for(let r=0;r<MINE_SIZE;r++){
+  for(let cIdx=0;cIdx<MINE_SIZE;cIdx++){
+
+   const b=document.createElement("button");
+
+   b.className="gamecard";
+   b.style.fontSize="14px";
+   b.style.height="34px";
+
+   if(mineFlagged[r][cIdx]){
+
+    b.textContent="🚩";
+
+   }else if(mineRevealed[r][cIdx]){
+
+    if(mineGrid[r][cIdx]===-1){
+
+     b.textContent="💣";
+     b.style.background="#7f1d1d";
+
+    }else{
+
+     b.textContent=mineGrid[r][cIdx]||"";
+     b.style.background="#ffffff05";
+
+    }
+
+   }else{
+
+    b.textContent="";
+
+   }
+
+   b.onclick=()=>mineReveal(r,cIdx);
+   b.oncontextmenu=e=>mineFlag(r,cIdx,e);
+
+   box.appendChild(b);
+
+  }
+ }
+
+}
+
+
+/* TIC-TAC-TOE */
+
+let tttBoard=[];
+let tttActive=false;
+
+function startTicTacToe(){
+
+ tttBoard=Array(9).fill(null);
+ tttActive=true;
+
+ renderTicTacToe();
+
+}
+
+function tttCheckWinner(board){
+
+ const lines=[
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+ ];
+
+ for(const line of lines){
+
+  const a=line[0];
+  const b=line[1];
+  const cIdx=line[2];
+
+  if(board[a]&&board[a]===board[b]&&board[a]===board[cIdx])
+   return board[a];
+
+ }
+
+ if(board.every(v=>v))return "draw";
+
+ return null;
+
+}
+
+function tttPlayerMove(i){
+
+ if(!tttActive||tttBoard[i])return;
+
+ tttBoard[i]="X";
+
+ let winner=tttCheckWinner(tttBoard);
+
+ if(winner){
+
+  finishTicTacToe(winner);
+  return;
+
+ }
+
+ const move=tttBestMove();
+
+ if(move!==-1){
+
+  tttBoard[move]="O";
+
+  winner=tttCheckWinner(tttBoard);
+
+  if(winner){
+
+   finishTicTacToe(winner);
+   return;
+
+  }
+
+ }
+
+ renderTicTacToe();
+
+}
+
+function tttBestMove(){
+
+ const empty=tttBoard
+  .map((v,i)=>v?null:i)
+  .filter(v=>v!==null);
+
+ for(const i of empty){
+
+  const copy=tttBoard.slice();
+  copy[i]="O";
+
+  if(tttCheckWinner(copy)==="O")return i;
+
+ }
+
+ for(const i of empty){
+
+  const copy=tttBoard.slice();
+  copy[i]="X";
+
+  if(tttCheckWinner(copy)==="X")return i;
+
+ }
+
+ if(tttBoard[4]===null)return 4;
+
+ const corners=[0,2,6,8].filter(i=>tttBoard[i]===null);
+
+ if(corners.length)
+  return corners[Math.floor(Math.random()*corners.length)];
+
+ return empty.length?empty[Math.floor(Math.random()*empty.length)]:-1;
+
+}
+
+function finishTicTacToe(winner){
+
+ tttActive=false;
+
+ renderTicTacToe();
+
+ if(winner==="draw")notify("Tic-Tac-Toe: it's a draw!");
+ else notify(winner==="X"?"🎉 You win!":"Computer wins!");
+
+}
+
+function renderTicTacToe(){
+
+ const box=document.getElementById("tttGrid");
+
+ if(!box)return;
+
+ box.innerHTML="";
+
+ tttBoard.forEach((v,i)=>{
+
+  const b=document.createElement("button");
+
+  b.className="gamecard";
+  b.textContent=v||"";
+  b.onclick=()=>tttPlayerMove(i);
+
+  box.appendChild(b);
+
+ });
+
+}
+
+
+/* CONNECT FOUR */
+
+let c4Grid=[];
+let c4Turn="R";
+let c4Active=false;
+
+const C4_COLS=7;
+const C4_ROWS=6;
+
+function startConnectFour(){
+
+ c4Grid=Array.from({length:C4_ROWS},()=>Array(C4_COLS).fill(null));
+ c4Turn="R";
+ c4Active=true;
+
+ renderConnectFour();
+
+}
+
+function c4Drop(cIdx){
+
+ if(!c4Active)return;
+
+ for(let r=C4_ROWS-1;r>=0;r--){
+
+  if(!c4Grid[r][cIdx]){
+
+   c4Grid[r][cIdx]=c4Turn;
+
+   if(c4CheckWin(r,cIdx)){
+
+    c4Active=false;
+    renderConnectFour();
+    notify((c4Turn==="R"?"🔴 Red":"🟡 Yellow")+" wins!");
+    return;
+
+   }
+
+   if(c4Grid.every(row=>row.every(cell=>cell))){
+
+    c4Active=false;
+    renderConnectFour();
+    notify("Connect Four: it's a draw!");
+    return;
+
+   }
+
+   c4Turn=c4Turn==="R"?"Y":"R";
+
+   renderConnectFour();
+
+   return;
+
+  }
+
+ }
+
+}
+
+function c4CheckWin(r,cIdx){
+
+ const color=c4Grid[r][cIdx];
+ const dirs=[[0,1],[1,0],[1,1],[1,-1]];
+
+ for(const dir of dirs){
+
+  const dr=dir[0];
+  const dc=dir[1];
+
+  let count=1;
+
+  for(let step=1;step<4;step++){
+
+   const nr=r+dr*step;
+   const nc=cIdx+dc*step;
+
+   if(
+    nr>=0&&nr<C4_ROWS&&
+    nc>=0&&nc<C4_COLS&&
+    c4Grid[nr][nc]===color
+   )count++;
+   else break;
+
+  }
+
+  for(let step=1;step<4;step++){
+
+   const nr=r-dr*step;
+   const nc=cIdx-dc*step;
+
+   if(
+    nr>=0&&nr<C4_ROWS&&
+    nc>=0&&nc<C4_COLS&&
+    c4Grid[nr][nc]===color
+   )count++;
+   else break;
+
+  }
+
+  if(count>=4)return true;
+
+ }
+
+ return false;
+
+}
+
+function renderConnectFour(){
+
+ const box=document.getElementById("c4Grid");
+
+ if(!box)return;
+
+ box.innerHTML="";
+
+ box.style.display="grid";
+ box.style.gridTemplateColumns="repeat(7,1fr)";
+ box.style.gap="4px";
+ box.style.maxWidth="320px";
+ box.style.margin="auto";
+
+ for(let r=0;r<C4_ROWS;r++){
+  for(let cIdx=0;cIdx<C4_COLS;cIdx++){
+
+   const cell=document.createElement("button");
+
+   cell.className="gamecard";
+   cell.style.height="34px";
+   cell.style.borderRadius="50%";
+
+   const val=c4Grid[r][cIdx];
+
+   cell.style.background=
+    val==="R"?"#ef4444":
+    val==="Y"?"#facc15":"#ffffff10";
+
+   cell.onclick=()=>c4Drop(cIdx);
+
+   box.appendChild(cell);
+
+  }
+ }
+
+ const turnEl=document.getElementById("c4Turn");
+
+ if(turnEl)
+  turnEl.textContent=c4Turn==="R"?"🔴 Red's turn":"🟡 Yellow's turn";
+
+}
+
+
+/* TRIVIA */
+
+const TRIVIA_QUESTIONS=[
+ {q:"What planet is known as the Red Planet?",a:["Venus","Mars","Jupiter"],c:"Mars"},
+ {q:"How many continents are there on Earth?",a:["5","6","7"],c:"7"},
+ {q:"What is the largest ocean on Earth?",a:["Atlantic","Indian","Pacific"],c:"Pacific"},
+ {q:"Which element has the chemical symbol O?",a:["Gold","Oxygen","Osmium"],c:"Oxygen"},
+ {q:"How many strings does a standard guitar have?",a:["4","6","8"],c:"6"},
+ {q:"What is the capital of Japan?",a:["Seoul","Beijing","Tokyo"],c:"Tokyo"},
+ {q:"How many sides does a hexagon have?",a:["5","6","7"],c:"6"},
+ {q:"What gas do plants absorb from the atmosphere?",a:["Oxygen","Carbon Dioxide","Nitrogen"],c:"Carbon Dioxide"}
+];
+
+let triviaIndex=0;
+let triviaScore=0;
+let triviaActive=false;
+
+function startTrivia(){
+
+ triviaIndex=0;
+ triviaScore=0;
+ triviaActive=true;
+
+ renderTrivia();
+
+}
+
+function renderTrivia(){
+
+ const qEl=document.getElementById("triviaQuestion");
+ const bEl=document.getElementById("triviaButtons");
+ const scoreEl=document.getElementById("triviaScore");
+
+ if(!qEl||!bEl)return;
+
+ if(!triviaActive||triviaIndex>=TRIVIA_QUESTIONS.length){
+
+  qEl.textContent="Quiz complete! Final score: "+triviaScore+"/"+TRIVIA_QUESTIONS.length;
+  bEl.innerHTML="";
+
+  return;
+
+ }
+
+ const question=TRIVIA_QUESTIONS[triviaIndex];
+
+ qEl.textContent="Q"+(triviaIndex+1)+"/"+TRIVIA_QUESTIONS.length+": "+question.q;
+
+ bEl.innerHTML=question.a.map(x=>
+  `<button class="appbtn" onclick="triviaAnswer('${x}')">${x}</button>`
+ ).join("");
+
+ if(scoreEl)scoreEl.textContent=triviaScore;
+
+}
+
+function triviaAnswer(answer){
+
+ const question=TRIVIA_QUESTIONS[triviaIndex];
+
+ if(answer===question.c){
+
+  triviaScore++;
+  notify("Correct! 🎉");
+
+ }else{
+
+  notify("Not quite — it was "+question.c);
+
+ }
+
+ triviaIndex++;
+
+ renderTrivia();
+
+}
+
+
+/* SIMON */
+
+const SIMON_COLORS=[
+ {id:0,color:"#ef4444",freq:329.63},
+ {id:1,color:"#22c55e",freq:392.00},
+ {id:2,color:"#3b82f6",freq:261.63},
+ {id:3,color:"#facc15",freq:220.00}
+];
+
+let simonSequence=[];
+let simonPlayerIndex=0;
+let simonActive=false;
+let simonAccepting=false;
+
+function buildSimonBoard(){
+
+ const board=document.getElementById("simonBoard");
+
+ if(!board)return;
+
+ board.innerHTML="";
+
+ SIMON_COLORS.forEach(clr=>{
+
+  const pad=document.createElement("button");
+
+  pad.className="gamecard";
+  pad.id="simonPad"+clr.id;
+  pad.style.height="100px";
+  pad.style.background=clr.color;
+  pad.style.opacity="0.55";
+
+  pad.onclick=()=>simonPadClick(clr.id);
+
+  board.appendChild(pad);
+
+ });
+
+}
+
+function startSimon(){
+
+ simonSequence=[];
+ simonPlayerIndex=0;
+ simonActive=true;
+
+ const roundEl=document.getElementById("simonRound");
+
+ if(roundEl)roundEl.textContent="0";
+
+ nextSimonRound();
+
+}
+
+function nextSimonRound(){
+
+ simonSequence.push(Math.floor(Math.random()*4));
+ simonPlayerIndex=0;
+ simonAccepting=false;
+
+ const roundEl=document.getElementById("simonRound");
+
+ if(roundEl)roundEl.textContent=simonSequence.length;
+
+ playSimonSequence();
+
+}
+
+function playSimonSequence(){
+
+ let i=0;
+
+ const interval=setInterval(()=>{
+
+  if(i>=simonSequence.length){
+
+   clearInterval(interval);
+   simonAccepting=true;
+   return;
+
+  }
+
+  flashSimonPad(simonSequence[i]);
+
+  i++;
+
+ },700);
+
+}
+
+function flashSimonPad(id){
+
+ const pad=document.getElementById("simonPad"+id);
+
+ if(!pad)return;
+
+ pad.style.opacity="1";
+
+ beep(SIMON_COLORS[id].freq);
+
+ setTimeout(()=>{
+
+  pad.style.opacity="0.55";
+
+ },400);
+
+}
+
+function simonPadClick(id){
+
+ if(!simonActive||!simonAccepting)return;
+
+ flashSimonPad(id);
+
+ if(id!==simonSequence[simonPlayerIndex]){
+
+  simonActive=false;
+  notify("Nova Simon — wrong pad! You reached round "+simonSequence.length);
+  return;
+
+ }
+
+ simonPlayerIndex++;
+
+ if(simonPlayerIndex>=simonSequence.length){
+
+  simonAccepting=false;
+
+  setTimeout(nextSimonRound,900);
+
+ }
+
+}
+
+
+/* WHACK-A-MOLE */
+
+let whackActive=false;
+let whackScore=0;
+let whackTimeLeft=20;
+let whackGameInterval=null;
+let whackMoleInterval=null;
+let whackCurrentHole=-1;
+
+function buildWhackGrid(){
+
+ const grid=document.getElementById("whackGrid");
+
+ if(!grid)return;
+
+ grid.innerHTML="";
+
+ for(let i=0;i<9;i++){
+
+  const hole=document.createElement("button");
+
+  hole.className="gamecard";
+  hole.id="whackHole"+i;
+  hole.textContent="";
+
+  hole.onclick=()=>whackHit(i);
+
+  grid.appendChild(hole);
+
+ }
+
+}
+
+function startWhack(){
+
+ clearInterval(whackGameInterval);
+ clearInterval(whackMoleInterval);
+
+ whackActive=true;
+ whackScore=0;
+ whackTimeLeft=20;
+ whackCurrentHole=-1;
+
+ const scoreEl=document.getElementById("whackScore");
+ const timeEl=document.getElementById("whackTime");
+
+ if(scoreEl)scoreEl.textContent="0";
+ if(timeEl)timeEl.textContent="20";
+
+ for(let i=0;i<9;i++){
+
+  const hole=document.getElementById("whackHole"+i);
+
+  if(hole)hole.textContent="";
+
+ }
+
+ spawnMole();
+
+ whackMoleInterval=setInterval(spawnMole,900);
+
+ whackGameInterval=setInterval(()=>{
+
+  whackTimeLeft--;
+
+  if(timeEl)timeEl.textContent=whackTimeLeft;
+
+  if(whackTimeLeft<=0){
+
+   clearInterval(whackGameInterval);
+   clearInterval(whackMoleInterval);
+
+   whackActive=false;
+
+   if(whackCurrentHole!==-1){
+
+    const hole=document.getElementById("whackHole"+whackCurrentHole);
+
+    if(hole)hole.textContent="";
+
+   }
+
+   notify("Whack-a-Mole finished! Score: "+whackScore);
+
+  }
+
+ },1000);
+
+}
+
+function spawnMole(){
+
+ if(!whackActive)return;
+
+ if(whackCurrentHole!==-1){
+
+  const prevHole=document.getElementById("whackHole"+whackCurrentHole);
+
+  if(prevHole)prevHole.textContent="";
+
+ }
+
+ whackCurrentHole=Math.floor(Math.random()*9);
+
+ const hole=document.getElementById("whackHole"+whackCurrentHole);
+
+ if(hole)hole.textContent="🐹";
+
+}
+
+function whackHit(i){
+
+ if(!whackActive||i!==whackCurrentHole)return;
+
+ whackScore++;
+
+ const scoreEl=document.getElementById("whackScore");
+
+ if(scoreEl)scoreEl.textContent=whackScore;
+
+ const hole=document.getElementById("whackHole"+i);
+
+ if(hole)hole.textContent="";
+
+ whackCurrentHole=-1;
+
+}
+
+
+/* WORD SCRAMBLE */
+
+const SCRAMBLE_WORDS=["PLANET","GUITAR","PYTHON","GALAXY","BREEZE","PUZZLE","ROCKET","CASTLE","JUNGLE","WIZARD","MARBLE","SILVER"];
+
+let scrambleAnswer="";
+let scrambleScore=0;
+
+function scrambleWordLetters(word){
+
+ const letters=word.split("");
+
+ for(let i=letters.length-1;i>0;i--){
+
+  const j=Math.floor(Math.random()*(i+1));
+  const temp=letters[i];
+
+  letters[i]=letters[j];
+  letters[j]=temp;
+
+ }
+
+ return letters.join("");
+
+}
+
+function newScramble(){
+
+ scrambleAnswer=SCRAMBLE_WORDS[Math.floor(Math.random()*SCRAMBLE_WORDS.length)];
+
+ let scrambled=scrambleWordLetters(scrambleAnswer);
+
+ while(scrambled===scrambleAnswer){
+
+  scrambled=scrambleWordLetters(scrambleAnswer);
+
+ }
+
+ const wordEl=document.getElementById("scrambleWord");
+ const feedbackEl=document.getElementById("scrambleFeedback");
+ const inputEl=document.getElementById("scrambleInput");
+
+ if(wordEl)wordEl.textContent=scrambled;
+ if(feedbackEl)feedbackEl.textContent="";
+ if(inputEl)inputEl.value="";
+
+}
+
+function checkScramble(){
+
+ const inputEl=document.getElementById("scrambleInput");
+ const feedbackEl=document.getElementById("scrambleFeedback");
+
+ if(!inputEl)return;
+
+ const guess=inputEl.value.trim().toUpperCase();
+
+ if(guess===scrambleAnswer){
+
+  scrambleScore++;
+
+  const scoreEl=document.getElementById("scrambleScore");
+
+  if(scoreEl)scoreEl.textContent=scrambleScore;
+
+  if(feedbackEl)feedbackEl.textContent="🎉 Correct!";
+
+  setTimeout(newScramble,900);
+
+ }else{
+
+  if(feedbackEl)feedbackEl.textContent="❌ Try again.";
+
+ }
+
+}
+
+
+/* HANGMAN */
+
+const HANGMAN_WORDS=["JAVASCRIPT","COMPUTER","KEYBOARD","INTERNET","DESKTOP","BROWSER","SOFTWARE","MONITOR","NOVAOS","PIXEL"];
+
+const HANGMAN_STAGES=["🙂","😐","😟","😧","😨","😱","💀"];
+
+let hangmanWord="";
+let hangmanGuessed=[];
+let hangmanWrong=0;
+let hangmanActive=false;
+
+function startHangman(){
+
+ hangmanWord=HANGMAN_WORDS[Math.floor(Math.random()*HANGMAN_WORDS.length)];
+ hangmanGuessed=[];
+ hangmanWrong=0;
+ hangmanActive=true;
+
+ renderHangman();
+ renderHangmanLetters();
+
+}
+
+function renderHangman(){
+
+ const wordEl=document.getElementById("hangmanWord");
+ const stageEl=document.getElementById("hangmanStage");
+ const wrongEl=document.getElementById("hangmanWrong");
+
+ if(wordEl){
+
+  wordEl.textContent=hangmanWord
+  .split("")
+  .map(letter=>hangmanGuessed.includes(letter)?letter:"_")
+  .join(" ");
+
+ }
+
+ if(stageEl)stageEl.textContent=HANGMAN_STAGES[Math.min(hangmanWrong,HANGMAN_STAGES.length-1)];
+
+ if(wrongEl)wrongEl.textContent=hangmanWrong;
+
+}
+
+function renderHangmanLetters(){
+
+ const box=document.getElementById("hangmanLetters");
+
+ if(!box)return;
+
+ const alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+ box.innerHTML=alphabet.map(letter=>{
+
+  const used=hangmanGuessed.includes(letter);
+
+  return '<button class="appbtn" style="display:inline-block;width:34px;padding:8px 0;margin:2px" '+
+   (used?"disabled":"")+
+   ' onclick="guessHangmanLetter(\''+letter+'\')">'+letter+'</button>';
+
+ }).join("");
+
+}
+
+function guessHangmanLetter(letter){
+
+ if(!hangmanActive||hangmanGuessed.includes(letter))return;
+
+ hangmanGuessed.push(letter);
+
+ if(!hangmanWord.includes(letter)){
+
+  hangmanWrong++;
+
+ }
+
+ renderHangman();
+ renderHangmanLetters();
+
+ const isComplete=hangmanWord.split("").every(l=>hangmanGuessed.includes(l));
+
+ if(isComplete){
+
+  hangmanActive=false;
+  notify("🎉 You guessed it: "+hangmanWord);
+
+ }else if(hangmanWrong>=6){
+
+  hangmanActive=false;
+
+  const wordEl=document.getElementById("hangmanWord");
+
+  if(wordEl)wordEl.textContent=hangmanWord.split("").join(" ");
+
+  notify("Game over — the word was "+hangmanWord);
+
+ }
+
+}
+
+
+/* REVERSI */
+
+let reversiBoard=[];
+let reversiTurn="B";
+let reversiActive=false;
+
+const REVERSI_DIRS=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+function startReversi(){
+
+ reversiBoard=Array.from({length:8},()=>Array(8).fill(null));
+
+ reversiBoard[3][3]="W";
+ reversiBoard[3][4]="B";
+ reversiBoard[4][3]="B";
+ reversiBoard[4][4]="W";
+
+ reversiTurn="B";
+ reversiActive=true;
+
+ renderReversi();
+
+}
+
+function reversiValidMove(r,c,color){
+
+ if(reversiBoard[r][c])return false;
+
+ const opponent=color==="B"?"W":"B";
+
+ for(const dir of REVERSI_DIRS){
+
+  let nr=r+dir[0];
+  let nc=c+dir[1];
+  let sawOpponent=false;
+
+  while(nr>=0&&nr<8&&nc>=0&&nc<8&&reversiBoard[nr][nc]===opponent){
+
+   sawOpponent=true;
+   nr+=dir[0];
+   nc+=dir[1];
+
+  }
+
+  if(sawOpponent&&nr>=0&&nr<8&&nc>=0&&nc<8&&reversiBoard[nr][nc]===color){
+
+   return true;
+
+  }
+
+ }
+
+ return false;
+
+}
+
+function reversiHasValidMove(color){
+
+ for(let r=0;r<8;r++)
+  for(let c=0;c<8;c++)
+   if(reversiValidMove(r,c,color))return true;
+
+ return false;
+
+}
+
+function reversiPlay(r,c){
+
+ if(!reversiActive)return;
+
+ if(!reversiValidMove(r,c,reversiTurn))return;
+
+ const opponent=reversiTurn==="B"?"W":"B";
+
+ reversiBoard[r][c]=reversiTurn;
+
+ REVERSI_DIRS.forEach(dir=>{
+
+  let nr=r+dir[0];
+  let nc=c+dir[1];
+
+  const toFlip=[];
+
+  while(nr>=0&&nr<8&&nc>=0&&nc<8&&reversiBoard[nr][nc]===opponent){
+
+   toFlip.push([nr,nc]);
+   nr+=dir[0];
+   nc+=dir[1];
+
+  }
+
+  if(toFlip.length&&nr>=0&&nr<8&&nc>=0&&nc<8&&reversiBoard[nr][nc]===reversiTurn){
+
+   toFlip.forEach(pos=>{
+
+    reversiBoard[pos[0]][pos[1]]=reversiTurn;
+
+   });
+
+  }
+
+ });
+
+ const nextTurn=opponent;
+
+ if(reversiHasValidMove(nextTurn)){
+
+  reversiTurn=nextTurn;
+
+ }else if(reversiHasValidMove(reversiTurn)){
+
+  notify((nextTurn==="B"?"Black":"White")+" has no valid move — turn skipped.");
+
+ }else{
+
+  reversiActive=false;
+
+  finishReversi();
+
+ }
+
+ renderReversi();
+
+}
+
+function finishReversi(){
+
+ let blackCount=0;
+ let whiteCount=0;
+
+ reversiBoard.forEach(row=>row.forEach(cell=>{
+
+  if(cell==="B")blackCount++;
+  if(cell==="W")whiteCount++;
+
+ }));
+
+ if(blackCount>whiteCount)notify("🎉 Black wins "+blackCount+"-"+whiteCount+"!");
+ else if(whiteCount>blackCount)notify("🎉 White wins "+whiteCount+"-"+blackCount+"!");
+ else notify("It's a tie, "+blackCount+"-"+whiteCount+"!");
+
+}
+
+function renderReversi(){
+
+ const board=document.getElementById("reversiBoard");
+
+ if(!board)return;
+
+ board.innerHTML="";
+
+ let blackCount=0;
+ let whiteCount=0;
+
+ for(let r=0;r<8;r++){
+  for(let c=0;c<8;c++){
+
+   const cell=reversiBoard[r][c];
+
+   if(cell==="B")blackCount++;
+   if(cell==="W")whiteCount++;
+
+   const btn=document.createElement("button");
+
+   btn.className="gamecard";
+   btn.style.height="34px";
+   btn.style.borderRadius="50%";
+   btn.style.background=
+    cell==="B"?"#020617":
+    cell==="W"?"#f8fafc":"#166534";
+
+   btn.onclick=()=>reversiPlay(r,c);
+
+   board.appendChild(btn);
+
+  }
+ }
+
+ const turnEl=document.getElementById("reversiTurn");
+ const blackEl=document.getElementById("reversiBlackCount");
+ const whiteEl=document.getElementById("reversiWhiteCount");
+
+ if(turnEl)turnEl.textContent=reversiTurn==="B"?"⚫ Black's turn":"⚪ White's turn";
+ if(blackEl)blackEl.textContent=blackCount;
+ if(whiteEl)whiteEl.textContent=whiteCount;
+
+}
+
+
+/* MINI SUDOKU */
+
+let sudokuSolution=[];
+let sudokuGiven=[];
+let sudokuPlayerGrid=[];
+
+function generateSudokuSolution(){
+
+ let grid=[
+  [1,2,3,4],
+  [3,4,1,2],
+  [2,1,4,3],
+  [4,3,2,1]
+ ];
+
+ const mapping=[1,2,3,4].sort(()=>Math.random()-0.5);
+
+ grid=grid.map(row=>row.map(v=>mapping[v-1]));
+
+ if(Math.random()<0.5){
+
+  const temp=grid[0];
+  grid[0]=grid[1];
+  grid[1]=temp;
+
+ }
+
+ if(Math.random()<0.5){
+
+  const temp=grid[2];
+  grid[2]=grid[3];
+  grid[3]=temp;
+
+ }
+
+ const swapCols1=Math.random()<0.5;
+ const swapCols2=Math.random()<0.5;
+
+ grid=grid.map(row=>{
+
+  const newRow=row.slice();
+
+  if(swapCols1){
+
+   const t=newRow[0];
+   newRow[0]=newRow[1];
+   newRow[1]=t;
+
+  }
+
+  if(swapCols2){
+
+   const t=newRow[2];
+   newRow[2]=newRow[3];
+   newRow[3]=t;
+
+  }
+
+  return newRow;
+
+ });
+
+ return grid;
+
+}
+
+function startSudoku(){
+
+ sudokuSolution=generateSudokuSolution();
+
+ sudokuGiven=Array.from({length:4},()=>Array(4).fill(false));
+ sudokuPlayerGrid=Array.from({length:4},()=>Array(4).fill(0));
+
+ const cellsToKeep=7+Math.floor(Math.random()*2);
+
+ const allCells=[];
+
+ for(let r=0;r<4;r++)
+  for(let c=0;c<4;c++)
+   allCells.push([r,c]);
+
+ allCells.sort(()=>Math.random()-0.5);
+
+ for(let i=0;i<cellsToKeep;i++){
+
+  const pos=allCells[i];
+
+  sudokuGiven[pos[0]][pos[1]]=true;
+  sudokuPlayerGrid[pos[0]][pos[1]]=sudokuSolution[pos[0]][pos[1]];
+
+ }
+
+ const feedbackEl=document.getElementById("sudokuFeedback");
+
+ if(feedbackEl)feedbackEl.textContent="";
+
+ renderSudoku();
+
+}
+
+function renderSudoku(){
+
+ const grid=document.getElementById("sudokuGrid");
+
+ if(!grid)return;
+
+ grid.innerHTML="";
+
+ for(let r=0;r<4;r++){
+  for(let c=0;c<4;c++){
+
+   if(sudokuGiven[r][c]){
+
+    const cell=document.createElement("div");
+
+    cell.className="gamecard";
+    cell.style.display="flex";
+    cell.style.alignItems="center";
+    cell.style.justifyContent="center";
+    cell.style.background="#ffffff20";
+    cell.textContent=sudokuPlayerGrid[r][c];
+
+    grid.appendChild(cell);
+
+   }else{
+
+    const select=document.createElement("select");
+
+    select.style.width="100%";
+    select.style.height="100%";
+    select.style.textAlign="center";
+    select.style.fontSize="18px";
+
+    select.innerHTML=
+     '<option value="0"></option>'+
+     '<option value="1">1</option>'+
+     '<option value="2">2</option>'+
+     '<option value="3">3</option>'+
+     '<option value="4">4</option>';
+
+    select.value=sudokuPlayerGrid[r][c]||0;
+
+    select.onchange=()=>{
+
+     sudokuPlayerGrid[r][c]=Number(select.value);
+
+    };
+
+    grid.appendChild(select);
+
+   }
+
+  }
+ }
+
+}
+
+function sudokuGroupValid(group){
+
+ const seen=new Set(group);
+
+ return seen.size===4&&![...seen].some(v=>v<1||v>4);
+
+}
+
+function checkSudoku(){
+
+ const feedbackEl=document.getElementById("sudokuFeedback");
+
+ if(!feedbackEl)return;
+
+ for(let r=0;r<4;r++)
+  for(let c=0;c<4;c++)
+   if(!sudokuPlayerGrid[r][c]){
+
+    feedbackEl.textContent="Fill in every cell first.";
+    return;
+
+   }
+
+ let valid=true;
+
+ for(let r=0;r<4;r++)
+  if(!sudokuGroupValid(sudokuPlayerGrid[r]))valid=false;
+
+ for(let c=0;c<4;c++)
+  if(!sudokuGroupValid([0,1,2,3].map(r=>sudokuPlayerGrid[r][c])))valid=false;
+
+ const boxes=[[0,0],[0,2],[2,0],[2,2]];
+
+ boxes.forEach(box=>{
+
+  const br=box[0];
+  const bc=box[1];
+  const cells=[];
+
+  for(let r=br;r<br+2;r++)
+   for(let c=bc;c<bc+2;c++)
+    cells.push(sudokuPlayerGrid[r][c]);
+
+  if(!sudokuGroupValid(cells))valid=false;
+
+ });
+
+ feedbackEl.textContent=valid?"🎉 Solved correctly!":"❌ Not quite right — check for repeats.";
+
+}
+
+
+/* WEATHER */
+
+const WEATHER_CITIES={
+ Melbourne:{temp:18,condition:"⛅ Partly Cloudy"},
+ London:{temp:12,condition:"🌧️ Rainy"},
+ "New York":{temp:9,condition:"🌤️ Sunny Spells"},
+ Tokyo:{temp:21,condition:"☀️ Sunny"},
+ "Los Angeles":{temp:24,condition:"☀️ Sunny"},
+ Cairo:{temp:29,condition:"☀️ Hot & Clear"},
+ Moscow:{temp:-3,condition:"❄️ Snowing"}
+};
+
+function showWeather(){
+
+ const cityEl=document.getElementById("weatherCity");
+ const el=document.getElementById("weatherResult");
+
+ if(!cityEl||!el)return;
+
+ const data=WEATHER_CITIES[cityEl.value];
+
+ if(!data)return;
+
+ el.innerHTML=
+  '<div class="big">'+data.condition+'</div>'+
+  '<p style="text-align:center;font-size:30px">'+data.temp+'°C</p>';
+
+}
+
+
+/* STICKY NOTES */
+
+function renderStickyNotes(){
+
+ const notes=JSON.parse(localStorage.getItem("novaStickyNotesList")||"[]");
+ const el=document.getElementById("stickyNotesList");
+
+ if(!el)return;
+
+ el.innerHTML=notes.map((n,i)=>
+  '<div class="note" style="margin-bottom:10px;position:relative">'+
+  escapeHTML(n)+
+  '<button onclick="removeStickyNote('+i+')" style="position:absolute;top:5px;right:5px;border:0;background:transparent;font-size:16px;cursor:pointer">×</button>'+
+  '</div>'
+ ).join("");
+
+}
+
+function addStickyNote(){
+
+ const input=document.getElementById("stickyNoteInput");
+
+ if(!input.value.trim())return;
+
+ const notes=JSON.parse(localStorage.getItem("novaStickyNotesList")||"[]");
+
+ notes.push(input.value.trim());
+
+ localStorage.setItem("novaStickyNotesList",JSON.stringify(notes));
+
+ input.value="";
+
+ renderStickyNotes();
+
+}
+
+function removeStickyNote(i){
+
+ const notes=JSON.parse(localStorage.getItem("novaStickyNotesList")||"[]");
+
+ notes.splice(i,1);
+
+ localStorage.setItem("novaStickyNotesList",JSON.stringify(notes));
+
+ renderStickyNotes();
+
+}
+
+
+/* CURRENCY CONVERTER */
+
+const CURRENCY_FALLBACK_RATES={
+ USD:1,
+ EUR:0.92,
+ GBP:0.79,
+ JPY:151.5,
+ AUD:1.52,
+ CAD:1.36
+};
+
+let currencyLiveRates=null;
+
+function convertCurrency(){
+
+ const amount=Number(document.getElementById("currencyAmount").value)||0;
+ const from=document.getElementById("currencyFrom").value;
+ const to=document.getElementById("currencyTo").value;
+ const resultEl=document.getElementById("currencyResult");
+
+ if(currencyLiveRates){
+
+  renderCurrencyResult(amount,from,to,currencyLiveRates,"Live rates");
+  return;
+
+ }
+
+ if(resultEl)resultEl.textContent="Fetching live rates…";
+
+ fetch("https://api.frankfurter.app/latest?from=USD")
+ .then(res=>res.json())
+ .then(data=>{
+
+  currencyLiveRates=Object.assign({USD:1},data.rates);
+
+  renderCurrencyResult(amount,from,to,currencyLiveRates,"Live rates");
+
+ })
+ .catch(()=>{
+
+  renderCurrencyResult(amount,from,to,CURRENCY_FALLBACK_RATES,"Offline sample rates");
+
+ });
+
+}
+
+function renderCurrencyResult(amount,from,to,rates,label){
+
+ const resultEl=document.getElementById("currencyResult");
+
+ if(!resultEl)return;
+
+ if(!rates[from]||!rates[to]){
+
+  resultEl.textContent="Rate unavailable for that currency.";
+  return;
+
+ }
+
+ const usd=amount/rates[from];
+ const result=usd*rates[to];
+
+ resultEl.innerHTML=
+  amount+" "+from+" = <b>"+result.toFixed(2)+"</b> "+to+
+  '<br><small style="opacity:.6">'+label+'</small>';
+
+}
+
+
+/* HABIT TRACKER */
+
+function renderHabits(){
+
+ const habits=JSON.parse(localStorage.getItem("novaHabitsList")||"[]");
+ const el=document.getElementById("habitsList");
+
+ if(!el)return;
+
+ el.innerHTML=habits.map((h,i)=>
+  '<div class="store-card">'+
+  '<span style="flex:1">'+escapeHTML(h.name)+' — 🔥 '+h.streak+' day streak</span>'+
+  '<button onclick="markHabitDone('+i+')">✓ Done Today</button>'+
+  '<button onclick="removeHabit('+i+')">🗑️</button>'+
+  '</div>'
+ ).join("");
+
+}
+
+function addHabit(){
+
+ const input=document.getElementById("habitInput");
+
+ if(!input.value.trim())return;
+
+ const habits=JSON.parse(localStorage.getItem("novaHabitsList")||"[]");
+
+ habits.push({name:input.value.trim(),streak:0});
+
+ localStorage.setItem("novaHabitsList",JSON.stringify(habits));
+
+ input.value="";
+
+ renderHabits();
+
+}
+
+function markHabitDone(i){
+
+ const habits=JSON.parse(localStorage.getItem("novaHabitsList")||"[]");
+
+ habits[i].streak++;
+
+ localStorage.setItem("novaHabitsList",JSON.stringify(habits));
+
+ renderHabits();
+
+}
+
+function removeHabit(i){
+
+ const habits=JSON.parse(localStorage.getItem("novaHabitsList")||"[]");
+
+ habits.splice(i,1);
+
+ localStorage.setItem("novaHabitsList",JSON.stringify(habits));
+
+ renderHabits();
+
+}
+
+
+/* JOURNAL */
+
+function renderJournal(){
+
+ const entries=JSON.parse(localStorage.getItem("novaJournalEntries")||"[]");
+ const el=document.getElementById("journalList");
+
+ if(!el)return;
+
+ el.innerHTML=entries.map((e,i)=>
+  '<div class="store-card" style="align-items:flex-start">'+
+  '<div style="flex:1"><small style="opacity:.6">'+escapeHTML(e.date)+'</small><br>'+escapeHTML(e.text)+'</div>'+
+  '<button onclick="removeJournalEntry('+i+')">🗑️</button>'+
+  '</div>'
+ ).join("");
+
+}
+
+function addJournalEntry(){
+
+ const input=document.getElementById("journalInput");
+
+ if(!input.value.trim())return;
+
+ const entries=JSON.parse(localStorage.getItem("novaJournalEntries")||"[]");
+
+ entries.unshift({
+  date:new Date().toLocaleString(),
+  text:input.value.trim()
+ });
+
+ localStorage.setItem("novaJournalEntries",JSON.stringify(entries));
+
+ input.value="";
+
+ renderJournal();
+
+}
+
+function removeJournalEntry(i){
+
+ const entries=JSON.parse(localStorage.getItem("novaJournalEntries")||"[]");
+
+ entries.splice(i,1);
+
+ localStorage.setItem("novaJournalEntries",JSON.stringify(entries));
+
+ renderJournal();
+
+}
+
+
+/* FLASHCARDS */
+
+let flashcards=[];
+let flashcardIndex=0;
+let flashcardFlipped=false;
+
+function loadFlashcards(){
+
+ flashcards=JSON.parse(localStorage.getItem("novaFlashcardsList")||"[]");
+ flashcardIndex=0;
+ flashcardFlipped=false;
+
+ renderFlashcard();
+
+}
+
+function addFlashcard(){
+
+ const front=document.getElementById("flashFront").value.trim();
+ const back=document.getElementById("flashBack").value.trim();
+
+ if(!front||!back)return;
+
+ flashcards.push({front,back});
+
+ localStorage.setItem("novaFlashcardsList",JSON.stringify(flashcards));
+
+ document.getElementById("flashFront").value="";
+ document.getElementById("flashBack").value="";
+
+ flashcardIndex=flashcards.length-1;
+ flashcardFlipped=false;
+
+ renderFlashcard();
+
+}
+
+function flipFlashcard(){
+
+ flashcardFlipped=!flashcardFlipped;
+
+ renderFlashcard();
+
+}
+
+function nextFlashcard(){
+
+ if(flashcards.length===0)return;
+
+ flashcardIndex=(flashcardIndex+1)%flashcards.length;
+ flashcardFlipped=false;
+
+ renderFlashcard();
+
+}
+
+function renderFlashcard(){
+
+ const el=document.getElementById("flashcardView");
+ const countEl=document.getElementById("flashcardCount");
+
+ if(!el)return;
+
+ if(flashcards.length===0){
+
+  el.textContent="No flashcards yet — add one below.";
+
+ }else{
+
+  const card=flashcards[flashcardIndex];
+
+  el.textContent=flashcardFlipped?card.back:card.front;
+
+ }
+
+ if(countEl)
+  countEl.textContent=flashcards.length?
+   (flashcardIndex+1)+" / "+flashcards.length:"0 / 0";
+
+}
+
+
+/* STOPWATCH */
+
+let stopwatchInterval=null;
+let stopwatchElapsed=0;
+let stopwatchRunning=false;
+let stopwatchLaps=[];
+
+function toggleStopwatch(){
+
+ if(stopwatchRunning){
+
+  clearInterval(stopwatchInterval);
+  stopwatchRunning=false;
+
+ }else{
+
+  const start=Date.now()-stopwatchElapsed;
+
+  stopwatchInterval=setInterval(()=>{
+
+   stopwatchElapsed=Date.now()-start;
+   updateStopwatchDisplay();
+
+  },100);
+
+  stopwatchRunning=true;
+
+ }
+
+}
+
+function lapStopwatch(){
+
+ if(!stopwatchRunning)return;
+
+ stopwatchLaps.unshift(formatStopwatchTime(stopwatchElapsed));
+
+ renderStopwatchLaps();
+
+}
+
+function resetStopwatch(){
+
+ clearInterval(stopwatchInterval);
+
+ stopwatchRunning=false;
+ stopwatchElapsed=0;
+ stopwatchLaps=[];
+
+ updateStopwatchDisplay();
+ renderStopwatchLaps();
+
+}
+
+function formatStopwatchTime(ms){
+
+ const totalSeconds=Math.floor(ms/100)/10;
+ const minutes=Math.floor(totalSeconds/60);
+ const seconds=(totalSeconds%60).toFixed(1);
+
+ return minutes+"m "+seconds+"s";
+
+}
+
+function updateStopwatchDisplay(){
+
+ const el=document.getElementById("stopwatchDisplay");
+
+ if(el)el.textContent=formatStopwatchTime(stopwatchElapsed);
+
+}
+
+function renderStopwatchLaps(){
+
+ const el=document.getElementById("stopwatchLaps");
+
+ if(!el)return;
+
+ el.innerHTML=stopwatchLaps.map((l,i)=>
+  '<div class="store-card">Lap '+(stopwatchLaps.length-i)+": "+l+'</div>'
+ ).join("");
+
+}
+
+
+/* BMI CALCULATOR */
+
+function calculateBMI(){
+
+ const heightCm=Number(document.getElementById("bmiHeight").value);
+ const weightKg=Number(document.getElementById("bmiWeight").value);
+
+ if(!heightCm||!weightKg){
+
+  document.getElementById("bmiResult").textContent="";
+  return;
+
+ }
+
+ const heightM=heightCm/100;
+ const bmi=weightKg/(heightM*heightM);
+
+ let category="Normal range";
+
+ if(bmi<18.5)category="Below typical range";
+ else if(bmi>=25&&bmi<30)category="Above typical range";
+ else if(bmi>=30)category="Well above typical range";
+
+ document.getElementById("bmiResult").innerHTML=
+  "BMI: <b>"+bmi.toFixed(1)+"</b><br>"+category;
+
+}
+
+
+/* TIP CALCULATOR */
+
+function calculateTip(){
+
+ const bill=Number(document.getElementById("tipBill").value)||0;
+ const percent=Number(document.getElementById("tipPercent").value)||0;
+ const people=Number(document.getElementById("tipPeople").value)||1;
+
+ const tipAmount=bill*(percent/100);
+ const total=bill+tipAmount;
+ const perPerson=total/people;
+
+ document.getElementById("tipResult").innerHTML=
+  "Tip: <b>"+tipAmount.toFixed(2)+"</b><br>"+
+  "Total: <b>"+total.toFixed(2)+"</b><br>"+
+  "Per person: <b>"+perPerson.toFixed(2)+"</b>";
+
+}
+
+
+/* AGE CALCULATOR */
+
+function calculateAge(){
+
+ const input=document.getElementById("ageBirthdate").value;
+
+ if(!input)return;
+
+ const birth=new Date(input);
+ const now=new Date();
+
+ let years=now.getFullYear()-birth.getFullYear();
+ let months=now.getMonth()-birth.getMonth();
+ let days=now.getDate()-birth.getDate();
+
+ if(days<0){
+
+  months--;
+
+  const daysInPrevMonth=new Date(now.getFullYear(),now.getMonth(),0).getDate();
+
+  days+=daysInPrevMonth;
+
+ }
+
+ if(months<0){
+
+  years--;
+  months+=12;
+
+ }
+
+ document.getElementById("ageResult").textContent=
+  years+" years, "+months+" months, "+days+" days";
+
+}
+
+
+/* DICE ROLLER */
+
+function rollDice(){
+
+ const count=Number(document.getElementById("diceCount").value)||1;
+ const results=[];
+
+ for(let i=0;i<count;i++)
+  results.push(Math.floor(Math.random()*6)+1);
+
+ const faces=["⚀","⚁","⚂","⚃","⚄","⚅"];
+
+ document.getElementById("diceResult").innerHTML=
+  results.map(r=>'<span style="font-size:40px;margin:5px">'+faces[r-1]+'</span>').join("")+
+  "<p>Total: "+results.reduce((a,b)=>a+b,0)+"</p>";
+
+}
+
+
+/* COIN FLIP */
+
+let coinHeads=0;
+let coinTails=0;
+let coinHistoryList=[];
+
+function trueRandomBit(){
+
+ if(window.crypto&&window.crypto.getRandomValues){
+
+  const arr=new Uint32Array(1);
+
+  window.crypto.getRandomValues(arr);
+
+  return arr[0]%2===0;
+
+ }
+
+ return Math.random()<0.5;
+
+}
+
+function flipCoin(){
+
+ const face=document.getElementById("coinFace");
+
+ if(face)face.textContent="🪙";
+
+ setTimeout(()=>{
+
+  const isHeads=trueRandomBit();
+  const result=isHeads?"Heads":"Tails";
+
+  if(isHeads)coinHeads++;
+  else coinTails++;
+
+  coinHistoryList.push(result==="Heads"?"H":"T");
+
+  if(coinHistoryList.length>20)coinHistoryList.shift();
+
+  if(face)face.textContent=isHeads?"👑 Heads":"🪙 Tails";
+
+  const headsEl=document.getElementById("coinHeadsCount");
+  const tailsEl=document.getElementById("coinTailsCount");
+  const totalEl=document.getElementById("coinTotalCount");
+  const historyEl=document.getElementById("coinHistory");
+
+  if(headsEl)headsEl.textContent=coinHeads;
+  if(tailsEl)tailsEl.textContent=coinTails;
+  if(totalEl)totalEl.textContent=coinHeads+coinTails;
+  if(historyEl)historyEl.textContent=coinHistoryList.join(" ");
+
+ },250);
+
+}
+
+function resetCoinFlip(){
+
+ coinHeads=0;
+ coinTails=0;
+ coinHistoryList=[];
+
+ const face=document.getElementById("coinFace");
+ const headsEl=document.getElementById("coinHeadsCount");
+ const tailsEl=document.getElementById("coinTailsCount");
+ const totalEl=document.getElementById("coinTotalCount");
+ const historyEl=document.getElementById("coinHistory");
+
+ if(face)face.textContent="🪙";
+ if(headsEl)headsEl.textContent="0";
+ if(tailsEl)tailsEl.textContent="0";
+ if(totalEl)totalEl.textContent="0";
+ if(historyEl)historyEl.textContent="—";
+
+}
+
+
+/* WALLPAPER CREATOR */
+
+function updateWallpaperPreview(){
+
+ const c1=document.getElementById("wallpaperColor1").value;
+ const c2=document.getElementById("wallpaperColor2").value;
+
+ const preview=document.getElementById("wallpaperPreview");
+
+ if(preview)
+  preview.style.background="linear-gradient(135deg,"+c1+","+c2+")";
+
+}
+
+function applyCustomWallpaper(){
+
+ const c1=document.getElementById("wallpaperColor1").value;
+ const c2=document.getElementById("wallpaperColor2").value;
+
+ document.body.style.background="linear-gradient(135deg,"+c1+","+c2+")";
+
+ notify("Custom wallpaper applied.");
+
+}
+
+
+/* RECIPE OF THE DAY */
+
+const NOVA_RECIPES=[
+ {name:"Simple Pancakes",ingredients:["1 cup flour","1 egg","1 cup milk","1 tbsp sugar"],steps:"Whisk everything together and cook spoonfuls on a hot pan until golden on both sides."},
+ {name:"Garlic Pasta",ingredients:["200g pasta","3 cloves garlic","Olive oil","Parmesan"],steps:"Cook pasta, sauté garlic in olive oil, toss together and top with parmesan."},
+ {name:"Veggie Stir Fry",ingredients:["Mixed vegetables","Soy sauce","Garlic","Rice"],steps:"Stir fry vegetables with garlic and soy sauce, serve over rice."},
+ {name:"Fruit Smoothie",ingredients:["1 banana","1 cup berries","1 cup yoghurt","Honey"],steps:"Blend everything together until smooth."},
+ {name:"Grilled Cheese",ingredients:["2 slices bread","Cheese","Butter"],steps:"Butter the bread, add cheese, grill until golden on both sides."}
+];
+
+function shuffleRecipe(){
+
+ const recipe=NOVA_RECIPES[Math.floor(Math.random()*NOVA_RECIPES.length)];
+
+ const el=document.getElementById("recipeView");
+
+ if(!el)return;
+
+ el.innerHTML=
+  "<h3>"+escapeHTML(recipe.name)+"</h3>"+
+  "<p><b>Ingredients:</b> "+recipe.ingredients.map(escapeHTML).join(", ")+"</p>"+
+  "<p><b>Steps:</b> "+escapeHTML(recipe.steps)+"</p>";
+
+}
+
+
+/* PIXEL STUDIO */
+
+function createPixelGrid(){
+
+ const grid=document.getElementById("pixelGrid");
+
+ if(!grid)return;
+
+ for(let i=0;i<96;i++){
+
+  const b=document.createElement("button");
+
+  b.className="gamecard";
+
+  b.onclick=()=>{
+   b.style.background=
+    document.getElementById("pixelColor").value;
+  };
+
+  grid.appendChild(b);
+
+ }
+
+}
+
+function clearPixelStudio(){
+
+ document.querySelectorAll("#pixelGrid button")
+ .forEach(b=>b.style.background="");
+
+}
+
+
+/* RADIO */
+
+let radioAudio=null;
+
+const RADIO_STREAMS={
+ "Nova Hits":"https://ice1.somafm.com/poptron-128-mp3",
+ "Nova Chill":"https://ice1.somafm.com/groovesalad-128-mp3",
+ "Nova Rock":"https://ice1.somafm.com/seventies-128-mp3"
+};
+
+function radioPlay(station){
+
+ const url=RADIO_STREAMS[station];
+
+ if(!url)return;
+
+ if(!radioAudio)radioAudio=new Audio();
+
+ radioAudio.pause();
+ radioAudio.src=url;
+
+ const volumeEl=document.getElementById("radioVolume");
+
+ radioAudio.volume=volumeEl?volumeEl.value/100:0.7;
+
+ radioAudio.play().catch(()=>{
+
+  notify("Couldn't start playback — check your connection.");
+
+ });
+
+ const now=document.getElementById("radioNow");
+
+ if(now)now.textContent="▶ Now playing: "+station;
+
+}
+
+function radioStop(){
+
+ if(radioAudio)radioAudio.pause();
+
+ const now=document.getElementById("radioNow");
+
+ if(now)now.textContent="Radio stopped";
+
+}
+
+function setRadioVolume(v){
+
+ if(radioAudio)radioAudio.volume=v/100;
+
+}
+
+
+/* PHOTO EDITOR */
+
+let photoImage=null;
+let photoRotation=0;
+let photoFlipH=false;
+let photoFlipV=false;
+let photoGrayscale=false;
+let photoInvert=false;
+
+function loadPhotoForEditing(e){
+
+ const file=e.target.files[0];
+
+ if(!file)return;
+
+ const img=new Image();
+
+ img.onload=()=>{
+
+  photoImage=img;
+  photoRotation=0;
+  photoFlipH=false;
+  photoFlipV=false;
+  photoGrayscale=false;
+  photoInvert=false;
+
+  const brightness=document.getElementById("photoBrightness");
+  const contrast=document.getElementById("photoContrast");
+  const saturation=document.getElementById("photoSaturation");
+  const blur=document.getElementById("photoBlur");
+
+  if(brightness)brightness.value=100;
+  if(contrast)contrast.value=100;
+  if(saturation)saturation.value=100;
+  if(blur)blur.value=0;
+
+  document.getElementById("photoCanvas").style.display="block";
+  document.getElementById("photoControls").style.display="block";
+
+  drawPhotoCanvas();
+
+ };
+
+ img.src=URL.createObjectURL(file);
+
+}
+
+function drawPhotoCanvas(){
+
+ if(!photoImage)return;
+
+ const canvas=document.getElementById("photoCanvas");
+
+ if(!canvas)return;
+
+ const ctx=canvas.getContext("2d");
+
+ const rotated=photoRotation%180!==0;
+
+ const w=photoImage.width;
+ const h=photoImage.height;
+
+ canvas.width=rotated?h:w;
+ canvas.height=rotated?w:h;
+
+ const brightness=document.getElementById("photoBrightness").value;
+ const contrast=document.getElementById("photoContrast").value;
+ const saturation=document.getElementById("photoSaturation").value;
+ const blur=document.getElementById("photoBlur").value;
+
+ let filter=
+  "brightness("+brightness+"%) "+
+  "contrast("+contrast+"%) "+
+  "saturate("+saturation+"%) "+
+  "blur("+blur+"px)";
+
+ if(photoGrayscale)filter+=" grayscale(100%)";
+ if(photoInvert)filter+=" invert(100%)";
+
+ ctx.filter=filter;
+
+ ctx.save();
+
+ ctx.translate(canvas.width/2,canvas.height/2);
+ ctx.rotate(photoRotation*Math.PI/180);
+ ctx.scale(photoFlipH?-1:1,photoFlipV?-1:1);
+
+ ctx.drawImage(photoImage,-w/2,-h/2,w,h);
+
+ ctx.restore();
+
+}
+
+function applyPhotoFilters(){
+
+ drawPhotoCanvas();
+
+}
+
+function togglePhotoGrayscale(){
+
+ photoGrayscale=!photoGrayscale;
+
+ drawPhotoCanvas();
+
+}
+
+function togglePhotoInvert(){
+
+ photoInvert=!photoInvert;
+
+ drawPhotoCanvas();
+
+}
+
+function rotatePhoto(deg){
+
+ photoRotation=(photoRotation+deg)%360;
+
+ drawPhotoCanvas();
+
+}
+
+function flipPhoto(axis){
+
+ if(axis==="h")photoFlipH=!photoFlipH;
+ if(axis==="v")photoFlipV=!photoFlipV;
+
+ drawPhotoCanvas();
+
+}
+
+function resetPhotoEdits(){
+
+ photoRotation=0;
+ photoFlipH=false;
+ photoFlipV=false;
+ photoGrayscale=false;
+ photoInvert=false;
+
+ document.getElementById("photoBrightness").value=100;
+ document.getElementById("photoContrast").value=100;
+ document.getElementById("photoSaturation").value=100;
+ document.getElementById("photoBlur").value=0;
+
+ drawPhotoCanvas();
+
+}
+
+function downloadPhoto(){
+
+ const canvas=document.getElementById("photoCanvas");
+
+ if(!canvas)return;
+
+ const link=document.createElement("a");
+
+ link.download="nova-edited-photo.png";
+ link.href=canvas.toDataURL("image/png");
+
+ link.click();
+
+ notify("Photo downloaded.");
+
+}
+
+
+/* NEWS */
+
+function loadNovaNews(){
+
+ const el=document.getElementById("newsList");
+
+ if(!el)return;
+
+ el.innerHTML="<p style='opacity:.6'>Loading headlines…</p>";
+
+ fetch("https://hacker-news.firebaseio.com/v0/topstories.json")
+ .then(res=>res.json())
+ .then(ids=>{
+
+  const topIds=ids.slice(0,8);
+
+  return Promise.all(
+   topIds.map(id=>
+    fetch("https://hacker-news.firebaseio.com/v0/item/"+id+".json")
+    .then(res=>res.json())
+   )
+  );
+
+ })
+ .then(stories=>{
+
+  el.innerHTML=stories.map(story=>{
+
+   const url=story.url||("https://news.ycombinator.com/item?id="+story.id);
+
+   return '<div class="store-card">'+
+    '<div class="store-info">'+
+    '<b>'+escapeHTML(story.title||"Untitled")+'</b>'+
+    '<small>👍 '+(story.score||0)+' points — '+escapeHTML(story.by||"unknown")+'</small>'+
+    '</div>'+
+    '<button onclick="window.open(\''+url+'\',\'_blank\')">Open ↗</button>'+
+    '</div>';
+
+  }).join("");
+
+ })
+ .catch(()=>{
+
+  el.innerHTML="<p>Couldn't load live headlines — check your connection.</p>";
+
+ });
+
+}
+
+
+/* BOOKS */
+
+function renderBooks(){
+
+ const books=JSON.parse(
+  localStorage.getItem("novaBooks")||"[]"
+ );
+
+ const el=document.getElementById("books");
+
+ if(!el)return;
+
+ el.innerHTML=books.map((b,i)=>
+ `<div class="store-card">📚 ${escapeHTML(b)}
+ <button onclick="removeBook(${i})">×</button></div>`
+ ).join("");
+
+}
+
+function addBook(){
+
+ const input=document.getElementById("bookInput");
+
+ if(!input.value.trim())return;
+
+ const books=JSON.parse(
+  localStorage.getItem("novaBooks")||"[]"
+ );
+
+ books.push(input.value.trim());
+
+ localStorage.setItem("novaBooks",JSON.stringify(books));
+
+ input.value="";
+
+ renderBooks();
+
+}
+
+function removeBook(i){
+
+ const books=JSON.parse(
+  localStorage.getItem("novaBooks")||"[]"
+ );
+
+ books.splice(i,1);
+
+ localStorage.setItem("novaBooks",JSON.stringify(books));
+
+ renderBooks();
+
+}
+
+
+/* SOUND */
+
+function beep(freq){
+
+ if(!soundsEnabled)return;
+
+ const audio=new AudioContext();
+ const osc=audio.createOscillator();
+ const gain=audio.createGain();
+
+ osc.frequency.value=freq;
+
+ osc.connect(gain);
+ gain.connect(audio.destination);
+
+ osc.start();
+
+ gain.gain.setValueAtTime(.15,audio.currentTime);
+
+ gain.gain.exponentialRampToValueAtTime(
+  .001,
+  audio.currentTime+.25
+ );
+
+ osc.stop(audio.currentTime+.25);
+
+}
+
+
+/* LAB */
+
+function mixChemicals(){
+
+ const a=document.getElementById("chemA").value;
+ const b=document.getElementById("chemB").value;
+
+ let result="Nothing unusual happened.";
+
+ if(
+  (a==="Acid"&&b==="Base")||
+  (a==="Base"&&b==="Acid")
+ )result="🧪 Neutralisation reaction!";
+
+ if(
+  (a==="Metal"&&b==="Oxygen")||
+  (a==="Oxygen"&&b==="Metal")
+ )result="🔥 Oxidation reaction!";
+
+ document.getElementById("labResult").textContent=result;
+
+}
+
+
+/* UNIT CONVERTER */
+
+function convertUnits(){
+
+ const m=Number(document.getElementById("meters").value);
+
+ document.getElementById("conversionResult").textContent=
+  m+" metres = "+
+  (m*100).toFixed(2)+" centimetres = "+
+  (m/1000).toFixed(3)+" kilometres";
+
+}
+
+
+/* WORLD CLOCK */
+
+function updateWorldClock(){
+
+ const el=document.getElementById("worldClockDisplay");
+
+ if(!el)return;
+
+ const zones=[
+  ["🇦🇺 Melbourne","Australia/Melbourne"],
+  ["🇬🇧 London","Europe/London"],
+  ["🇺🇸 New York","America/New_York"],
+  ["🇯🇵 Tokyo","Asia/Tokyo"],
+  ["🇺🇸 Los Angeles","America/Los_Angeles"]
+ ];
+
+ el.innerHTML=zones.map(z=>
+  `<div class="store-card">
+   🌍 <b>${z[0]}</b>
+   <span style="margin-left:auto">${new Date().toLocaleTimeString([],{
+    timeZone:z[1],
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+   })}</span>
+  </div>`
+ ).join("");
+
+}
+
+setInterval(updateWorldClock,1000);
+
+
+/* PASSWORD */
+
+function generatePassword(){
+
+ const chars=
+ "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+
+ let p="";
+
+ for(let i=0;i<16;i++)
+  p+=chars[Math.floor(Math.random()*chars.length)];
+
+ const el=document.getElementById("generatedPassword");
+
+ if(el)el.value=p;
+
+}
+
+
+/* COLOR */
+
+function updateColorPicker(){
+
+ const color=document.getElementById("pickerColor").value;
+
+ document.getElementById("pickedColor").textContent=
+ color.toUpperCase();
+
+}
+
+function copyColor(){
+
+ navigator.clipboard.writeText(
+  document.getElementById("pickedColor").textContent
+ );
+
+ notify("Colour copied.");
+
+}
+
+
+/* TEXT COUNTER */
+
+function countText(){
+
+ const text=document.getElementById("counterText").value;
+
+ document.getElementById("charCount").textContent=text.length;
+
+ document.getElementById("wordCount").textContent=
+  text.trim()?text.trim().split(/\s+/).length:0;
+
+ document.getElementById("lineCount").textContent=
+  text?text.split("\n").length:0;
+
+}
+
+
+/* RANDOMIZER */
+
+function randomNumber(){
+
+ const min=Number(document.getElementById("minRandom").value);
+ const max=Number(document.getElementById("maxRandom").value);
+
+ const n=Math.floor(
+  Math.random()*(max-min+1)+min
+ );
+
+ document.getElementById("randomResult").textContent=n;
+
+}
+
+
+/* TODO */
+
+function renderTodos(){
+
+ const list=JSON.parse(
+  localStorage.getItem("novaTodos")||"[]"
+ );
+
+ const el=document.getElementById("todoList");
+
+ if(!el)return;
+
+ el.innerHTML=list.map((x,i)=>
+  `<div class="store-card">
+   <span style="flex:1">${escapeHTML(x)}</span>
+   <button onclick="removeTodo(${i})">✓</button>
+  </div>`
+ ).join("");
+
+}
+
+function addTodo(){
+
+ const input=document.getElementById("todoInput");
+
+ if(!input.value.trim())return;
+
+ const list=JSON.parse(
+  localStorage.getItem("novaTodos")||"[]"
+ );
+
+ list.push(input.value.trim());
+
+ localStorage.setItem("novaTodos",JSON.stringify(list));
+
+ input.value="";
+
+ renderTodos();
+
+}
+
+function removeTodo(i){
+
+ const list=JSON.parse(
+  localStorage.getItem("novaTodos")||"[]"
+ );
+
+ list.splice(i,1);
+
+ localStorage.setItem("novaTodos",JSON.stringify(list));
+
+ renderTodos();
+
+}
+
+
+/* TIMER */
+
+let timerInterval;
+
+function startTimer(){
+
+ clearInterval(timerInterval);
+
+ let seconds=Number(
+  document.getElementById("timerSeconds").value
+ );
+
+ const display=document.getElementById("timerDisplay");
+
+ display.textContent=seconds;
+
+ timerInterval=setInterval(()=>{
+
+  seconds--;
+
+  display.textContent=Math.max(0,seconds);
+
+  if(seconds<=0){
+
+   clearInterval(timerInterval);
+   notify("Timer finished! ⏲️");
+
+  }
+
+ },1000);
+
+}
+
+
+/* NOTIFICATIONS */
+
+function notify(text){
+
+ if(!notificationsEnabled||dndEnabled)return;
+
+ const n=document.createElement("div");
+
+ n.className="notification";
+ n.textContent=text;
+
+ const top=
+  localStorage.getItem("novaNotifyPosition")==="top";
+
+ if(top){
+
+  n.style.top="18px";
+  n.style.bottom="auto";
+
+ }
+
+ document.body.appendChild(n);
+
+ setTimeout(()=>n.remove(),3500);
+
+}
+
+
+/* CLOCK */
+
+function updateClock(){
+
+ const now=new Date();
+
+ const options={
+  hour:"2-digit",
+  minute:"2-digit",
+  hour12:!is24Hour
+ };
+
+ if(showSeconds)options.second="2-digit";
+
+ document.getElementById("clock").innerHTML=
+  now.toLocaleTimeString([],options)+"<br>"+
+  now.toLocaleDateString([],{
+   weekday:"short",
+   day:"numeric",
+   month:"short"
+  });
+
+}
+
+setInterval(updateClock,1000);
+
+
+/* NOTEPAD */
+
+document.getElementById("notes").value=
+ localStorage.getItem("novaNotes")||"";
+
+function saveNotes(){
+
+ localStorage.setItem(
+  "novaNotes",
+  document.getElementById("notes").value
+ );
+
+ notify("Notes saved.");
+
+}
+
+function clearNotes(){
+
+ document.getElementById("notes").value="";
+
+ localStorage.removeItem("novaNotes");
+
+}
+
+
+/* CALCULATOR */
+
+function calc(v){
+
+ document.getElementById("calcDisplay").value+=v;
+
+}
+
+function clearCalc(){
+
+ document.getElementById("calcDisplay").value="";
+
+}
+
+function calculate(){
+
+ const d=document.getElementById("calcDisplay");
+
+ try{
+
+  d.value=Function(
+   '"use strict";return ('+d.value+')'
+  )();
+
+ }catch{
+
+  d.value="Error";
+
+ }
+
+}
+
+
+/* TERMINAL */
+
+function terminalCommand(e){
+
+ if(e.key!=="Enter")return;
+
+ const input=e.target;
+ const cmd=input.value.trim();
+ const output=document.getElementById("terminalOutput");
+
+ output.innerHTML+=
+  "<span style='color:#94a3b8'>nova&gt;</span> "+
+  escapeHTML(cmd)+"<br>";
+
+ if(cmd==="help"){
+
+  output.innerHTML+=
+  "help<br>clear<br>date<br>time<br>apps<br>settings<br>about<br>";
+
+ }else if(cmd==="clear"){
+
+  output.innerHTML="";
+
+ }else if(cmd==="date"){
+
+  output.innerHTML+=new Date().toDateString()+"<br>";
+
+ }else if(cmd==="time"){
+
+  output.innerHTML+=new Date().toLocaleTimeString()+"<br>";
+
+ }else if(cmd==="apps"){
+
+  output.innerHTML+=
+   [...builtInApps,...getInstalledApps()]
+   .map(a=>a.name)
+   .join(", ")+"<br>";
+
+ }else if(cmd==="settings"){
+
+  openApp("settings");
+
+ }else if(cmd==="about"){
+
+  output.innerHTML+="NovaOS 3.0<br>";
+
+ }else{
+
+  output.innerHTML+="Command not found.<br>";
+
+ }
+
+ input.value="";
+
+}
+
+
+/* BROWSER */
+
+let browserHistory=["nova://home"];
+let browserHistoryIndex=0;
+
+function browse(){
+
+ const raw=document.getElementById("browserInput").value.trim();
+
+ navigateBrowser(raw,true);
+
+}
+
+function navigateBrowser(raw,addHistory){
+
+ const v=raw.toLowerCase();
+ const p=document.getElementById("browserPage");
+
+ if(addHistory){
+
+  browserHistory=browserHistory.slice(0,browserHistoryIndex+1);
+  browserHistory.push(raw);
+  browserHistoryIndex=browserHistory.length-1;
+
+ }
+
+ document.getElementById("browserInput").value=raw;
+
+ updateBrowserNavButtons();
+
+ if(v==="nova://home"){
+
+  p.style.padding="20px";
+  p.innerHTML="<h1>🌐 Nova Browser</h1><p>Welcome to NovaOS.</p>";
+  return;
+
+ }else if(v==="nova://news"){
+
+  p.style.padding="20px";
+  p.innerHTML="<h1>📰 Nova News</h1><p>NovaOS has received a major update.</p>";
+  return;
+
+ }else if(v==="nova://system"){
+
+  p.style.padding="20px";
+  p.innerHTML="<h1>💻 Nova System</h1><p>NovaOS 3.0 • 128GB • 8GB RAM</p>";
+  return;
+
+ }else if(v==="nova://about"){
+
+  p.style.padding="20px";
+  p.innerHTML="<h1>🚀 About NovaOS</h1><p>A fully self-contained browser-based desktop.</p>";
+  return;
+
+ }
+
+ let target=raw;
+
+ const looksLikeUrl=
+  /^https?:\/\//i.test(raw)||
+  (/\.[a-z]{2,}(\/|$|\?|:)/i.test(raw)&&!raw.includes(" "));
+
+ if(looksLikeUrl){
+
+  if(!/^https?:\/\//i.test(target))target="https://"+target;
+
+  p.style.padding="0";
+
+  p.innerHTML=
+   `<iframe src="${target}" style="width:100%;height:480px;border:0;border-radius:8px 8px 0 0;background:white" `+
+   `sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-presentation" `+
+   `allow="fullscreen;clipboard-write;encrypted-media;autoplay;picture-in-picture" `+
+   `allowfullscreen loading="eager"></iframe>`+
+   `<div style="padding:10px;font-size:12px;color:#475569;text-align:center;background:#f1f5f9;border-radius:0 0 8px 8px">`+
+   `Blank above? That site refuses to be embedded. `+
+   `<a href="${target}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:bold">Open it in a new tab instead ↗</a>`+
+   `</div>`;
+
+ }else{
+
+  const searchUrl="https://duckduckgo.com/?q="+encodeURIComponent(raw);
+
+  window.open(searchUrl,"_blank");
+
+  p.style.padding="20px";
+
+  p.innerHTML=
+   "<h1>🔎 Nova Search</h1>"+
+   "<p>Search engines block being embedded inside any window — every one of them does this for security, so it can't be fixed from inside NovaOS.</p>"+
+   '<p>Your search for "<b>'+escapeHTML(raw)+'</b>" opened in a new browser tab instead.</p>'+
+   '<p><a href="'+searchUrl+'" target="_blank" rel="noopener" style="color:var(--accent);font-weight:bold">Open those results again ↗</a></p>'+
+   "<p>To browse inside NovaOS, type a real address instead — like <b>wikipedia.org</b> or <b>example.com</b>.</p>";
+
+ }
+
+}
+
+function goBrowserBack(){
+
+ if(browserHistoryIndex<=0)return;
+
+ browserHistoryIndex--;
+
+ navigateBrowser(browserHistory[browserHistoryIndex],false);
+
+}
+
+function goBrowserForward(){
+
+ if(browserHistoryIndex>=browserHistory.length-1)return;
+
+ browserHistoryIndex++;
+
+ navigateBrowser(browserHistory[browserHistoryIndex],false);
+
+}
+
+function reloadBrowser(){
+
+ navigateBrowser(browserHistory[browserHistoryIndex],false);
+
+}
+
+function updateBrowserNavButtons(){
+
+ const backBtn=document.getElementById("browserBackBtn");
+ const forwardBtn=document.getElementById("browserForwardBtn");
+
+ if(backBtn)backBtn.disabled=browserHistoryIndex<=0;
+ if(forwardBtn)forwardBtn.disabled=browserHistoryIndex>=browserHistory.length-1;
+
+}
+
+
+/* PAINT */
+
+const paintCanvas=document.getElementById("paintCanvas");
+const paintCtx=paintCanvas.getContext("2d");
+let painting=false;
+
+paintCanvas.addEventListener("mousedown",e=>{
+ painting=true;
+ paintCtx.beginPath();
+ paintCtx.moveTo(e.offsetX,e.offsetY);
+});
+
+paintCanvas.addEventListener("mousemove",e=>{
+
+ if(!painting)return;
+
+ paintCtx.lineTo(e.offsetX,e.offsetY);
+ paintCtx.strokeStyle=document.getElementById("paintColor").value;
+ paintCtx.lineWidth=document.getElementById("paintSize").value;
+ paintCtx.lineCap="round";
+ paintCtx.stroke();
+
+});
+
+paintCanvas.addEventListener("mouseup",()=>painting=false);
+paintCanvas.addEventListener("mouseleave",()=>painting=false);
+
+function clearPaint(){
+
+ paintCtx.clearRect(
+  0,0,
+  paintCanvas.width,
+  paintCanvas.height
+ );
+
+}
+
+
+/* CALENDAR */
+
+function createCalendar(){
+
+ const grid=document.getElementById("calendarGrid");
+ const now=new Date();
+
+ grid.innerHTML="";
+
+ for(let d=1;d<=new Date(
+  now.getFullYear(),
+  now.getMonth()+1,
+  0
+ ).getDate();d++){
+
+  const el=document.createElement("div");
+
+  el.className="gamecard";
+  el.style.padding="15px";
+  el.textContent=d;
+
+  if(d===now.getDate())
+   el.style.background="var(--accent)";
+
+  grid.appendChild(el);
+
+ }
+
+}
+
+
+/* MUSIC */
+
+let musicLibrary=[];
+let currentSong=-1;
+let currentMusicURL=null;
+
+function loadMusicFiles(event){
+
+ musicLibrary=Array.from(event.target.files);
+ currentSong=-1;
+
+ const list=document.getElementById("songList");
+
+ list.innerHTML="";
+
+ musicLibrary.forEach((file,index)=>{
+
+  const song=document.createElement("div");
+
+  song.className="song";
+  song.textContent="🎵 "+file.name;
+
+  song.onclick=()=>playSong(index);
+
+  list.appendChild(song);
+
+ });
+
+ notify(musicLibrary.length+" music file(s) added.");
+
+}
+
+function playSong(index){
+
+ const file=musicLibrary[index];
+
+ if(!file)return;
+
+ currentSong=index;
+
+ if(currentMusicURL)
+  URL.revokeObjectURL(currentMusicURL);
+
+ currentMusicURL=URL.createObjectURL(file);
+
+ const audio=document.getElementById("audioPlayer");
+
+ audio.src=currentMusicURL;
+
+ document.getElementById("musicPlayer").style.display="block";
+
+ document.getElementById("nowPlaying").textContent=file.name;
+
+ audio.play().catch(()=>{});
+
+}
+
+
+/* SETTINGS */
+
+let screenBrightness=100;
+let highContrastOn=false;
+let batterySaverOn=false;
+
+function updateScreenFilter(){
+
+ const filters=["brightness("+screenBrightness+"%)"];
+
+ if(highContrastOn)filters.push("contrast(1.25)");
+
+ if(batterySaverOn)filters.push("brightness(0.9)");
+
+ document.body.style.filter=filters.join(" ");
+
+}
+
+function changeBrightness(){
+
+ screenBrightness=document.getElementById("brightness").value;
+
+ saveSetting("brightness",screenBrightness);
+
+ updateScreenFilter();
+
+}
+
+function saveSetting(k,v){
+
+ localStorage.setItem("nova_"+k,v);
+
+}
+
+function toggleSetting(type){
+
+ let el;
+
+ if(type==="dark")el=document.getElementById("darkSwitch");
+ if(type==="icons")el=document.getElementById("iconsSwitch");
+ if(type==="trans")el=document.getElementById("transSwitch");
+ if(type==="anim")el=document.getElementById("animSwitch");
+ if(type==="contrast")el=document.getElementById("contrastSwitch");
+ if(type==="cursor")el=document.getElementById("cursorSwitch");
+ if(type==="notify")el=document.getElementById("notifySwitch");
+ if(type==="sound")el=document.getElementById("soundSwitch");
+ if(type==="clock")el=document.getElementById("clockSwitch");
+ if(type==="seconds")el=document.getElementById("secondsSwitch");
+ if(type==="hardware")el=document.getElementById("hardwareSwitch");
+ if(type==="cleanup")el=document.getElementById("cleanupSwitch");
+ if(type==="windowSave")el=document.getElementById("windowSaveSwitch");
+ if(type==="lock")el=document.getElementById("lockSwitch");
+ if(type==="battery")el=document.getElementById("batterySwitch");
+ if(type==="boot")el=document.getElementById("bootSwitch");
+ if(type==="developer")el=document.getElementById("developerSwitch");
+ if(type==="badges")el=document.getElementById("badgesSwitch");
+ if(type==="autohideTaskbar")el=document.getElementById("autohideTaskbarSwitch");
+ if(type==="snapGrid")el=document.getElementById("snapGridSwitch");
+ if(type==="compact")el=document.getElementById("compactSwitch");
+ if(type==="dnd")el=document.getElementById("dndSwitch");
+ if(type==="history")el=document.getElementById("historySwitch");
+ if(type==="location")el=document.getElementById("locationSwitch");
+ if(type==="diagnostics")el=document.getElementById("diagnosticsSwitch");
+ if(type==="familySafety")el=document.getElementById("familySafetySwitch");
+ if(type==="guestMode")el=document.getElementById("guestModeSwitch");
+ if(type==="reduceMotion")el=document.getElementById("reduceMotionSwitch");
+ if(type==="screenReader")el=document.getElementById("screenReaderSwitch");
+ if(type==="autoUpdate")el=document.getElementById("autoUpdateSwitch");
+ if(type==="startupApps")el=document.getElementById("startupAppsSwitch");
+
+ if(!el)return;
+
+ const on=!el.classList.contains("on");
+
+ el.classList.toggle("on",on);
+
+ saveSetting(type,on);
+
+ if(type==="dark"){
+
+  document.body.classList.toggle("light",!on);
+
+ }
+
+ if(type==="icons")
+  document.body.classList.toggle("hide-icons",!on);
+
+ if(type==="trans")
+  document.body.classList.toggle("transparent-windows",on);
+
+ if(type==="anim")
+  document.body.classList.toggle("no-animations",!on);
+
+ if(type==="contrast"){
+
+  highContrastOn=on;
+  document.body.classList.toggle("high-contrast",on);
+  updateScreenFilter();
+
+ }
+
+ if(type==="cursor")
+  document.body.classList.toggle("big-cursor",on);
+
+ if(type==="notify")
+  notificationsEnabled=on;
+
+ if(type==="sound")
+  soundsEnabled=on;
+
+ if(type==="clock"){
+
+  is24Hour=on;
+  updateClock();
+
+ }
+
+ if(type==="seconds"){
+
+  showSeconds=on;
+  updateClock();
+
+ }
+
+ if(type==="battery"){
+
+  batterySaverOn=on;
+  updateScreenFilter();
+
+ }
+
+ if(type==="dnd")
+  dndEnabled=on;
+
+ if(type==="reduceMotion")
+  document.body.classList.toggle("reduce-motion",on);
+
+ if(type==="compact")
+  document.body.classList.toggle("compact-mode",on);
+
+ if(type==="autohideTaskbar")
+  document.body.classList.toggle("autohide-taskbar",on);
+
+ if(type==="badges"){
+  badgesEnabled=on;
+  renderTaskbar();
+ }
+
+}
+
+function changeIconSize(){
+
+ const v=document.getElementById("iconSize").value;
+
+ document.body.classList.remove(
+  "small-icons",
+  "large-icons"
+ );
+
+ if(v==="small")
+  document.body.classList.add("small-icons");
+
+ if(v==="large")
+  document.body.classList.add("large-icons");
+
+ saveSetting("iconSize",v);
+
+}
+
+function changeAccent(){
+
+ const c=document.getElementById("accent").value;
+
+ document.documentElement.style.setProperty(
+  "--accent",
+  c
+ );
+
+ saveSetting("accent",c);
+
+}
+
+function changeWallpaper(){
+
+ const v=document.getElementById("wallpaper").value;
+
+ const backgrounds={
+
+  blue:"linear-gradient(135deg,#172554,#312e81 45%,#0f172a)",
+  purple:"linear-gradient(135deg,#581c87,#7e22ce,#1e1b4b)",
+  green:"linear-gradient(135deg,#064e3b,#047857,#022c22)",
+  red:"linear-gradient(135deg,#7f1d1d,#b91c1c,#450a0a)",
+  black:"linear-gradient(135deg,#020617,#111827,#000)",
+  light:"linear-gradient(135deg,#bae6fd,#dbeafe,#f8fafc)"
+
+ };
+
+ document.body.style.background=
+  backgrounds[v];
+
+ saveSetting("wallpaper",v);
+
+}
+
+function scanStorage(){
+
+ const used=Math.floor(
+  30+Math.random()*50
+ );
+
+ document.getElementById("storageBar").style.width=
+  (used/128*100)+"%";
+
+ document.getElementById("storageText").textContent=
+  used+" GB used of 128 GB";
+
+ notify("Storage scan complete.");
+
+}
+
+function clearCache(){
+
+ notify("NovaOS cache cleared.");
+
+}
+
+function resetSettings(){
+
+ if(confirm("Reset all NovaOS settings?")){
+
+  Object.keys(localStorage)
+  .filter(k=>k.startsWith("nova_"))
+  .forEach(k=>localStorage.removeItem(k));
+
+  location.reload();
+
+ }
+
+}
+
+function clearNovaData(){
+
+ if(confirm("This removes saved notes, tasks, books and settings. Continue?")){
+
+  localStorage.clear();
+
+  location.reload();
+
+ }
+
+}
+
+
+/* DRAG WINDOWS */
+
+function makeDraggable(win){
+
+ const bar=win.querySelector(".titlebar");
+
+ let dragging=false;
+ let ox=0;
+ let oy=0;
+
+ bar.addEventListener("mousedown",e=>{
+
+  if(e.target.classList.contains("winbtn"))return;
+
+  if(win.classList.contains("maximized"))return;
+
+  dragging=true;
+
+  const r=win.getBoundingClientRect();
+
+  ox=e.clientX-r.left;
+  oy=e.clientY-r.top;
+
+  win.style.zIndex=++zIndex;
+
+ });
+
+ document.addEventListener("mousemove",e=>{
+
+  if(!dragging)return;
+
+  win.style.left=
+   Math.max(0,e.clientX-ox)+"px";
+
+  win.style.top=
+   Math.max(0,e.clientY-oy)+"px";
+
+ });
+
+ document.addEventListener("mouseup",()=>{
+  dragging=false;
+ });
+
+ win.addEventListener("mousedown",()=>{
+  win.style.zIndex=++zIndex;
+ });
+
+}
+
+document.querySelectorAll(".window").forEach(makeDraggable);
+
+
+/* RESIZE WINDOWS */
+
+function makeResizable(win){
+
+ const handle=document.createElement("div");
+
+ handle.className="resize-handle";
+
+ win.appendChild(handle);
+
+ let resizing=false;
+ let startX=0;
+ let startY=0;
+ let startW=0;
+ let startH=0;
+
+ const minWidth=320;
+ const minHeight=220;
+
+ handle.addEventListener("mousedown",e=>{
+
+  if(win.classList.contains("maximized"))return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  resizing=true;
+
+  startX=e.clientX;
+  startY=e.clientY;
+
+  const rect=win.getBoundingClientRect();
+
+  startW=rect.width;
+  startH=rect.height;
+
+  win.style.zIndex=++zIndex;
+
+ });
+
+ document.addEventListener("mousemove",e=>{
+
+  if(!resizing)return;
+
+  const newW=Math.max(minWidth,startW+(e.clientX-startX));
+  const newH=Math.max(minHeight,startH+(e.clientY-startY));
+
+  win.style.width=newW+"px";
+  win.style.height=newH+"px";
+
+ });
+
+ document.addEventListener("mouseup",()=>{
+  resizing=false;
+ });
+
+}
+
+document.querySelectorAll(".window").forEach(makeResizable);
+
+
+/* DESKTOP ICON DRAGGING */
+
+let draggedIcon=null;
+let offsetX=0;
+let offsetY=0;
+
+function attachIconDrag(icon){
+
+ icon.addEventListener("mousedown",e=>{
+
+  if(e.button!==0)return;
+
+  draggedIcon=icon;
+
+  const r=icon.getBoundingClientRect();
+
+  offsetX=e.clientX-r.left;
+  offsetY=e.clientY-r.top;
+
+ });
+
+}
+
+document.querySelectorAll(".icon").forEach(attachIconDrag);
+
+document.addEventListener("mousemove",e=>{
+
+ if(!draggedIcon)return;
+
+ const desktop=document.getElementById("desktop");
+ const r=desktop.getBoundingClientRect();
+
+ draggedIcon.style.left=
+  Math.max(0,e.clientX-r.left-offsetX)+"px";
+
+ draggedIcon.style.top=
+  Math.max(0,e.clientY-r.top-offsetY)+"px";
+
+});
+
+
+/* INSTALLED APPS ON DESKTOP */
+
+function renderDesktopIcons(){
+
+ const desktop=document.getElementById("desktop");
+
+ if(!desktop)return;
+
+ desktop.querySelectorAll(".dynamic-icon").forEach(el=>el.remove());
+
+ const installedList=novaStoreApps.filter(a=>
+  localStorage.getItem("novaInstalled_"+a.id)==="true"
+ );
+
+ const cols=[202,294,386,478,570,662];
+ const rows=[18,110,202,294,386];
+
+ installedList.forEach((app,index)=>{
+
+  const col=Math.floor(index/rows.length);
+  const row=index%rows.length;
+
+  const icon=document.createElement("div");
+
+  icon.className="icon dynamic-icon";
+  icon.style.left=(cols[col]||(202+col*92))+"px";
+  icon.style.top=rows[row]+"px";
+  icon.innerHTML=
+   '<div class="emoji">'+app.icon+'</div><span>'+escapeHTML(app.name)+'</span>';
+
+  icon.ondblclick=()=>openApp(app.id);
+  icon.oncontextmenu=e=>showAppContextMenu(e,app.id);
+
+  desktop.appendChild(icon);
+
+  attachIconDrag(icon);
+
+ });
+
+}
+
+document.addEventListener("mouseup",()=>{
+ draggedIcon=null;
+});
+
+
+/* LOAD SETTINGS */
+
+function loadSettings(){
+
+ const get=k=>localStorage.getItem("nova_"+k);
+
+ if(get("dark")==="false")
+  toggleSetting("dark");
+
+ if(get("icons")==="false")
+  toggleSetting("icons");
+
+ if(get("trans")==="true")
+  toggleSetting("trans");
+
+ if(get("anim")==="false")
+  toggleSetting("anim");
+
+ if(get("contrast")==="true")
+  toggleSetting("contrast");
+
+ if(get("cursor")==="true")
+  toggleSetting("cursor");
+
+ if(get("notify")==="false")
+  toggleSetting("notify");
+
+ if(get("sound")==="false")
+  toggleSetting("sound");
+
+ if(get("clock")==="true")
+  toggleSetting("clock");
+
+ if(get("seconds")==="true")
+  toggleSetting("seconds");
+
+ if(get("hardware")==="false")
+  toggleSetting("hardware");
+
+ if(get("cleanup")==="false")
+  toggleSetting("cleanup");
+
+ if(get("windowSave")==="false")
+  toggleSetting("windowSave");
+
+ if(get("lock")==="true")
+  toggleSetting("lock");
+
+ if(get("battery")==="true")
+  toggleSetting("battery");
+
+ if(get("boot")==="false")
+  toggleSetting("boot");
+
+ if(get("developer")==="true")
+  toggleSetting("developer");
+
+ if(get("badges")==="false")
+  toggleSetting("badges");
+
+ if(get("autohideTaskbar")==="true")
+  toggleSetting("autohideTaskbar");
+
+ if(get("snapGrid")==="true")
+  toggleSetting("snapGrid");
+
+ if(get("compact")==="true")
+  toggleSetting("compact");
+
+ if(get("dnd")==="true")
+  toggleSetting("dnd");
+
+ if(get("history")==="false")
+  toggleSetting("history");
+
+ if(get("location")==="true")
+  toggleSetting("location");
+
+ if(get("diagnostics")==="false")
+  toggleSetting("diagnostics");
+
+ if(get("familySafety")==="true")
+  toggleSetting("familySafety");
+
+ if(get("guestMode")==="true")
+  toggleSetting("guestMode");
+
+ if(get("reduceMotion")==="true")
+  toggleSetting("reduceMotion");
+
+ if(get("screenReader")==="true")
+  toggleSetting("screenReader");
+
+ if(get("autoUpdate")==="false")
+  toggleSetting("autoUpdate");
+
+ if(get("startupApps")==="true")
+  toggleSetting("startupApps");
+
+ const size=get("iconSize");
+
+ if(size){
+
+  document.getElementById("iconSize").value=size;
+  changeIconSize();
+
+ }
+
+ const accent=get("accent");
+
+ if(accent){
+
+  document.getElementById("accent").value=accent;
+  changeAccent();
+
+ }
+
+ const wallpaper=get("wallpaper");
+
+ if(wallpaper){
+
+  document.getElementById("wallpaper").value=wallpaper;
+  changeWallpaper();
+
+ }
+
+ const brightness=get("brightness");
+
+ if(brightness){
+
+  document.getElementById("brightness").value=brightness;
+  screenBrightness=brightness;
+  updateScreenFilter();
+
+ }
+
+ const volume=get("volume");
+
+ if(volume)
+  document.getElementById("volume").value=volume;
+
+ const notifyPosition=get("notifyPosition");
+
+ if(notifyPosition)
+  document.getElementById("notifyPosition").value=notifyPosition;
+
+ const autoLock=get("autoLock");
+
+ if(autoLock)
+  document.getElementById("autoLock").value=autoLock;
+
+ const sleep=get("sleepTimer");
+
+ if(sleep)
+  document.getElementById("sleepTimer").value=sleep;
+
+ const textSize=get("textSize");
+
+ if(textSize)
+  document.getElementById("textSize").value=textSize;
+
+ const language=get("language");
+
+ if(language)
+  document.getElementById("language").value=language;
+
+ const region=get("region");
+
+ if(region)
+  document.getElementById("region").value=region;
+
+ const timezoneSetting=get("timezoneSetting");
+
+ if(timezoneSetting)
+  document.getElementById("timezoneSetting").value=timezoneSetting;
+
+ const updateChannel=get("updateChannel");
+
+ if(updateChannel)
+  document.getElementById("updateChannel").value=updateChannel;
+
+ const backupFrequency=get("backupFrequency");
+
+ if(backupFrequency)
+  document.getElementById("backupFrequency").value=backupFrequency;
+
+}
+
+
+/* ESCAPE */
+
+document.addEventListener("keydown",e=>{
+
+ if(e.key==="Escape"){
+  closeStartMenu();
+  hideAppContextMenu();
+ }
+
+});
+
+
+/* UTILITY */
+
+function escapeHTML(str){
+
+ return String(str)
+ .replaceAll("&","&amp;")
+ .replaceAll("<","&lt;")
+ .replaceAll(">","&gt;")
+ .replaceAll('"',"&quot;")
+ .replaceAll("'","&#039;");
+
+}
+
+
+/* BOOT */
+
+window.addEventListener("load",()=>{
+
+ loadSettings();
+
+ renderStart();
+ renderStore();
+ renderTaskbar();
+ renderDesktopIcons();
+ updateClock();
+
+});
+
+let novaOSRunning=false;
+
+function launchNovaOS(){
+
+ const docEl=document.documentElement;
+
+ const goFullscreen=
+  docEl.requestFullscreen?docEl.requestFullscreen():
+  docEl.webkitRequestFullscreen?docEl.webkitRequestFullscreen():
+  docEl.msRequestFullscreen?docEl.msRequestFullscreen():
+  Promise.resolve();
+
+ Promise.resolve(goFullscreen).catch(()=>{});
+
+ document.getElementById("launcher").style.display="none";
+
+ novaOSRunning=true;
+
+ const boot=document.getElementById("boot");
+
+ boot.style.display="flex";
+
+ setTimeout(()=>{
+
+  boot.style.display="none";
+
+ },900);
+
+}
+
+function isNovaFullscreen(){
+
+ return !!(
+  document.fullscreenElement||
+  document.webkitFullscreenElement||
+  document.msFullscreenElement
+ );
+
+}
+
+function reenterFullscreenIfNeeded(){
+
+ if(!novaOSRunning)return;
+
+ if(isNovaFullscreen())return;
+
+ const docEl=document.documentElement;
+
+ const request=
+  docEl.requestFullscreen?docEl.requestFullscreen():
+  docEl.webkitRequestFullscreen?docEl.webkitRequestFullscreen():
+  docEl.msRequestFullscreen?docEl.msRequestFullscreen():
+  null;
+
+ if(request)Promise.resolve(request).catch(()=>{});
+
+}
+
+document.addEventListener("click",reenterFullscreenIfNeeded);
+document.addEventListener("keydown",reenterFullscreenIfNeeded);
+
+
+/* FIRST-TIME INSTALL FLOW */
+
+function updateLauncherUI(){
+
+ const sub=document.getElementById("launcherSub");
+ const btn=document.getElementById("launcherBtn");
+
+ if(localStorage.getItem("novaOSInstalled")==="true"){
+
+  sub.textContent="Click below to open NovaOS.";
+  btn.textContent="🚀 Click Here To Open NovaOS";
+
+ }else{
+
+  sub.textContent="Click below to install NovaOS onto your computer.";
+  btn.textContent="🚀 Click Here To Install NovaOS Onto Your Computer";
+
+ }
+
+ btn.style.display="block";
+
+ document.getElementById("installProgressWrap").style.display="none";
+
+}
+
+updateLauncherUI();
+
+function launcherClick(){
+
+ if(localStorage.getItem("novaOSInstalled")==="true"){
+
+  launchNovaOS();
+
+ }else{
+
+  runInstallAnimation();
+
+ }
+
+}
+
+function runInstallAnimation(){
+
+ const btn=document.getElementById("launcherBtn");
+ const wrap=document.getElementById("installProgressWrap");
+ const bar=document.getElementById("installProgressBar");
+ const text=document.getElementById("installProgressText");
+
+ btn.style.display="none";
+ wrap.style.display="block";
+
+ let percent=1;
+
+ bar.style.width=percent+"%";
+ text.textContent=percent+"%";
+
+ const interval=setInterval(()=>{
+
+  percent+=Math.floor(Math.random()*18)+7;
+
+  if(percent>=100)percent=100;
+
+  bar.style.width=percent+"%";
+  text.textContent=percent+"%";
+
+  if(percent>=100){
+
+   clearInterval(interval);
+
+   localStorage.setItem("novaOSInstalled","true");
+
+   setTimeout(()=>{
+    launchNovaOS();
+   },250);
+
+  }
+
+ },40);
+
+}
+
+</script>
+
+</body>
+</html>
