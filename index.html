@@ -729,12 +729,23 @@ body.big-cursor input{
 <button class="winbtn close" onclick="closeApp('files')">×</button>
 </div>
 <div class="content">
-<h2>📁 This PC</h2>
 
-<div class="store-card"><div class="store-icon">💽</div><div class="store-info"><b>Local Disk (C:)</b><small>NovaOS System Drive</small><div class="progress"><div style="width:42%"></div></div></div></div>
-<div class="store-card"><div class="store-icon">📂</div><div class="store-info"><b>Documents</b><small>Your documents</small></div></div>
-<div class="store-card"><div class="store-icon">🖼️</div><div class="store-info"><b>Pictures</b><small>Your pictures</small></div></div>
-<div class="store-card"><div class="store-icon">🎵</div><div class="store-info"><b>Music</b><small>Your music files</small></div></div>
+<h2>📁 <span id="filesBreadcrumb">This PC</span></h2>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+<button class="appbtn" id="filesUpBtn" onclick="goUpFolder()" disabled>⬆ Up</button>
+<button class="appbtn" onclick="createNewFolder()">📁 New Folder</button>
+<button class="appbtn" onclick="createNewTextFile()">📄 New Text File</button>
+<label class="appbtn" style="display:inline-block;cursor:pointer">
+📤 Upload File
+<input type="file" style="display:none" onchange="uploadFSFile(event)">
+</label>
+</div>
+
+<div id="filesList"></div>
+
+<div id="filesViewer" style="display:none;margin-top:15px;padding:15px;background:#ffffff0d;border-radius:10px"></div>
+
 </div>
 </div>
 
@@ -996,7 +1007,7 @@ Type <b>help</b> for commands.<br><br>
 
 <div class="settings-row">
 <div>🖼️ Wallpaper</div>
-<select id="wallpaper" onchange="changeWallpaper()">
+<select id="wallpaper" onchange="changeWallpaper(true)">
 <option value="blue">Nova Blue</option>
 <option value="purple">Purple Space</option>
 <option value="green">Emerald</option>
@@ -1450,6 +1461,7 @@ function openApp(id){
 
  if(id==="store")renderStore();
  if(id==="calendar")createCalendar();
+ if(id==="files")renderFiles();
 
 }
 
@@ -2643,11 +2655,20 @@ function buildStoreApp(app,c){
  if(app.id==="novaWallpaperMaker"){
   c.innerHTML=`
   <h2>🖼️ Wallpaper Creator</h2>
+
+  <h3>🎨 Gradient</h3>
   <input type="color" id="wallpaperColor1" value="#172554" oninput="updateWallpaperPreview()">
   <input type="color" id="wallpaperColor2" value="#312e81" oninput="updateWallpaperPreview()">
   <div id="wallpaperPreview" style="height:150px;border-radius:10px;margin-top:15px;background:linear-gradient(135deg,#172554,#312e81)"></div>
   <br>
-  <button class="appbtn" onclick="applyCustomWallpaper()">🖼️ Apply to Desktop</button>`;
+  <button class="appbtn" onclick="applyCustomWallpaper()">🖼️ Apply Gradient</button>
+
+  <h3>📷 Upload a Photo</h3>
+  <input type="file" accept="image/*" onchange="uploadWallpaperImage(event)">
+  <p style="opacity:.6;font-size:12px">Your wallpaper — gradient or photo — is saved automatically and restored next time NovaOS opens.</p>
+
+  <br>
+  <button class="appbtn" onclick="resetWallpaperToDefault()">↩ Reset to Default</button>`;
   return;
  }
 
@@ -6306,9 +6327,104 @@ function applyCustomWallpaper(){
  const c1=document.getElementById("wallpaperColor1").value;
  const c2=document.getElementById("wallpaperColor2").value;
 
- document.body.style.background="linear-gradient(135deg,"+c1+","+c2+")";
+ const gradient="linear-gradient(135deg,"+c1+","+c2+")";
+
+ document.body.style.backgroundImage="";
+ document.body.style.background=gradient;
+
+ localStorage.setItem("novaCustomWallpaperType","gradient");
+ localStorage.setItem("novaCustomWallpaperValue",gradient);
 
  notify("Custom wallpaper applied.");
+
+}
+
+function uploadWallpaperImage(event){
+
+ const file=event.target.files[0];
+
+ if(!file)return;
+
+ const reader=new FileReader();
+
+ reader.onload=()=>{
+
+  try{
+
+   localStorage.setItem("novaCustomWallpaperType","image");
+   localStorage.setItem("novaCustomWallpaperValue",reader.result);
+
+   applyWallpaperImage(reader.result);
+
+   notify("Wallpaper photo applied.");
+
+  }catch(e){
+
+   notify("Couldn't save — that image may be too large for storage.");
+
+  }
+
+ };
+
+ reader.readAsDataURL(file);
+
+ event.target.value="";
+
+}
+
+function applyWallpaperImage(dataUrl){
+
+ document.body.style.background="";
+ document.body.style.backgroundImage="url("+dataUrl+")";
+ document.body.style.backgroundSize="cover";
+ document.body.style.backgroundPosition="center";
+ document.body.style.backgroundRepeat="no-repeat";
+
+ localStorage.setItem("novaCustomWallpaperType","image");
+ localStorage.setItem("novaCustomWallpaperValue",dataUrl);
+
+}
+
+function applyStoredWallpaper(){
+
+ const type=localStorage.getItem("novaCustomWallpaperType");
+ const value=localStorage.getItem("novaCustomWallpaperValue");
+
+ if(!type||!value)return;
+
+ if(type==="image"){
+
+  applyWallpaperImage(value);
+
+ }else if(type==="gradient"){
+
+  document.body.style.backgroundImage="";
+  document.body.style.background=value;
+
+ }
+
+}
+
+function resetWallpaperToDefault(){
+
+ localStorage.removeItem("novaCustomWallpaperType");
+ localStorage.removeItem("novaCustomWallpaperValue");
+
+ document.body.style.backgroundImage="";
+
+ const wallpaperSelect=document.getElementById("wallpaper");
+
+ if(wallpaperSelect){
+
+  changeWallpaper();
+
+ }else{
+
+  document.body.style.background="linear-gradient(135deg,#172554,#312e81 45%,#0f172a)";
+
+ }
+
+ notify("Wallpaper reset to default.");
 
 }
 
@@ -7016,6 +7132,412 @@ function updateClock(){
 setInterval(updateClock,1000);
 
 
+/* FILE SYSTEM */
+
+let novaFS=null;
+let novaFSPath=[];
+
+function makeFSId(){
+
+ return "id"+Math.random().toString(36).slice(2,10);
+
+}
+
+function loadFS(){
+
+ const saved=localStorage.getItem("novaFileSystem");
+
+ if(saved){
+
+  try{
+
+   novaFS=JSON.parse(saved);
+   return;
+
+  }catch(e){}
+
+ }
+
+ novaFS={
+  id:makeFSId(),
+  name:"This PC",
+  type:"folder",
+  children:[
+   {id:makeFSId(),name:"Documents",type:"folder",children:[]},
+   {id:makeFSId(),name:"Pictures",type:"folder",children:[]},
+   {id:makeFSId(),name:"Music",type:"folder",children:[]}
+  ]
+ };
+
+ saveFS();
+
+}
+
+function saveFS(){
+
+ localStorage.setItem("novaFileSystem",JSON.stringify(novaFS));
+
+}
+
+function getFSNode(path){
+
+ let node=novaFS;
+
+ for(const part of path){
+
+  if(!node||!node.children)return null;
+
+  node=node.children.find(c=>c.name===part);
+
+ }
+
+ return node;
+
+}
+
+function currentFSFolder(){
+
+ return getFSNode(novaFSPath)||novaFS;
+
+}
+
+function fileIconFor(item){
+
+ if(item.mimeType&&item.mimeType.indexOf("image/")===0)return "🖼️";
+ if(item.mimeType&&item.mimeType.indexOf("audio/")===0)return "🎵";
+ if(item.mimeType&&item.mimeType.indexOf("video/")===0)return "🎬";
+ if(item.content!==undefined)return "📄";
+
+ return "📦";
+
+}
+
+function formatFileSize(bytes){
+
+ if(bytes<1024)return bytes+" B";
+ if(bytes<1024*1024)return (bytes/1024).toFixed(1)+" KB";
+
+ return (bytes/1024/1024).toFixed(1)+" MB";
+
+}
+
+function renderFiles(){
+
+ if(!novaFS)loadFS();
+
+ const folder=currentFSFolder();
+
+ if(!folder)return;
+
+ const breadcrumb=document.getElementById("filesBreadcrumb");
+
+ if(breadcrumb)
+  breadcrumb.textContent="This PC"+(novaFSPath.length?" / "+novaFSPath.join(" / "):"");
+
+ const upBtn=document.getElementById("filesUpBtn");
+
+ if(upBtn)upBtn.disabled=novaFSPath.length===0;
+
+ const list=document.getElementById("filesList");
+
+ if(!list)return;
+
+ const items=(folder.children||[]).slice().sort((a,b)=>{
+
+  if(a.type!==b.type)return a.type==="folder"?-1:1;
+
+  return a.name.localeCompare(b.name);
+
+ });
+
+ if(items.length===0){
+
+  list.innerHTML="<p style='opacity:.6'>This folder is empty.</p>";
+  return;
+
+ }
+
+ list.innerHTML=items.map(item=>{
+
+  const icon=item.type==="folder"?"📁":fileIconFor(item);
+
+  const sizeLabel=
+   item.type==="folder"?
+   (item.children?item.children.length+" item(s)":"0 items"):
+   formatFileSize(item.size||0);
+
+  return '<div class="store-card">'+
+   '<div class="store-icon" style="cursor:pointer" onclick="openFSItem(\''+item.id+'\')">'+icon+'</div>'+
+   '<div class="store-info" style="cursor:pointer" onclick="openFSItem(\''+item.id+'\')">'+
+   '<b>'+escapeHTML(item.name)+'</b>'+
+   '<small>'+sizeLabel+'</small>'+
+   '</div>'+
+   '<button onclick="renameFSItem(\''+item.id+'\')">✏️</button>'+
+   '<button onclick="deleteFSItem(\''+item.id+'\')">🗑️</button>'+
+   '</div>';
+
+ }).join("");
+
+}
+
+function openFSItem(id){
+
+ const folder=currentFSFolder();
+ const item=folder.children.find(c=>c.id===id);
+
+ if(!item)return;
+
+ if(item.type==="folder"){
+
+  novaFSPath.push(item.name);
+
+  hideFileViewer();
+  renderFiles();
+
+ }else{
+
+  previewFSFile(item);
+
+ }
+
+}
+
+function goUpFolder(){
+
+ if(novaFSPath.length===0)return;
+
+ novaFSPath.pop();
+
+ hideFileViewer();
+ renderFiles();
+
+}
+
+function hideFileViewer(){
+
+ const viewer=document.getElementById("filesViewer");
+
+ if(viewer){
+
+  viewer.style.display="none";
+  viewer.innerHTML="";
+
+ }
+
+}
+
+function previewFSFile(item){
+
+ const viewer=document.getElementById("filesViewer");
+
+ if(!viewer)return;
+
+ if(item.mimeType&&item.mimeType.indexOf("image/")===0){
+
+  viewer.innerHTML=
+   "<h3>"+escapeHTML(item.name)+"</h3>"+
+   '<img src="'+item.dataUrl+'" style="max-width:100%;border-radius:8px;display:block;margin-bottom:10px">'+
+   '<button class="appbtn" onclick="setImageAsBackground(\''+item.id+'\')">🖼️ Set as Background</button>';
+
+ }else if(item.content!==undefined){
+
+  viewer.innerHTML=
+   "<h3>"+escapeHTML(item.name)+"</h3>"+
+   '<textarea id="fileEditText" style="height:200px">'+escapeHTML(item.content)+'</textarea>'+
+   '<br><br>'+
+   '<button class="appbtn" onclick="saveFSTextFile(\''+item.id+'\')">💾 Save</button>';
+
+ }else{
+
+  viewer.innerHTML=
+   "<h3>"+escapeHTML(item.name)+"</h3>"+
+   "<p>"+formatFileSize(item.size||0)+"</p>"+
+   '<a class="appbtn" href="'+(item.dataUrl||"#")+'" download="'+escapeHTML(item.name)+'">⬇ Download</a>';
+
+ }
+
+ viewer.style.display="block";
+
+}
+
+function saveFSTextFile(id){
+
+ const folder=currentFSFolder();
+ const item=folder.children.find(c=>c.id===id);
+
+ if(!item)return;
+
+ const textarea=document.getElementById("fileEditText");
+
+ if(!textarea)return;
+
+ item.content=textarea.value;
+ item.size=new Blob([item.content]).size;
+
+ saveFS();
+
+ notify("File saved.");
+
+ renderFiles();
+
+}
+
+function setImageAsBackground(id){
+
+ const folder=currentFSFolder();
+ const item=folder.children.find(c=>c.id===id);
+
+ if(!item||!item.dataUrl)return;
+
+ applyWallpaperImage(item.dataUrl);
+
+ notify("Background updated from "+item.name+".");
+
+}
+
+function createNewFolder(){
+
+ const name=prompt("Folder name:");
+
+ if(!name||!name.trim())return;
+
+ const folder=currentFSFolder();
+
+ if(folder.children.some(c=>c.name===name.trim())){
+
+  notify("An item with that name already exists here.");
+  return;
+
+ }
+
+ folder.children.push({
+  id:makeFSId(),
+  name:name.trim(),
+  type:"folder",
+  children:[]
+ });
+
+ saveFS();
+ renderFiles();
+
+}
+
+function createNewTextFile(){
+
+ const name=prompt("File name:","New Document.txt");
+
+ if(!name||!name.trim())return;
+
+ const folder=currentFSFolder();
+
+ if(folder.children.some(c=>c.name===name.trim())){
+
+  notify("An item with that name already exists here.");
+  return;
+
+ }
+
+ const newFile={
+  id:makeFSId(),
+  name:name.trim(),
+  type:"file",
+  content:"",
+  size:0
+ };
+
+ folder.children.push(newFile);
+
+ saveFS();
+ renderFiles();
+ previewFSFile(newFile);
+
+}
+
+function uploadFSFile(event){
+
+ const file=event.target.files[0];
+
+ if(!file)return;
+
+ const folder=currentFSFolder();
+
+ const reader=new FileReader();
+
+ reader.onload=()=>{
+
+  const newFile={
+   id:makeFSId(),
+   name:file.name,
+   type:"file",
+   dataUrl:reader.result,
+   mimeType:file.type,
+   size:file.size
+  };
+
+  folder.children.push(newFile);
+
+  try{
+
+   saveFS();
+
+  }catch(e){
+
+   folder.children.pop();
+
+   notify("Couldn't save — that file may be too large for storage.");
+
+   return;
+
+  }
+
+  renderFiles();
+
+  notify(file.name+" uploaded.");
+
+ };
+
+ reader.readAsDataURL(file);
+
+ event.target.value="";
+
+}
+
+function renameFSItem(id){
+
+ const folder=currentFSFolder();
+ const item=folder.children.find(c=>c.id===id);
+
+ if(!item)return;
+
+ const newName=prompt("Rename to:",item.name);
+
+ if(!newName||!newName.trim())return;
+
+ item.name=newName.trim();
+
+ saveFS();
+ renderFiles();
+
+}
+
+function deleteFSItem(id){
+
+ const folder=currentFSFolder();
+ const idx=folder.children.findIndex(c=>c.id===id);
+
+ if(idx===-1)return;
+
+ if(!confirm('Delete "'+folder.children[idx].name+'"? This can\'t be undone.'))return;
+
+ folder.children.splice(idx,1);
+
+ saveFS();
+ renderFiles();
+ hideFileViewer();
+
+}
+
+
 /* NOTEPAD */
 
 document.getElementById("notes").value=
@@ -7574,7 +8096,7 @@ function changeAccent(){
 
 }
 
-function changeWallpaper(){
+function changeWallpaper(userInitiated){
 
  const v=document.getElementById("wallpaper").value;
 
@@ -7588,6 +8110,14 @@ function changeWallpaper(){
   light:"linear-gradient(135deg,#bae6fd,#dbeafe,#f8fafc)"
 
  };
+
+ if(userInitiated){
+
+  localStorage.removeItem("novaCustomWallpaperType");
+  localStorage.removeItem("novaCustomWallpaperValue");
+  document.body.style.backgroundImage="";
+
+ }
 
  document.body.style.background=
   backgrounds[v];
@@ -8065,12 +8595,15 @@ function escapeHTML(str){
 window.addEventListener("load",()=>{
 
  loadSettings();
+ loadFS();
 
  renderStart();
  renderStore();
  renderTaskbar();
  renderDesktopIcons();
  updateClock();
+
+ applyStoredWallpaper();
 
 });
 
