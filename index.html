@@ -193,6 +193,36 @@ body.light .contextmenu button:hover{
  pointer-events:auto;
 }
 
+.notif-panel{
+ position:absolute;
+ right:10px;
+ bottom:62px;
+ width:320px;
+ max-height:420px;
+ overflow-y:auto;
+ background:rgba(18,24,45,.97);
+ backdrop-filter:blur(25px);
+ border:1px solid #ffffff22;
+ border-radius:16px;
+ z-index:9998;
+ box-shadow:0 20px 60px #0008;
+ opacity:0;
+ transform:translateY(14px) scale(.97);
+ pointer-events:none;
+ transition:opacity .18s ease, transform .18s ease;
+}
+
+.notif-panel.show{
+ opacity:1;
+ transform:translateY(0) scale(1);
+ pointer-events:auto;
+}
+
+body.light .notif-panel{
+ background:rgba(248,250,252,.97);
+ color:#111827;
+}
+
 body.light #start{
  background:rgba(248,250,252,.97);
  color:#111827;
@@ -227,7 +257,7 @@ body.light #start{
  top:80px;
  width:680px;
  height:480px;
- background:#111827f5;
+ background:rgba(17,24,39,var(--window-opacity,.96));
  color:white;
  border:1px solid #ffffff25;
  border-radius:12px;
@@ -253,8 +283,27 @@ body.light #start{
 }
 
 body.light .window{
- background:#f8fafcf5;
+ background:rgba(248,250,252,var(--window-opacity,.96));
  color:#111827;
+}
+
+body.sharp-corners .window,
+body.sharp-corners .icon,
+body.sharp-corners .appbtn,
+body.sharp-corners .gamecard,
+body.sharp-corners .store-card,
+body.sharp-corners .tbbtn,
+body.sharp-corners #start,
+body.sharp-corners .notif-panel,
+body.sharp-corners .contextmenu{
+ border-radius:0!important;
+}
+
+body.reduce-transparency #start,
+body.reduce-transparency #taskbar,
+body.reduce-transparency .notif-panel,
+body.reduce-transparency .contextmenu{
+ backdrop-filter:none!important;
 }
 
 .titlebar{
@@ -696,6 +745,15 @@ body.big-cursor input{
 <div id="bootText">Starting NovaOS...</div>
 </div>
 
+<div id="lockScreen" style="display:none;position:fixed;inset:0;background:#020617;z-index:90000;flex-direction:column;align-items:center;justify-content:center;color:white;text-align:center">
+<div style="font-size:70px">🔒</div>
+<h2>NovaOS is Locked</h2>
+<input type="password" id="lockPinInput" placeholder="Enter PIN" style="text-align:center;font-size:18px;width:220px" onkeydown="if(event.key==='Enter')attemptUnlock()">
+<br><br>
+<button class="appbtn" onclick="attemptUnlock()">🔓 Unlock</button>
+<p id="lockFeedback" style="color:#ef4444;min-height:20px"></p>
+</div>
+
 <div id="desktop">
 
 <div class="icon" style="left:18px;top:18px" ondblclick="openApp('files')" oncontextmenu="showAppContextMenu(event,'files')"><div class="emoji">📁</div><span>Files</span></div>
@@ -974,6 +1032,26 @@ Type <b>help</b> for commands.<br><br>
 </div>
 
 <div class="settings-row">
+<div>⬜ Rounded Corners<small>Turn off for sharp, square edges</small></div>
+<div id="roundedCornersSwitch" class="switch on" onclick="toggleSetting('roundedCorners')"></div>
+</div>
+
+<div class="settings-row">
+<div>🪟 Window Opacity</div>
+<input type="range" id="windowOpacity" min="50" max="100" value="96" oninput="changeWindowOpacity()">
+</div>
+
+<div class="settings-row">
+<div>🔤 Font Style</div>
+<select id="fontFamily" onchange="changeFontFamily()">
+<option value="default">Default</option>
+<option value="serif">Serif</option>
+<option value="mono">Monospace</option>
+<option value="rounded">Rounded</option>
+</select>
+</div>
+
+<div class="settings-row">
 <div>🌈 High Contrast<small>Increase interface contrast</small></div>
 <div id="contrastSwitch" class="switch" onclick="toggleSetting('contrast')"></div>
 </div>
@@ -1038,12 +1116,25 @@ Type <b>help</b> for commands.<br><br>
 </select>
 </div>
 
+<div class="settings-row">
+<div>⏱️ Notification Duration<small>How long toasts stay on screen</small></div>
+<input type="range" id="notifDuration" min="1" max="10" step="0.5" value="3.5" oninput="changeNotificationDuration()">
+</div>
+
+<button class="appbtn" onclick="clearNotificationHistory()">🗑️ Clear Notification History</button>
+
+
 
 <h3>🔊 Sound</h3>
 
 <div class="settings-row">
 <div>🔊 Master Volume</div>
 <input type="range" id="volume" min="0" max="100" value="70" onchange="saveSetting('volume',this.value)">
+</div>
+
+<div class="settings-row">
+<div>🖱️ UI Click Sounds<small>Play a soft click on button presses</small></div>
+<div id="clickSoundsSwitch" class="switch" onclick="toggleSetting('clickSounds')"></div>
 </div>
 
 
@@ -1073,6 +1164,11 @@ Type <b>help</b> for commands.<br><br>
 </div>
 
 <div class="settings-row">
+<div>🪟 Reduce Transparency<small>Turn off blur effects for smoother performance</small></div>
+<div id="reduceTransparencySwitch" class="switch" onclick="toggleSetting('reduceTransparency')"></div>
+</div>
+
+<div class="settings-row">
 <div>💾 Save Window Positions</div>
 <div id="windowSaveSwitch" class="switch on" onclick="toggleSetting('windowSave')"></div>
 </div>
@@ -1081,8 +1177,13 @@ Type <b>help</b> for commands.<br><br>
 <h3>🔐 Security</h3>
 
 <div class="settings-row">
-<div>🔒 Lock Screen</div>
+<div>🔒 Lock Screen<small>Require a PIN to unlock NovaOS</small></div>
 <div id="lockSwitch" class="switch" onclick="toggleSetting('lock')"></div>
+</div>
+
+<div style="display:flex;gap:8px;margin-bottom:10px">
+<button class="appbtn" onclick="lockNovaOS()">🔒 Lock Now</button>
+<button class="appbtn" onclick="changeLockPin()">🔑 Change PIN</button>
 </div>
 
 <div class="settings-row">
@@ -1327,13 +1428,127 @@ Type <b>help</b> for commands.<br><br>
 <div id="taskbar">
 <button class="tbbtn" onclick="toggleStart()">⊞</button>
 <div id="taskbarApps" style="display:flex;gap:7px"></div>
+<button class="tbbtn" id="notifBellBtn" onclick="toggleNotificationPanel(event)" style="position:relative">
+🔔
+<span id="notifBadge" style="display:none;position:absolute;top:2px;right:2px;background:#ef4444;color:white;font-size:10px;border-radius:50%;min-width:16px;height:16px;line-height:16px;text-align:center"></span>
+</button>
+<button class="tbbtn" onclick="lockNovaOS()" title="Lock NovaOS">🔒</button>
 <div id="clock"></div>
 </div>
+
+<div id="notifPanel" class="notif-panel"></div>
 
 <div id="appContextMenu" class="contextmenu"></div>
 
 
 <script>
+
+/* INDEXEDDB STORAGE (for large data — files, wallpapers) */
+
+let novaDB=null;
+let novaDBFailed=false;
+
+function openNovaDB(){
+
+ return new Promise(resolve=>{
+
+  if(!window.indexedDB){
+
+   novaDBFailed=true;
+   resolve(null);
+   return;
+
+  }
+
+  try{
+
+   const request=indexedDB.open("NovaOSStorage",1);
+
+   request.onupgradeneeded=e=>{
+
+    const db=e.target.result;
+
+    if(!db.objectStoreNames.contains("kv"))db.createObjectStore("kv");
+
+   };
+
+   request.onsuccess=e=>{
+
+    novaDB=e.target.result;
+    resolve(novaDB);
+
+   };
+
+   request.onerror=()=>{
+
+    novaDBFailed=true;
+    resolve(null);
+
+   };
+
+  }catch(e){
+
+   novaDBFailed=true;
+   resolve(null);
+
+  }
+
+ });
+
+}
+
+function idbSet(key,value){
+
+ if(novaDBFailed||!novaDB){
+
+  try{
+
+   localStorage.setItem("novaFallback_"+key,JSON.stringify(value));
+   return Promise.resolve();
+
+  }catch(e){
+
+   return Promise.reject(e);
+
+  }
+
+ }
+
+ return new Promise((resolve,reject)=>{
+
+  const tx=novaDB.transaction("kv","readwrite");
+
+  tx.objectStore("kv").put(value,key);
+
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+
+ });
+
+}
+
+function idbGet(key){
+
+ if(novaDBFailed||!novaDB){
+
+  const raw=localStorage.getItem("novaFallback_"+key);
+
+  return Promise.resolve(raw?JSON.parse(raw):undefined);
+
+ }
+
+ return new Promise(resolve=>{
+
+  const tx=novaDB.transaction("kv","readonly");
+  const req=tx.objectStore("kv").get(key);
+
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>resolve(undefined);
+
+ });
+
+}
+
 
 let zIndex=1000;
 let notificationsEnabled=true;
@@ -1427,7 +1642,15 @@ const novaStoreApps=[
 {id:"novaDice",icon:"🎲",name:"Dice Roller",description:"Roll a set of virtual dice.",type:"app",category:"Entertainment"},
 {id:"novaCoinFlip",icon:"🪙",name:"Coin Flip",description:"Flip a virtual coin.",type:"app",category:"Entertainment"},
 {id:"novaWallpaperMaker",icon:"🖼️",name:"Wallpaper Creator",description:"Design and apply a custom gradient wallpaper.",type:"app",category:"Creativity"},
-{id:"novaRecipe",icon:"🍳",name:"Recipe of the Day",description:"Shuffle through simple recipe ideas.",type:"app",category:"Entertainment"}
+{id:"novaRecipe",icon:"🍳",name:"Recipe of the Day",description:"Shuffle through simple recipe ideas.",type:"app",category:"Entertainment"},
+{id:"novaReminders",icon:"🔔",name:"Nova Reminders",description:"Set reminders that notify you at the right time.",type:"app",category:"Productivity"},
+{id:"novaMarkdown",icon:"📝",name:"Markdown Previewer",description:"Write Markdown and see it rendered live.",type:"app",category:"Productivity"},
+{id:"novaExpenses",icon:"💸",name:"Expense Tracker",description:"Log expenses by category and see your total.",type:"app",category:"Productivity"},
+{id:"novaPomodoro",icon:"🍅",name:"Nova Pomodoro",description:"Work/break focus timer using the Pomodoro method.",type:"app",category:"Utilities"},
+{id:"novaPalette",icon:"🎨",name:"Palette Generator",description:"Generate random colour palettes with copyable hex codes.",type:"app",category:"Creativity"},
+{id:"novaEmoji",icon:"😀",name:"Emoji Picker",description:"Search and copy emoji by keyword.",type:"app",category:"Utilities"},
+{id:"novaTyping",icon:"⌨️",name:"Typing Speed Test",description:"Measure your typing speed in words per minute.",type:"app",category:"Utilities"},
+{id:"novaCompound",icon:"📈",name:"Compound Interest Calculator",description:"See how savings grow over time with compound interest.",type:"app",category:"Utilities"}
 
 ];
 
@@ -1456,6 +1679,8 @@ function openApp(id){
  el.classList.remove("closing");
  el.style.display="block";
  el.style.zIndex=++zIndex;
+
+ restoreWindowPosition(el);
 
  markRunning(id);
 
@@ -1708,6 +1933,7 @@ function createStoreWindow(app){
   existing.classList.remove("closing");
   existing.style.display="block";
   existing.style.zIndex=++zIndex;
+  restoreWindowPosition(existing);
   markRunning(app.id);
   return;
 
@@ -1732,6 +1958,8 @@ function createStoreWindow(app){
 
  existing.style.display="block";
  existing.style.zIndex=++zIndex;
+
+ restoreWindowPosition(existing);
 
  markRunning(app.id);
 
@@ -2665,10 +2893,25 @@ function buildStoreApp(app,c){
 
   <h3>📷 Upload a Photo</h3>
   <input type="file" accept="image/*" onchange="uploadWallpaperImage(event)">
+
+  <div class="settings-row" style="margin-top:12px">
+  <div>🖼️ Photo Fit</div>
+  <select id="wallpaperFit" onchange="changeWallpaperFit()">
+  <option value="cover">Fill screen</option>
+  <option value="contain">Fit to screen</option>
+  <option value="repeat">Tile / repeat</option>
+  </select>
+  </div>
+
   <p style="opacity:.6;font-size:12px">Your wallpaper — gradient or photo — is saved automatically and restored next time NovaOS opens.</p>
 
   <br>
   <button class="appbtn" onclick="resetWallpaperToDefault()">↩ Reset to Default</button>`;
+
+  const savedFit=localStorage.getItem("nova_wallpaperFit");
+
+  if(savedFit)document.getElementById("wallpaperFit").value=savedFit;
+
   return;
  }
 
@@ -2679,6 +2922,105 @@ function buildStoreApp(app,c){
   <br>
   <button class="appbtn" onclick="shuffleRecipe()">🔀 Shuffle Recipe</button>`;
   shuffleRecipe();
+  return;
+ }
+
+ if(app.id==="novaReminders"){
+  c.innerHTML=`
+  <h2>🔔 Nova Reminders</h2>
+  <input id="reminderText" placeholder="Remind me to...">
+  <input id="reminderTime" type="datetime-local">
+  <button class="appbtn" onclick="addReminder()">➕ Add Reminder</button>
+  <div id="reminderList" style="margin-top:15px"></div>`;
+  renderReminders();
+  return;
+ }
+
+ if(app.id==="novaMarkdown"){
+  c.innerHTML=`
+  <h2>📝 Markdown Previewer</h2>
+  <div style="display:flex;gap:10px">
+  <textarea id="markdownInput" style="height:280px;flex:1" oninput="renderMarkdownPreview()" placeholder="# Try some Markdown&#10;&#10;**bold**, *italic*, and a list:&#10;- one&#10;- two"></textarea>
+  <div id="markdownPreview" style="flex:1;background:#ffffff0d;border-radius:8px;padding:12px;overflow:auto;height:280px"></div>
+  </div>`;
+  renderMarkdownPreview();
+  return;
+ }
+
+ if(app.id==="novaExpenses"){
+  c.innerHTML=`
+  <h2>💸 Expense Tracker</h2>
+  <input id="expenseName" placeholder="What did you spend on?">
+  <input id="expenseAmount" type="number" placeholder="Amount">
+  <select id="expenseCategory">
+  <option>Food</option>
+  <option>Transport</option>
+  <option>Bills</option>
+  <option>Shopping</option>
+  <option>Other</option>
+  </select>
+  <button class="appbtn" onclick="addExpense()">➕ Add</button>
+  <h3>Total: <span id="expenseTotal">0.00</span></h3>
+  <div id="expenseList"></div>`;
+  renderExpenses();
+  return;
+ }
+
+ if(app.id==="novaPomodoro"){
+  c.innerHTML=`
+  <h2>🍅 Nova Pomodoro</h2>
+  <p id="pomodoroPhase">Focus Session</p>
+  <div class="big" id="pomodoroDisplay">25:00</div>
+  <div style="text-align:center">
+  <button class="appbtn" onclick="startPomodoro()">▶ Start</button>
+  <button class="appbtn" onclick="pausePomodoro()">⏸ Pause</button>
+  <button class="appbtn" onclick="resetPomodoro()">🔄 Reset</button>
+  </div>
+  <p style="text-align:center">Completed sessions: <b id="pomodoroCount">0</b></p>`;
+  resetPomodoro();
+  return;
+ }
+
+ if(app.id==="novaPalette"){
+  c.innerHTML=`
+  <h2>🎨 Palette Generator</h2>
+  <div id="paletteSwatches" class="statgrid" style="grid-template-columns:repeat(5,1fr)"></div>
+  <br>
+  <button class="appbtn" onclick="generatePalette()">🔀 Generate New Palette</button>`;
+  generatePalette();
+  return;
+ }
+
+ if(app.id==="novaEmoji"){
+  c.innerHTML=`
+  <h2>😀 Emoji Picker</h2>
+  <input id="emojiSearch" placeholder="Search emoji (smile, heart, cat...)" oninput="renderEmojiResults()">
+  <div id="emojiResults" style="font-size:28px;margin-top:15px;line-height:1.8"></div>`;
+  renderEmojiResults();
+  return;
+ }
+
+ if(app.id==="novaTyping"){
+  c.innerHTML=`
+  <h2>⌨️ Typing Speed Test</h2>
+  <p id="typingSample" style="background:#ffffff0d;padding:12px;border-radius:8px"></p>
+  <textarea id="typingInput" style="height:100px" placeholder="Start typing here to begin..." oninput="handleTypingInput()"></textarea>
+  <p>WPM: <b id="typingWPM">0</b> &nbsp; Accuracy: <b id="typingAccuracy">100</b>%</p>
+  <button class="appbtn" onclick="newTypingTest()">🔄 New Test</button>`;
+  newTypingTest();
+  return;
+ }
+
+ if(app.id==="novaCompound"){
+  c.innerHTML=`
+  <h2>📈 Compound Interest Calculator</h2>
+  <input id="compoundPrincipal" type="number" placeholder="Starting amount" value="1000">
+  <input id="compoundRate" type="number" placeholder="Annual interest rate %" value="5">
+  <input id="compoundYears" type="number" placeholder="Years" value="10">
+  <input id="compoundContribution" type="number" placeholder="Monthly contribution" value="0">
+  <button class="appbtn" onclick="calculateCompoundInterest()">Calculate</button>
+  <p id="compoundResult"></p>
+  <p style="opacity:.6;font-size:12px">A general estimate only — not financial advice.</p>`;
   return;
  }
 
@@ -6332,8 +6674,7 @@ function applyCustomWallpaper(){
  document.body.style.backgroundImage="";
  document.body.style.background=gradient;
 
- localStorage.setItem("novaCustomWallpaperType","gradient");
- localStorage.setItem("novaCustomWallpaperValue",gradient);
+ idbSet("novaWallpaper",{type:"gradient",value:gradient}).catch(()=>{});
 
  notify("Custom wallpaper applied.");
 
@@ -6349,20 +6690,17 @@ function uploadWallpaperImage(event){
 
  reader.onload=()=>{
 
-  try{
-
-   localStorage.setItem("novaCustomWallpaperType","image");
-   localStorage.setItem("novaCustomWallpaperValue",reader.result);
+  idbSet("novaWallpaper",{type:"image",value:reader.result}).then(()=>{
 
    applyWallpaperImage(reader.result);
 
    notify("Wallpaper photo applied.");
 
-  }catch(e){
+  }).catch(()=>{
 
    notify("Couldn't save — that image may be too large for storage.");
 
-  }
+  });
 
  };
 
@@ -6374,32 +6712,62 @@ function uploadWallpaperImage(event){
 
 function applyWallpaperImage(dataUrl){
 
+ const fit=localStorage.getItem("nova_wallpaperFit")||"cover";
+
  document.body.style.background="";
  document.body.style.backgroundImage="url("+dataUrl+")";
- document.body.style.backgroundSize="cover";
  document.body.style.backgroundPosition="center";
- document.body.style.backgroundRepeat="no-repeat";
 
- localStorage.setItem("novaCustomWallpaperType","image");
- localStorage.setItem("novaCustomWallpaperValue",dataUrl);
+ if(fit==="repeat"){
+
+  document.body.style.backgroundSize="auto";
+  document.body.style.backgroundRepeat="repeat";
+
+ }else{
+
+  document.body.style.backgroundSize=fit;
+  document.body.style.backgroundRepeat="no-repeat";
+
+ }
 
 }
 
-function applyStoredWallpaper(){
+function saveAndApplyWallpaperImage(dataUrl){
 
- const type=localStorage.getItem("novaCustomWallpaperType");
- const value=localStorage.getItem("novaCustomWallpaperValue");
+ return idbSet("novaWallpaper",{type:"image",value:dataUrl}).then(()=>{
 
- if(!type||!value)return;
+  applyWallpaperImage(dataUrl);
 
- if(type==="image"){
+ });
 
-  applyWallpaperImage(value);
+}
 
- }else if(type==="gradient"){
+async function changeWallpaperFit(){
+
+ const v=document.getElementById("wallpaperFit").value;
+
+ saveSetting("wallpaperFit",v);
+
+ const saved=await idbGet("novaWallpaper");
+
+ if(saved&&saved.type==="image")applyWallpaperImage(saved.value);
+
+}
+
+async function applyStoredWallpaper(){
+
+ const saved=await idbGet("novaWallpaper");
+
+ if(!saved||!saved.type)return;
+
+ if(saved.type==="image"){
+
+  applyWallpaperImage(saved.value);
+
+ }else if(saved.type==="gradient"){
 
   document.body.style.backgroundImage="";
-  document.body.style.background=value;
+  document.body.style.background=saved.value;
 
  }
 
@@ -6407,8 +6775,7 @@ function applyStoredWallpaper(){
 
 function resetWallpaperToDefault(){
 
- localStorage.removeItem("novaCustomWallpaperType");
- localStorage.removeItem("novaCustomWallpaperValue");
+ idbSet("novaWallpaper",null).catch(()=>{});
 
  document.body.style.backgroundImage="";
 
@@ -6451,6 +6818,531 @@ function shuffleRecipe(){
   "<h3>"+escapeHTML(recipe.name)+"</h3>"+
   "<p><b>Ingredients:</b> "+recipe.ingredients.map(escapeHTML).join(", ")+"</p>"+
   "<p><b>Steps:</b> "+escapeHTML(recipe.steps)+"</p>";
+
+}
+
+
+/* REMINDERS */
+
+function getReminders(){
+
+ return JSON.parse(localStorage.getItem("novaReminders")||"[]");
+
+}
+
+function saveReminders(list){
+
+ localStorage.setItem("novaReminders",JSON.stringify(list));
+
+}
+
+function addReminder(){
+
+ const textEl=document.getElementById("reminderText");
+ const timeEl=document.getElementById("reminderTime");
+
+ if(!textEl.value.trim()||!timeEl.value)return;
+
+ const list=getReminders();
+
+ list.push({
+  id:makeFSId(),
+  text:textEl.value.trim(),
+  time:timeEl.value,
+  notified:false
+ });
+
+ saveReminders(list);
+
+ textEl.value="";
+ timeEl.value="";
+
+ renderReminders();
+
+}
+
+function removeReminder(id){
+
+ saveReminders(getReminders().filter(r=>r.id!==id));
+
+ renderReminders();
+
+}
+
+function renderReminders(){
+
+ const list=getReminders().slice().sort((a,b)=>new Date(a.time)-new Date(b.time));
+ const el=document.getElementById("reminderList");
+
+ if(!el)return;
+
+ if(list.length===0){
+
+  el.innerHTML="<p style='opacity:.6'>No reminders set.</p>";
+  return;
+
+ }
+
+ el.innerHTML=list.map(r=>
+  '<div class="store-card"><div class="store-info">'+
+  '<b>'+escapeHTML(r.text)+'</b>'+
+  '<small>'+new Date(r.time).toLocaleString()+(r.notified?" — done":"")+'</small>'+
+  '</div><button onclick="removeReminder(\''+r.id+'\')">🗑️</button></div>'
+ ).join("");
+
+}
+
+setInterval(()=>{
+
+ const list=getReminders();
+ let changed=false;
+ const now=Date.now();
+
+ list.forEach(r=>{
+
+  if(!r.notified&&new Date(r.time).getTime()<=now){
+
+   notify("🔔 Reminder: "+r.text);
+
+   r.notified=true;
+   changed=true;
+
+  }
+
+ });
+
+ if(changed){
+
+  saveReminders(list);
+  renderReminders();
+
+ }
+
+},30000);
+
+
+/* MARKDOWN PREVIEWER */
+
+function renderMarkdownPreview(){
+
+ const input=document.getElementById("markdownInput");
+ const preview=document.getElementById("markdownPreview");
+
+ if(!input||!preview)return;
+
+ let html=escapeHTML(input.value);
+
+ html=html.replace(/^### (.*)$/gim,"<h3>$1</h3>");
+ html=html.replace(/^## (.*)$/gim,"<h2>$1</h2>");
+ html=html.replace(/^# (.*)$/gim,"<h1>$1</h1>");
+ html=html.replace(/\*\*(.*?)\*\*/g,"<b>$1</b>");
+ html=html.replace(/\*(.*?)\*/g,"<i>$1</i>");
+ html=html.replace(/`(.*?)`/g,"<code>$1</code>");
+ html=html.replace(/^- (.*)$/gim,"<li>$1</li>");
+ html=html.replace(/(<li>.*<\/li>)/gims,"<ul>$1</ul>");
+ html=html.replace(/\n/g,"<br>");
+
+ preview.innerHTML=html;
+
+}
+
+
+/* EXPENSE TRACKER */
+
+function getExpenses(){
+
+ return JSON.parse(localStorage.getItem("novaExpenses")||"[]");
+
+}
+
+function saveExpenses(list){
+
+ localStorage.setItem("novaExpenses",JSON.stringify(list));
+
+}
+
+function addExpense(){
+
+ const nameEl=document.getElementById("expenseName");
+ const amountEl=document.getElementById("expenseAmount");
+ const categoryEl=document.getElementById("expenseCategory");
+
+ const amount=Number(amountEl.value);
+
+ if(!nameEl.value.trim()||!amount)return;
+
+ const list=getExpenses();
+
+ list.unshift({
+  id:makeFSId(),
+  name:nameEl.value.trim(),
+  amount,
+  category:categoryEl.value
+ });
+
+ saveExpenses(list);
+
+ nameEl.value="";
+ amountEl.value="";
+
+ renderExpenses();
+
+}
+
+function removeExpense(id){
+
+ saveExpenses(getExpenses().filter(e=>e.id!==id));
+
+ renderExpenses();
+
+}
+
+function renderExpenses(){
+
+ const list=getExpenses();
+ const el=document.getElementById("expenseList");
+ const totalEl=document.getElementById("expenseTotal");
+
+ if(!el)return;
+
+ const total=list.reduce((sum,e)=>sum+e.amount,0);
+
+ if(totalEl)totalEl.textContent=total.toFixed(2);
+
+ if(list.length===0){
+
+  el.innerHTML="<p style='opacity:.6'>No expenses logged yet.</p>";
+  return;
+
+ }
+
+ el.innerHTML=list.map(e=>
+  '<div class="store-card"><div class="store-info">'+
+  '<b>'+escapeHTML(e.name)+'</b>'+
+  '<small>'+escapeHTML(e.category)+' — '+e.amount.toFixed(2)+'</small>'+
+  '</div><button onclick="removeExpense(\''+e.id+'\')">🗑️</button></div>'
+ ).join("");
+
+}
+
+
+/* POMODORO */
+
+let pomodoroInterval=null;
+let pomodoroSeconds=25*60;
+let pomodoroIsBreak=false;
+let pomodoroCompleted=0;
+let pomodoroRunning=false;
+
+function resetPomodoro(){
+
+ clearInterval(pomodoroInterval);
+
+ pomodoroRunning=false;
+ pomodoroIsBreak=false;
+ pomodoroSeconds=25*60;
+ pomodoroCompleted=0;
+
+ updatePomodoroDisplay();
+
+ const phaseEl=document.getElementById("pomodoroPhase");
+ const countEl=document.getElementById("pomodoroCount");
+
+ if(phaseEl)phaseEl.textContent="Focus Session";
+ if(countEl)countEl.textContent="0";
+
+}
+
+function startPomodoro(){
+
+ if(pomodoroRunning)return;
+
+ pomodoroRunning=true;
+
+ pomodoroInterval=setInterval(()=>{
+
+  pomodoroSeconds--;
+
+  updatePomodoroDisplay();
+
+  if(pomodoroSeconds<=0){
+
+   if(pomodoroIsBreak){
+
+    pomodoroIsBreak=false;
+    pomodoroSeconds=25*60;
+
+    notify("Break's over — back to focus!");
+
+   }else{
+
+    pomodoroCompleted++;
+
+    const countEl=document.getElementById("pomodoroCount");
+
+    if(countEl)countEl.textContent=pomodoroCompleted;
+
+    pomodoroIsBreak=true;
+    pomodoroSeconds=5*60;
+
+    notify("Focus session complete — take a 5 minute break.");
+
+   }
+
+   const phaseEl=document.getElementById("pomodoroPhase");
+
+   if(phaseEl)phaseEl.textContent=pomodoroIsBreak?"Break Time":"Focus Session";
+
+  }
+
+ },1000);
+
+}
+
+function pausePomodoro(){
+
+ clearInterval(pomodoroInterval);
+
+ pomodoroRunning=false;
+
+}
+
+function updatePomodoroDisplay(){
+
+ const minutes=Math.floor(pomodoroSeconds/60);
+ const seconds=pomodoroSeconds%60;
+
+ const display=document.getElementById("pomodoroDisplay");
+
+ if(display)display.textContent=minutes+":"+(seconds<10?"0":"")+seconds;
+
+}
+
+
+/* PALETTE GENERATOR */
+
+function generatePalette(){
+
+ const box=document.getElementById("paletteSwatches");
+
+ if(!box)return;
+
+ box.innerHTML="";
+
+ for(let i=0;i<5;i++){
+
+  const hex="#"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0");
+
+  const swatch=document.createElement("div");
+
+  swatch.className="stat";
+  swatch.style.background=hex;
+  swatch.style.cursor="pointer";
+  swatch.style.color=isColorLight(hex)?"#111827":"#ffffff";
+  swatch.innerHTML="<b>"+hex.toUpperCase()+"</b>";
+
+  swatch.onclick=()=>{
+
+   navigator.clipboard.writeText(hex);
+
+   notify(hex.toUpperCase()+" copied.");
+
+  };
+
+  box.appendChild(swatch);
+
+ }
+
+}
+
+function isColorLight(hex){
+
+ const r=parseInt(hex.slice(1,3),16);
+ const g=parseInt(hex.slice(3,5),16);
+ const b=parseInt(hex.slice(5,7),16);
+
+ const brightness=(r*299+g*587+b*114)/1000;
+
+ return brightness>150;
+
+}
+
+
+/* EMOJI PICKER */
+
+const EMOJI_LIST=[
+ {emoji:"😀",keywords:"smile happy face"},
+ {emoji:"😂",keywords:"laugh funny lol"},
+ {emoji:"😍",keywords:"love heart eyes"},
+ {emoji:"😎",keywords:"cool sunglasses"},
+ {emoji:"😢",keywords:"sad cry tear"},
+ {emoji:"😡",keywords:"angry mad"},
+ {emoji:"🥳",keywords:"party celebrate"},
+ {emoji:"🤔",keywords:"think hmm"},
+ {emoji:"😴",keywords:"sleep tired"},
+ {emoji:"❤️",keywords:"heart love"},
+ {emoji:"🔥",keywords:"fire hot lit"},
+ {emoji:"⭐",keywords:"star favorite"},
+ {emoji:"🎉",keywords:"party celebrate confetti"},
+ {emoji:"👍",keywords:"thumbs up good yes"},
+ {emoji:"👎",keywords:"thumbs down bad no"},
+ {emoji:"🙏",keywords:"please thanks pray"},
+ {emoji:"💯",keywords:"hundred perfect"},
+ {emoji:"🐱",keywords:"cat animal kitten"},
+ {emoji:"🐶",keywords:"dog animal puppy"},
+ {emoji:"🍕",keywords:"pizza food"},
+ {emoji:"🍔",keywords:"burger food"},
+ {emoji:"☕",keywords:"coffee drink"},
+ {emoji:"🚀",keywords:"rocket space launch"},
+ {emoji:"🌈",keywords:"rainbow colorful"},
+ {emoji:"☀️",keywords:"sun sunny weather"},
+ {emoji:"🌧️",keywords:"rain weather"},
+ {emoji:"🎮",keywords:"game controller"},
+ {emoji:"💻",keywords:"laptop computer"},
+ {emoji:"📱",keywords:"phone mobile"},
+ {emoji:"🎵",keywords:"music note"},
+ {emoji:"⚽",keywords:"soccer football sport"},
+ {emoji:"🏀",keywords:"basketball sport"},
+ {emoji:"✅",keywords:"check done yes"},
+ {emoji:"❌",keywords:"cross no wrong"},
+ {emoji:"⚡",keywords:"lightning bolt fast"},
+ {emoji:"💰",keywords:"money cash"},
+ {emoji:"🎂",keywords:"cake birthday"},
+ {emoji:"🎁",keywords:"gift present"},
+ {emoji:"📚",keywords:"books read study"},
+ {emoji:"✈️",keywords:"plane travel flight"},
+ {emoji:"🚗",keywords:"car drive vehicle"}
+];
+
+function renderEmojiResults(){
+
+ const searchEl=document.getElementById("emojiSearch");
+ const query=searchEl?searchEl.value.toLowerCase():"";
+ const el=document.getElementById("emojiResults");
+
+ if(!el)return;
+
+ const matches=query?
+  EMOJI_LIST.filter(e=>e.keywords.indexOf(query)!==-1):
+  EMOJI_LIST;
+
+ if(matches.length===0){
+
+  el.innerHTML="<p style='font-size:14px;opacity:.6'>No emoji found.</p>";
+  return;
+
+ }
+
+ el.innerHTML=matches.map(e=>
+  '<span style="cursor:pointer;margin-right:8px" onclick="copyEmoji(\''+e.emoji+'\')">'+e.emoji+'</span>'
+ ).join("");
+
+}
+
+function copyEmoji(emoji){
+
+ navigator.clipboard.writeText(emoji);
+
+ notify(emoji+" copied.");
+
+}
+
+
+/* TYPING SPEED TEST */
+
+const TYPING_SAMPLES=[
+ "The quick brown fox jumps over the lazy dog while the sun sets slowly behind the mountains.",
+ "NovaOS is a fully self-contained desktop experience that runs entirely inside your browser.",
+ "Practice makes perfect, and the more you type, the faster and more accurate you will become.",
+ "A journey of a thousand miles begins with a single step, taken with confidence and purpose.",
+ "Technology continues to evolve rapidly, changing the way people work, learn, and communicate daily."
+];
+
+let typingStartTime=null;
+let typingSampleText="";
+
+function newTypingTest(){
+
+ typingSampleText=TYPING_SAMPLES[Math.floor(Math.random()*TYPING_SAMPLES.length)];
+ typingStartTime=null;
+
+ const sampleEl=document.getElementById("typingSample");
+ const inputEl=document.getElementById("typingInput");
+ const wpmEl=document.getElementById("typingWPM");
+ const accEl=document.getElementById("typingAccuracy");
+
+ if(sampleEl)sampleEl.textContent=typingSampleText;
+ if(inputEl)inputEl.value="";
+ if(wpmEl)wpmEl.textContent="0";
+ if(accEl)accEl.textContent="100";
+
+}
+
+function handleTypingInput(){
+
+ const inputEl=document.getElementById("typingInput");
+
+ if(!inputEl)return;
+
+ if(!typingStartTime)typingStartTime=Date.now();
+
+ const typed=inputEl.value;
+
+ let correct=0;
+
+ for(let i=0;i<typed.length;i++){
+
+  if(typed[i]===typingSampleText[i])correct++;
+
+ }
+
+ const accuracy=typed.length?Math.round((correct/typed.length)*100):100;
+ const minutes=(Date.now()-typingStartTime)/60000;
+ const words=typed.trim().split(/\s+/).filter(Boolean).length;
+ const wpm=minutes>0?Math.round(words/minutes):0;
+
+ const wpmEl=document.getElementById("typingWPM");
+ const accEl=document.getElementById("typingAccuracy");
+
+ if(wpmEl)wpmEl.textContent=wpm;
+ if(accEl)accEl.textContent=accuracy;
+
+ if(typed===typingSampleText){
+
+  notify("🎉 Finished! "+wpm+" WPM at "+accuracy+"% accuracy.");
+
+ }
+
+}
+
+
+/* COMPOUND INTEREST CALCULATOR */
+
+function calculateCompoundInterest(){
+
+ const principal=Number(document.getElementById("compoundPrincipal").value)||0;
+ const rate=Number(document.getElementById("compoundRate").value)||0;
+ const years=Number(document.getElementById("compoundYears").value)||0;
+ const monthly=Number(document.getElementById("compoundContribution").value)||0;
+
+ const monthlyRate=rate/100/12;
+ const months=years*12;
+
+ let balance=principal;
+
+ for(let i=0;i<months;i++){
+
+  balance=balance*(1+monthlyRate)+monthly;
+
+ }
+
+ const totalContributed=principal+monthly*months;
+ const interestEarned=balance-totalContributed;
+
+ document.getElementById("compoundResult").innerHTML=
+  "Final balance: <b>"+balance.toFixed(2)+"</b><br>"+
+  "Total contributed: "+totalContributed.toFixed(2)+"<br>"+
+  "Interest earned: "+interestEarned.toFixed(2);
 
 }
 
@@ -6815,11 +7707,25 @@ function removeBook(i){
 
 /* SOUND */
 
+let sharedAudioContext=null;
+
+function getSharedAudioContext(){
+
+ if(!sharedAudioContext){
+
+  sharedAudioContext=new (window.AudioContext||window.webkitAudioContext)();
+
+ }
+
+ return sharedAudioContext;
+
+}
+
 function beep(freq){
 
  if(!soundsEnabled)return;
 
- const audio=new AudioContext();
+ const audio=getSharedAudioContext();
  const osc=audio.createOscillator();
  const gain=audio.createGain();
 
@@ -6840,6 +7746,36 @@ function beep(freq){
  osc.stop(audio.currentTime+.25);
 
 }
+
+let clickSoundsEnabled=false;
+
+function playClickSound(){
+
+ if(!soundsEnabled)return;
+
+ const audio=getSharedAudioContext();
+ const osc=audio.createOscillator();
+ const gain=audio.createGain();
+
+ osc.frequency.value=800;
+
+ osc.connect(gain);
+ gain.connect(audio.destination);
+
+ osc.start();
+
+ gain.gain.setValueAtTime(.06,audio.currentTime);
+ gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.06);
+
+ osc.stop(audio.currentTime+.06);
+
+}
+
+document.addEventListener("click",e=>{
+
+ if(clickSoundsEnabled&&e.target.closest("button"))playClickSound();
+
+});
 
 
 /* LAB */
@@ -7079,7 +8015,123 @@ function startTimer(){
 
 /* NOTIFICATIONS */
 
+let notificationHistory=JSON.parse(localStorage.getItem("novaNotificationHistory")||"[]");
+let notificationUnreadCount=0;
+let notificationDuration=3500;
+
+function recordNotification(text){
+
+ notificationHistory.unshift({
+  text,
+  time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
+ });
+
+ if(notificationHistory.length>30)notificationHistory.pop();
+
+ localStorage.setItem("novaNotificationHistory",JSON.stringify(notificationHistory));
+
+ notificationUnreadCount++;
+
+ updateNotificationBadge();
+
+}
+
+function updateNotificationBadge(){
+
+ const badge=document.getElementById("notifBadge");
+
+ if(!badge)return;
+
+ if(notificationUnreadCount>0){
+
+  badge.style.display="block";
+  badge.textContent=notificationUnreadCount>9?"9+":notificationUnreadCount;
+
+ }else{
+
+  badge.style.display="none";
+
+ }
+
+}
+
+function toggleNotificationPanel(e){
+
+ if(e)e.stopPropagation();
+
+ const panel=document.getElementById("notifPanel");
+
+ if(!panel)return;
+
+ if(panel.classList.contains("show")){
+
+  closeNotificationPanel();
+
+ }else{
+
+  panel.classList.add("show");
+
+  renderNotificationPanel();
+
+  notificationUnreadCount=0;
+
+  updateNotificationBadge();
+
+ }
+
+}
+
+function closeNotificationPanel(){
+
+ const panel=document.getElementById("notifPanel");
+
+ if(panel)panel.classList.remove("show");
+
+}
+
+function renderNotificationPanel(){
+
+ const panel=document.getElementById("notifPanel");
+
+ if(!panel)return;
+
+ if(notificationHistory.length===0){
+
+  panel.innerHTML="<p style='padding:15px;opacity:.6'>No notifications yet.</p>";
+  return;
+
+ }
+
+ panel.innerHTML=
+  "<div style='padding:12px;font-weight:bold;display:flex;justify-content:space-between;align-items:center'>"+
+  "Notifications"+
+  "<button class='appbtn' style='padding:5px 10px;font-size:12px' onclick='clearNotificationHistory()'>Clear All</button>"+
+  "</div>"+
+  notificationHistory.map(n=>
+   '<div class="store-card"><div class="store-info"><b>'+escapeHTML(n.text)+'</b><small>'+n.time+'</small></div></div>'
+  ).join("");
+
+}
+
+function clearNotificationHistory(){
+
+ notificationHistory=[];
+
+ localStorage.setItem("novaNotificationHistory","[]");
+
+ renderNotificationPanel();
+
+}
+
+document.addEventListener("click",e=>{
+
+ if(!e.target.closest("#notifPanel"))closeNotificationPanel();
+
+});
+
 function notify(text){
+
+ recordNotification(text);
 
  if(!notificationsEnabled||dndEnabled)return;
 
@@ -7100,7 +8152,7 @@ function notify(text){
 
  document.body.appendChild(n);
 
- setTimeout(()=>n.remove(),3500);
+ setTimeout(()=>n.remove(),notificationDuration);
 
 }
 
@@ -7143,15 +8195,26 @@ function makeFSId(){
 
 }
 
-function loadFS(){
+async function loadFS(){
 
- const saved=localStorage.getItem("novaFileSystem");
+ const saved=await idbGet("novaFileSystem");
 
  if(saved){
 
+  novaFS=saved;
+  return;
+
+ }
+
+ const oldLocalStorage=localStorage.getItem("novaFileSystem");
+
+ if(oldLocalStorage){
+
   try{
 
-   novaFS=JSON.parse(saved);
+   novaFS=JSON.parse(oldLocalStorage);
+   await saveFS().catch(()=>notify("Couldn't save changes."));
+   localStorage.removeItem("novaFileSystem");
    return;
 
   }catch(e){}
@@ -7169,13 +8232,13 @@ function loadFS(){
   ]
  };
 
- saveFS();
+ await saveFS().catch(()=>notify("Couldn't save changes."));
 
 }
 
 function saveFS(){
 
- localStorage.setItem("novaFileSystem",JSON.stringify(novaFS));
+ return idbSet("novaFileSystem",novaFS);
 
 }
 
@@ -7374,7 +8437,7 @@ function saveFSTextFile(id){
  item.content=textarea.value;
  item.size=new Blob([item.content]).size;
 
- saveFS();
+ saveFS().catch(()=>notify("Couldn't save changes."));
 
  notify("File saved.");
 
@@ -7389,9 +8452,15 @@ function setImageAsBackground(id){
 
  if(!item||!item.dataUrl)return;
 
- applyWallpaperImage(item.dataUrl);
+ saveAndApplyWallpaperImage(item.dataUrl).then(()=>{
 
- notify("Background updated from "+item.name+".");
+  notify("Background updated from "+item.name+".");
+
+ }).catch(()=>{
+
+  notify("Couldn't save that as your background — the image may be too large.");
+
+ });
 
 }
 
@@ -7417,7 +8486,7 @@ function createNewFolder(){
   children:[]
  });
 
- saveFS();
+ saveFS().catch(()=>notify("Couldn't save changes."));
  renderFiles();
 
 }
@@ -7447,7 +8516,7 @@ function createNewTextFile(){
 
  folder.children.push(newFile);
 
- saveFS();
+ saveFS().catch(()=>notify("Couldn't save changes."));
  renderFiles();
  previewFSFile(newFile);
 
@@ -7476,23 +8545,19 @@ function uploadFSFile(event){
 
   folder.children.push(newFile);
 
-  try{
+  saveFS().then(()=>{
 
-   saveFS();
+   renderFiles();
 
-  }catch(e){
+   notify(file.name+" uploaded.");
+
+  }).catch(()=>{
 
    folder.children.pop();
 
    notify("Couldn't save — that file may be too large for storage.");
 
-   return;
-
-  }
-
-  renderFiles();
-
-  notify(file.name+" uploaded.");
+  });
 
  };
 
@@ -7515,7 +8580,7 @@ function renameFSItem(id){
 
  item.name=newName.trim();
 
- saveFS();
+ saveFS().catch(()=>notify("Couldn't save changes."));
  renderFiles();
 
 }
@@ -7531,7 +8596,7 @@ function deleteFSItem(id){
 
  folder.children.splice(idx,1);
 
- saveFS();
+ saveFS().catch(()=>notify("Couldn't save changes."));
  renderFiles();
  hideFileViewer();
 
@@ -7942,6 +9007,45 @@ function changeBrightness(){
 
 }
 
+function changeWindowOpacity(){
+
+ const v=document.getElementById("windowOpacity").value;
+
+ document.documentElement.style.setProperty("--window-opacity",v/100);
+
+ saveSetting("windowOpacity",v);
+
+}
+
+function changeFontFamily(){
+
+ const v=document.getElementById("fontFamily").value;
+
+ const fonts={
+
+  default:"Arial,sans-serif",
+  serif:"Georgia,serif",
+  mono:"'Courier New',monospace",
+  rounded:"'Comic Sans MS','Comic Sans',cursive"
+
+ };
+
+ document.body.style.fontFamily=fonts[v]||fonts.default;
+
+ saveSetting("fontFamily",v);
+
+}
+
+function changeNotificationDuration(){
+
+ const v=document.getElementById("notifDuration").value;
+
+ notificationDuration=Number(v)*1000;
+
+ saveSetting("notifDuration",v);
+
+}
+
 function saveSetting(k,v){
 
  localStorage.setItem("nova_"+k,v);
@@ -7969,6 +9073,9 @@ function toggleSetting(type){
  if(type==="battery")el=document.getElementById("batterySwitch");
  if(type==="boot")el=document.getElementById("bootSwitch");
  if(type==="developer")el=document.getElementById("developerSwitch");
+ if(type==="roundedCorners")el=document.getElementById("roundedCornersSwitch");
+ if(type==="reduceTransparency")el=document.getElementById("reduceTransparencySwitch");
+ if(type==="clickSounds")el=document.getElementById("clickSoundsSwitch");
  if(type==="badges")el=document.getElementById("badgesSwitch");
  if(type==="autohideTaskbar")el=document.getElementById("autohideTaskbarSwitch");
  if(type==="snapGrid")el=document.getElementById("snapGridSwitch");
@@ -8045,8 +9152,47 @@ function toggleSetting(type){
 
  }
 
+ if(type==="lock"){
+
+  if(on){
+
+   const pin=prompt("Set a PIN to lock NovaOS (4+ characters):");
+
+   if(pin&&pin.trim().length>=4){
+
+    localStorage.setItem("novaLockPin",pin.trim());
+    notify("Lock Screen enabled.");
+
+   }else{
+
+    el.classList.remove("on");
+    saveSetting("lock",false);
+    notify("Lock Screen needs a PIN of at least 4 characters — not enabled.");
+
+   }
+
+  }
+
+ }
+
+ if(type==="guestMode"){
+
+  if(on)enterGuestMode();
+  else exitGuestMode();
+
+ }
+
  if(type==="dnd")
   dndEnabled=on;
+
+ if(type==="roundedCorners")
+  document.body.classList.toggle("sharp-corners",!on);
+
+ if(type==="reduceTransparency")
+  document.body.classList.toggle("reduce-transparency",on);
+
+ if(type==="clickSounds")
+  clickSoundsEnabled=on;
 
  if(type==="reduceMotion")
   document.body.classList.toggle("reduce-motion",on);
@@ -8113,8 +9259,7 @@ function changeWallpaper(userInitiated){
 
  if(userInitiated){
 
-  localStorage.removeItem("novaCustomWallpaperType");
-  localStorage.removeItem("novaCustomWallpaperValue");
+  idbSet("novaWallpaper",null).catch(()=>{});
   document.body.style.backgroundImage="";
 
  }
@@ -8215,7 +9360,11 @@ function makeDraggable(win){
  });
 
  document.addEventListener("mouseup",()=>{
+
+  if(dragging)saveWindowPosition(win);
+
   dragging=false;
+
  });
 
  win.addEventListener("mousedown",()=>{
@@ -8225,6 +9374,48 @@ function makeDraggable(win){
 }
 
 document.querySelectorAll(".window").forEach(makeDraggable);
+
+
+/* SAVE WINDOW POSITIONS */
+
+function windowPositionsEnabled(){
+
+ return localStorage.getItem("nova_windowSave")!=="false";
+
+}
+
+function saveWindowPosition(win){
+
+ if(!windowPositionsEnabled())return;
+
+ const all=JSON.parse(localStorage.getItem("novaWindowPositions")||"{}");
+
+ all[win.id]={
+  left:win.style.left,
+  top:win.style.top,
+  width:win.style.width,
+  height:win.style.height
+ };
+
+ localStorage.setItem("novaWindowPositions",JSON.stringify(all));
+
+}
+
+function restoreWindowPosition(win){
+
+ if(!windowPositionsEnabled())return;
+
+ const all=JSON.parse(localStorage.getItem("novaWindowPositions")||"{}");
+ const saved=all[win.id];
+
+ if(!saved)return;
+
+ if(saved.left)win.style.left=saved.left;
+ if(saved.top)win.style.top=saved.top;
+ if(saved.width)win.style.width=saved.width;
+ if(saved.height)win.style.height=saved.height;
+
+}
 
 
 /* RESIZE WINDOWS */
@@ -8280,7 +9471,11 @@ function makeResizable(win){
  });
 
  document.addEventListener("mouseup",()=>{
+
+  if(resizing)saveWindowPosition(win);
+
   resizing=false;
+
  });
 
 }
@@ -8432,6 +9627,15 @@ function loadSettings(){
  if(get("developer")==="true")
   toggleSetting("developer");
 
+ if(get("roundedCorners")==="false")
+  toggleSetting("roundedCorners");
+
+ if(get("reduceTransparency")==="true")
+  toggleSetting("reduceTransparency");
+
+ if(get("clickSounds")==="true")
+  toggleSetting("clickSounds");
+
  if(get("badges")==="false")
   toggleSetting("badges");
 
@@ -8508,6 +9712,33 @@ function loadSettings(){
   document.getElementById("brightness").value=brightness;
   screenBrightness=brightness;
   updateScreenFilter();
+
+ }
+
+ const windowOpacity=get("windowOpacity");
+
+ if(windowOpacity){
+
+  document.getElementById("windowOpacity").value=windowOpacity;
+  document.documentElement.style.setProperty("--window-opacity",windowOpacity/100);
+
+ }
+
+ const fontFamily=get("fontFamily");
+
+ if(fontFamily){
+
+  document.getElementById("fontFamily").value=fontFamily;
+  changeFontFamily();
+
+ }
+
+ const notifDuration=get("notifDuration");
+
+ if(notifDuration){
+
+  document.getElementById("notifDuration").value=notifDuration;
+  notificationDuration=Number(notifDuration)*1000;
 
  }
 
@@ -8592,10 +9823,12 @@ function escapeHTML(str){
 
 /* BOOT */
 
-window.addEventListener("load",()=>{
+window.addEventListener("load",async()=>{
 
  loadSettings();
- loadFS();
+
+ await openNovaDB();
+ await loadFS();
 
  renderStart();
  renderStore();
@@ -8603,7 +9836,7 @@ window.addEventListener("load",()=>{
  renderDesktopIcons();
  updateClock();
 
- applyStoredWallpaper();
+ await applyStoredWallpaper();
 
 });
 
@@ -8667,6 +9900,283 @@ function reenterFullscreenIfNeeded(){
 
 document.addEventListener("click",reenterFullscreenIfNeeded);
 document.addEventListener("keydown",reenterFullscreenIfNeeded);
+
+
+/* GUEST MODE */
+
+const GUEST_MODE_KEYS=[
+ "novaNotes","novaTodos","novaStickyNotesList","novaHabitsList",
+ "novaJournalEntries","novaFlashcardsList","novaBooks","novaPinned"
+];
+
+function enterGuestMode(){
+
+ const backup={};
+
+ GUEST_MODE_KEYS.forEach(k=>{
+
+  const v=localStorage.getItem(k);
+
+  if(v!==null)backup[k]=v;
+
+  localStorage.removeItem(k);
+
+ });
+
+ const installedBackup={};
+
+ Object.keys(localStorage)
+ .filter(k=>k.indexOf("novaInstalled_")===0)
+ .forEach(k=>{
+
+  installedBackup[k]=localStorage.getItem(k);
+
+  localStorage.removeItem(k);
+
+ });
+
+ backup.__installedApps=installedBackup;
+
+ localStorage.setItem("novaGuestBackup",JSON.stringify(backup));
+
+ notify("Guest Mode enabled — your data is safely stashed until you turn it off.");
+
+ renderStart();
+ renderStore();
+ renderTaskbar();
+ renderDesktopIcons();
+
+}
+
+function exitGuestMode(){
+
+ const backupRaw=localStorage.getItem("novaGuestBackup");
+
+ GUEST_MODE_KEYS.forEach(k=>localStorage.removeItem(k));
+
+ Object.keys(localStorage)
+ .filter(k=>k.indexOf("novaInstalled_")===0)
+ .forEach(k=>localStorage.removeItem(k));
+
+ if(backupRaw){
+
+  const backup=JSON.parse(backupRaw);
+
+  Object.keys(backup).forEach(k=>{
+
+   if(k==="__installedApps"){
+
+    Object.keys(backup[k]).forEach(ik=>{
+
+     localStorage.setItem(ik,backup[k][ik]);
+
+    });
+
+   }else{
+
+    localStorage.setItem(k,backup[k]);
+
+   }
+
+  });
+
+  localStorage.removeItem("novaGuestBackup");
+
+ }
+
+ notify("Guest Mode disabled — your data has been restored.");
+
+ renderStart();
+ renderStore();
+ renderTaskbar();
+ renderDesktopIcons();
+
+}
+
+
+/* LOCK SCREEN & INACTIVITY (Auto Lock / Sleep Timer) */
+
+let isLocked=false;
+let isDimmed=false;
+let lastActivityTime=Date.now();
+
+function lockScreenEnabled(){
+
+ return localStorage.getItem("nova_lock")==="true"&&!!localStorage.getItem("novaLockPin");
+
+}
+
+function lockNovaOS(){
+
+ if(!lockScreenEnabled()){
+
+  notify("Set up Lock Screen in Settings first (needs a PIN).");
+  return;
+
+ }
+
+ isLocked=true;
+
+ const lockEl=document.getElementById("lockScreen");
+
+ if(lockEl){
+
+  lockEl.style.display="flex";
+
+  const input=document.getElementById("lockPinInput");
+  const feedback=document.getElementById("lockFeedback");
+
+  if(input){
+
+   input.value="";
+   input.focus();
+
+  }
+
+  if(feedback)feedback.textContent="";
+
+ }
+
+}
+
+function attemptUnlock(){
+
+ const input=document.getElementById("lockPinInput");
+ const feedback=document.getElementById("lockFeedback");
+
+ if(!input)return;
+
+ const pin=localStorage.getItem("novaLockPin");
+
+ if(input.value===pin){
+
+  isLocked=false;
+
+  const lockEl=document.getElementById("lockScreen");
+
+  if(lockEl)lockEl.style.display="none";
+
+  lastActivityTime=Date.now();
+
+ }else{
+
+  if(feedback)feedback.textContent="Incorrect PIN — try again.";
+
+  input.value="";
+
+ }
+
+}
+
+function changeLockPin(){
+
+ if(localStorage.getItem("nova_lock")!=="true"){
+
+  notify("Turn on Lock Screen first.");
+  return;
+
+ }
+
+ const pin=prompt("Enter a new PIN (4+ characters):");
+
+ if(pin&&pin.trim().length>=4){
+
+  localStorage.setItem("novaLockPin",pin.trim());
+  notify("PIN updated.");
+
+ }
+
+}
+
+function dimScreen(){
+
+ if(isDimmed)return;
+
+ isDimmed=true;
+
+ let overlay=document.getElementById("sleepOverlay");
+
+ if(!overlay){
+
+  overlay=document.createElement("div");
+  overlay.id="sleepOverlay";
+  overlay.style.cssText=
+   "position:fixed;inset:0;background:#000;opacity:0;transition:opacity 1s ease;"+
+   "z-index:80000;display:flex;align-items:center;justify-content:center;"+
+   "color:#94a3b8;font-size:18px;cursor:pointer;text-align:center";
+  overlay.textContent="💤 Click or press any key to wake NovaOS";
+  overlay.onclick=wakeFromDim;
+
+  document.body.appendChild(overlay);
+
+ }
+
+ overlay.style.display="flex";
+
+ requestAnimationFrame(()=>{
+
+  overlay.style.opacity="1";
+
+ });
+
+}
+
+function wakeFromDim(){
+
+ if(!isDimmed)return;
+
+ isDimmed=false;
+
+ const overlay=document.getElementById("sleepOverlay");
+
+ if(overlay){
+
+  overlay.style.opacity="0";
+
+  setTimeout(()=>{
+
+   overlay.style.display="none";
+
+  },300);
+
+ }
+
+}
+
+function resetActivityTimer(){
+
+ lastActivityTime=Date.now();
+
+ if(isDimmed)wakeFromDim();
+
+}
+
+document.addEventListener("mousemove",resetActivityTimer);
+document.addEventListener("keydown",resetActivityTimer);
+document.addEventListener("click",resetActivityTimer);
+
+setInterval(()=>{
+
+ if(!novaOSRunning||isLocked)return;
+
+ const idleMinutes=(Date.now()-lastActivityTime)/60000;
+
+ const sleepSetting=localStorage.getItem("nova_sleepTimer");
+ const lockSetting=localStorage.getItem("nova_autoLock");
+
+ if(sleepSetting&&sleepSetting!=="never"&&idleMinutes>=Number(sleepSetting)&&!isDimmed){
+
+  dimScreen();
+
+ }
+
+ if(lockSetting&&lockSetting!=="never"&&idleMinutes>=Number(lockSetting)&&lockScreenEnabled()){
+
+  lockNovaOS();
+
+ }
+
+},10000);
 
 
 /* FIRST-TIME INSTALL FLOW */
