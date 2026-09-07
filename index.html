@@ -75,14 +75,31 @@ body.light .icon span{text-shadow:0 1px 3px #fff}
  z-index:10000;
 }
 
+body.taskbar-top #taskbar{
+ top:0;
+ bottom:auto;
+ border-top:0;
+ border-bottom:1px solid #ffffff22;
+}
+
+body.taskbar-top #start,
+body.taskbar-top .notif-panel{
+ bottom:auto;
+ top:62px;
+}
+
+body.taskbar-top #desktop{
+ padding-top:60px;
+}
+
 .tbbtn{
- height:42px;
- min-width:42px;
+ height:var(--tbbtn-size,42px);
+ min-width:var(--tbbtn-size,42px);
  border:0;
  border-radius:9px;
  background:#ffffff12;
  color:inherit;
- font-size:20px;
+ font-size:calc(var(--tbbtn-size,42px) * 0.48);
 }
 
 .tbbtn:hover{background:#ffffff25}
@@ -756,17 +773,17 @@ body.big-cursor input{
 
 <div id="desktop">
 
-<div class="icon" style="left:18px;top:18px" ondblclick="openApp('files')" oncontextmenu="showAppContextMenu(event,'files')"><div class="emoji">📁</div><span>Files</span></div>
-<div class="icon" style="left:18px;top:110px" ondblclick="openApp('notepad')" oncontextmenu="showAppContextMenu(event,'notepad')"><div class="emoji">📝</div><span>Notepad</span></div>
-<div class="icon" style="left:18px;top:202px" ondblclick="openApp('terminal')" oncontextmenu="showAppContextMenu(event,'terminal')"><div class="emoji">💻</div><span>Terminal</span></div>
-<div class="icon" style="left:18px;top:294px" ondblclick="openApp('calculator')" oncontextmenu="showAppContextMenu(event,'calculator')"><div class="emoji">🧮</div><span>Calculator</span></div>
-<div class="icon" style="left:18px;top:386px" ondblclick="openApp('browser')" oncontextmenu="showAppContextMenu(event,'browser')"><div class="emoji">🌐</div><span>Browser</span></div>
+<div class="icon" style="left:18px;top:18px" onclick="handleDesktopIconClick('files')" ondblclick="openApp('files')" oncontextmenu="showAppContextMenu(event,'files')"><div class="emoji">📁</div><span>Files</span></div>
+<div class="icon" style="left:18px;top:110px" onclick="handleDesktopIconClick('notepad')" ondblclick="openApp('notepad')" oncontextmenu="showAppContextMenu(event,'notepad')"><div class="emoji">📝</div><span>Notepad</span></div>
+<div class="icon" style="left:18px;top:202px" onclick="handleDesktopIconClick('terminal')" ondblclick="openApp('terminal')" oncontextmenu="showAppContextMenu(event,'terminal')"><div class="emoji">💻</div><span>Terminal</span></div>
+<div class="icon" style="left:18px;top:294px" onclick="handleDesktopIconClick('calculator')" ondblclick="openApp('calculator')" oncontextmenu="showAppContextMenu(event,'calculator')"><div class="emoji">🧮</div><span>Calculator</span></div>
+<div class="icon" style="left:18px;top:386px" onclick="handleDesktopIconClick('browser')" ondblclick="openApp('browser')" oncontextmenu="showAppContextMenu(event,'browser')"><div class="emoji">🌐</div><span>Browser</span></div>
 
-<div class="icon" style="left:110px;top:18px" ondblclick="openApp('paint')" oncontextmenu="showAppContextMenu(event,'paint')"><div class="emoji">🎨</div><span>Paint</span></div>
-<div class="icon" style="left:110px;top:110px" ondblclick="openApp('calendar')" oncontextmenu="showAppContextMenu(event,'calendar')"><div class="emoji">📅</div><span>Calendar</span></div>
-<div class="icon" style="left:110px;top:202px" ondblclick="openApp('music')" oncontextmenu="showAppContextMenu(event,'music')"><div class="emoji">🎵</div><span>Music</span></div>
-<div class="icon" style="left:110px;top:294px" ondblclick="openApp('settings')" oncontextmenu="showAppContextMenu(event,'settings')"><div class="emoji">⚙️</div><span>Settings</span></div>
-<div class="icon" style="left:110px;top:386px" ondblclick="openApp('store')" oncontextmenu="showAppContextMenu(event,'store')"><div class="emoji">🛒</div><span>App Store</span></div>
+<div class="icon" style="left:110px;top:18px" onclick="handleDesktopIconClick('paint')" ondblclick="openApp('paint')" oncontextmenu="showAppContextMenu(event,'paint')"><div class="emoji">🎨</div><span>Paint</span></div>
+<div class="icon" style="left:110px;top:110px" onclick="handleDesktopIconClick('calendar')" ondblclick="openApp('calendar')" oncontextmenu="showAppContextMenu(event,'calendar')"><div class="emoji">📅</div><span>Calendar</span></div>
+<div class="icon" style="left:110px;top:202px" onclick="handleDesktopIconClick('music')" ondblclick="openApp('music')" oncontextmenu="showAppContextMenu(event,'music')"><div class="emoji">🎵</div><span>Music</span></div>
+<div class="icon" style="left:110px;top:294px" onclick="handleDesktopIconClick('settings')" ondblclick="openApp('settings')" oncontextmenu="showAppContextMenu(event,'settings')"><div class="emoji">⚙️</div><span>Settings</span></div>
+<div class="icon" style="left:110px;top:386px" onclick="handleDesktopIconClick('store')" ondblclick="openApp('store')" oncontextmenu="showAppContextMenu(event,'store')"><div class="emoji">🛒</div><span>App Store</span></div>
 
 </div>
 
@@ -1129,7 +1146,7 @@ Type <b>help</b> for commands.<br><br>
 
 <div class="settings-row">
 <div>🔊 Master Volume</div>
-<input type="range" id="volume" min="0" max="100" value="70" onchange="saveSetting('volume',this.value)">
+<input type="range" id="volume" min="0" max="100" value="70" oninput="changeMasterVolume()">
 </div>
 
 <div class="settings-row">
@@ -1148,6 +1165,11 @@ Type <b>help</b> for commands.<br><br>
 <div class="settings-row">
 <div>📅 Show Seconds</div>
 <div id="secondsSwitch" class="switch" onclick="toggleSetting('seconds')"></div>
+</div>
+
+<div class="settings-row">
+<div>🕰️ Compact Clock<small>Hide the date, show time only</small></div>
+<div id="compactClockSwitch" class="switch" onclick="toggleSetting('compactClock')"></div>
 </div>
 
 
@@ -1262,6 +1284,28 @@ Type <b>help</b> for commands.<br><br>
 <div class="settings-row">
 <div>🗜️ Compact Mode<small>Reduce padding in windows and settings</small></div>
 <div id="compactSwitch" class="switch" onclick="toggleSetting('compact')"></div>
+</div>
+
+<div class="settings-row">
+<div>📍 Taskbar Position</div>
+<select id="taskbarPosition" onchange="changeTaskbarPosition()">
+<option value="bottom">Bottom</option>
+<option value="top">Top</option>
+</select>
+</div>
+
+<div class="settings-row">
+<div>📏 Taskbar Icon Size</div>
+<select id="taskbarIconSize" onchange="changeTaskbarIconSize()">
+<option value="small">Small</option>
+<option value="medium">Medium</option>
+<option value="large">Large</option>
+</select>
+</div>
+
+<div class="settings-row">
+<div>👆 Single-Click to Open<small>Open desktop icons with one click instead of two</small></div>
+<div id="singleClickOpenSwitch" class="switch" onclick="toggleSetting('singleClickOpen')"></div>
 </div>
 
 
@@ -1650,7 +1694,17 @@ const novaStoreApps=[
 {id:"novaPalette",icon:"🎨",name:"Palette Generator",description:"Generate random colour palettes with copyable hex codes.",type:"app",category:"Creativity"},
 {id:"novaEmoji",icon:"😀",name:"Emoji Picker",description:"Search and copy emoji by keyword.",type:"app",category:"Utilities"},
 {id:"novaTyping",icon:"⌨️",name:"Typing Speed Test",description:"Measure your typing speed in words per minute.",type:"app",category:"Utilities"},
-{id:"novaCompound",icon:"📈",name:"Compound Interest Calculator",description:"See how savings grow over time with compound interest.",type:"app",category:"Utilities"}
+{id:"novaCompound",icon:"📈",name:"Compound Interest Calculator",description:"See how savings grow over time with compound interest.",type:"app",category:"Utilities"},
+{id:"novaTTS",icon:"🗣️",name:"Nova Text-to-Speech",description:"Type text and have NovaOS read it aloud.",type:"app",category:"Utilities"},
+{id:"novaCountdown",icon:"⏳",name:"Nova Countdown",description:"Count down to any date or event.",type:"app",category:"Utilities"},
+{id:"novaKanban",icon:"🗃️",name:"Nova Kanban Board",description:"Track tasks across To Do, In Progress, and Done.",type:"app",category:"Productivity"},
+{id:"novaContacts",icon:"👤",name:"Nova Contacts",description:"Keep a simple list of contacts.",type:"app",category:"Productivity"},
+{id:"novaGroceries",icon:"🥕",name:"Nova Grocery List",description:"Check off items as you shop.",type:"app",category:"Productivity"},
+{id:"novaTimePlanner",icon:"🕓",name:"Meeting Time Planner",description:"Convert a meeting time between two cities.",type:"app",category:"Utilities"},
+{id:"novaPassphrase",icon:"🔑",name:"Passphrase Generator",description:"Generate a memorable multi-word passphrase.",type:"app",category:"Utilities"},
+{id:"novaMotivation",icon:"💬",name:"Daily Motivation",description:"Shuffle through short motivational lines.",type:"app",category:"Entertainment"},
+{id:"novaMeetingCost",icon:"💼",name:"Meeting Cost Calculator",description:"Estimate what a meeting costs in real time.",type:"app",category:"Utilities"},
+{id:"novaTeamPicker",icon:"👥",name:"Random Team Picker",description:"Split a list of names into random teams.",type:"app",category:"Entertainment"}
 
 ];
 
@@ -3021,6 +3075,133 @@ function buildStoreApp(app,c){
   <button class="appbtn" onclick="calculateCompoundInterest()">Calculate</button>
   <p id="compoundResult"></p>
   <p style="opacity:.6;font-size:12px">A general estimate only — not financial advice.</p>`;
+  return;
+ }
+
+ if(app.id==="novaTTS"){
+  c.innerHTML=`
+  <h2>🗣️ Nova Text-to-Speech</h2>
+  <textarea id="ttsInput" style="height:150px" placeholder="Type something for NovaOS to read aloud..."></textarea>
+  <br><br>
+  <select id="ttsVoice"></select>
+  <div>🎚️ Speed</div>
+  <input type="range" id="ttsRate" min="0.5" max="2" step="0.1" value="1">
+  <br><br>
+  <button class="appbtn" onclick="speakText()">🔊 Speak</button>
+  <button class="appbtn" onclick="stopSpeaking()">⏹ Stop</button>`;
+  populateTTSVoices();
+  return;
+ }
+
+ if(app.id==="novaCountdown"){
+  c.innerHTML=`
+  <h2>⏳ Nova Countdown</h2>
+  <input id="countdownName" placeholder="Event name (e.g. New Year)">
+  <input id="countdownDate" type="datetime-local">
+  <button class="appbtn" onclick="startCountdown()">Set Countdown</button>
+  <div class="big" id="countdownDisplay">Set an event above.</div>`;
+  loadSavedCountdown();
+  return;
+ }
+
+ if(app.id==="novaKanban"){
+  c.innerHTML=`
+  <h2>🗃️ Nova Kanban Board</h2>
+  <input id="kanbanCardText" placeholder="New task..." style="width:60%">
+  <button class="appbtn" onclick="addKanbanCard()">➕ Add to To Do</button>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px">
+  <div><h3>📋 To Do</h3><div id="kanbanTodo"></div></div>
+  <div><h3>🔧 In Progress</h3><div id="kanbanDoing"></div></div>
+  <div><h3>✅ Done</h3><div id="kanbanDone"></div></div>
+  </div>`;
+  renderKanban();
+  return;
+ }
+
+ if(app.id==="novaContacts"){
+  c.innerHTML=`
+  <h2>👤 Nova Contacts</h2>
+  <input id="contactName" placeholder="Name">
+  <input id="contactPhone" placeholder="Phone">
+  <input id="contactEmail" placeholder="Email">
+  <button class="appbtn" onclick="addContact()">➕ Add Contact</button>
+  <div id="contactList" style="margin-top:15px"></div>`;
+  renderContacts();
+  return;
+ }
+
+ if(app.id==="novaGroceries"){
+  c.innerHTML=`
+  <h2>🥕 Nova Grocery List</h2>
+  <input id="groceryItem" placeholder="Add item..." style="width:60%" onkeydown="if(event.key==='Enter')addGroceryItem()">
+  <button class="appbtn" onclick="addGroceryItem()">➕ Add</button>
+  <div id="groceryList" style="margin-top:15px"></div>
+  <button class="appbtn" onclick="clearBoughtGroceries()">🧹 Clear Checked Items</button>`;
+  renderGroceries();
+  return;
+ }
+
+ if(app.id==="novaTimePlanner"){
+  c.innerHTML=`
+  <h2>🕓 Meeting Time Planner</h2>
+  <select id="planCityA">
+  <option>Melbourne</option><option>London</option><option>New York</option>
+  <option>Tokyo</option><option>Los Angeles</option><option>Dubai</option>
+  </select>
+  <input type="time" id="planTimeA" value="09:00">
+  <p>converts to</p>
+  <select id="planCityB">
+  <option>London</option><option>Melbourne</option><option>New York</option>
+  <option>Tokyo</option><option>Los Angeles</option><option>Dubai</option>
+  </select>
+  <br><br>
+  <button class="appbtn" onclick="calculateMeetingTime()">Convert</button>
+  <p id="planResult"></p>`;
+  return;
+ }
+
+ if(app.id==="novaPassphrase"){
+  c.innerHTML=`
+  <h2>🔑 Passphrase Generator</h2>
+  <div>Number of words</div>
+  <input id="passphraseWordCount" type="number" value="4" min="2" max="8">
+  <label style="display:block;margin:10px 0"><input type="checkbox" id="passphraseIncludeNumber"> Include a number</label>
+  <button class="appbtn" onclick="generatePassphrase()">🔀 Generate</button>
+  <br><br>
+  <input id="passphraseResult" readonly style="width:100%">`;
+  return;
+ }
+
+ if(app.id==="novaMotivation"){
+  c.innerHTML=`
+  <h2>💬 Daily Motivation</h2>
+  <div class="note" id="motivationQuote" style="font-size:18px;text-align:center;min-height:60px;display:flex;align-items:center;justify-content:center"></div>
+  <br>
+  <button class="appbtn" onclick="shuffleMotivation()">🔀 Another One</button>`;
+  shuffleMotivation();
+  return;
+ }
+
+ if(app.id==="novaMeetingCost"){
+  c.innerHTML=`
+  <h2>💼 Meeting Cost Calculator</h2>
+  <input id="meetingAttendees" type="number" placeholder="Number of attendees" value="5">
+  <input id="meetingRate" type="number" placeholder="Average hourly rate" value="50">
+  <input id="meetingMinutes" type="number" placeholder="Meeting length (minutes)" value="30">
+  <button class="appbtn" onclick="calculateMeetingCost()">Calculate</button>
+  <p id="meetingCostResult"></p>
+  <p style="opacity:.6;font-size:12px">A rough estimate for awareness only.</p>`;
+  return;
+ }
+
+ if(app.id==="novaTeamPicker"){
+  c.innerHTML=`
+  <h2>👥 Random Team Picker</h2>
+  <textarea id="teamNamesInput" style="height:120px" placeholder="One name per line..."></textarea>
+  <div>Number of teams</div>
+  <input id="teamCount" type="number" value="2" min="2" max="10">
+  <button class="appbtn" onclick="generateTeams()">🔀 Make Teams</button>
+  <div id="teamResults" class="statgrid" style="margin-top:15px"></div>`;
   return;
  }
 
@@ -7347,6 +7528,562 @@ function calculateCompoundInterest(){
 }
 
 
+/* TEXT-TO-SPEECH */
+
+function populateTTSVoices(){
+
+ const select=document.getElementById("ttsVoice");
+
+ if(!select||!window.speechSynthesis)return;
+
+ const voices=speechSynthesis.getVoices();
+
+ select.innerHTML=voices.map((v,i)=>
+  '<option value="'+i+'">'+escapeHTML(v.name)+'</option>'
+ ).join("");
+
+}
+
+if(window.speechSynthesis){
+
+ speechSynthesis.onvoiceschanged=populateTTSVoices;
+
+}
+
+function speakText(){
+
+ if(!window.speechSynthesis){
+
+  notify("Speech isn't supported in this browser.");
+  return;
+
+ }
+
+ const text=document.getElementById("ttsInput").value.trim();
+
+ if(!text)return;
+
+ const utter=new SpeechSynthesisUtterance(text);
+ const voices=speechSynthesis.getVoices();
+ const voiceIdx=document.getElementById("ttsVoice").value;
+
+ if(voices[voiceIdx])utter.voice=voices[voiceIdx];
+
+ utter.rate=Number(document.getElementById("ttsRate").value)||1;
+
+ speechSynthesis.cancel();
+ speechSynthesis.speak(utter);
+
+}
+
+function stopSpeaking(){
+
+ if(window.speechSynthesis)speechSynthesis.cancel();
+
+}
+
+
+/* COUNTDOWN */
+
+let countdownInterval=null;
+let countdownTarget=null;
+let countdownName="";
+
+function startCountdown(){
+
+ const nameEl=document.getElementById("countdownName");
+ const dateEl=document.getElementById("countdownDate");
+
+ if(!dateEl.value)return;
+
+ countdownTarget=new Date(dateEl.value).getTime();
+ countdownName=nameEl.value.trim()||"Countdown";
+
+ localStorage.setItem("novaCountdown",JSON.stringify({name:countdownName,target:countdownTarget}));
+
+ clearInterval(countdownInterval);
+ updateCountdownDisplay();
+
+ countdownInterval=setInterval(updateCountdownDisplay,1000);
+
+}
+
+function updateCountdownDisplay(){
+
+ const display=document.getElementById("countdownDisplay");
+
+ if(!display||!countdownTarget)return;
+
+ const diff=countdownTarget-Date.now();
+
+ if(diff<=0){
+
+  display.textContent="🎉 "+countdownName+" is here!";
+
+  clearInterval(countdownInterval);
+  return;
+
+ }
+
+ const days=Math.floor(diff/86400000);
+ const hours=Math.floor((diff%86400000)/3600000);
+ const minutes=Math.floor((diff%3600000)/60000);
+ const seconds=Math.floor((diff%60000)/1000);
+
+ display.textContent=countdownName+": "+days+"d "+hours+"h "+minutes+"m "+seconds+"s";
+
+}
+
+function loadSavedCountdown(){
+
+ const saved=JSON.parse(localStorage.getItem("novaCountdown")||"null");
+
+ if(!saved)return;
+
+ countdownTarget=saved.target;
+ countdownName=saved.name;
+
+ const nameEl=document.getElementById("countdownName");
+
+ if(nameEl)nameEl.value=countdownName;
+
+ clearInterval(countdownInterval);
+ updateCountdownDisplay();
+
+ countdownInterval=setInterval(updateCountdownDisplay,1000);
+
+}
+
+
+/* KANBAN BOARD */
+
+function getKanbanCards(){
+
+ return JSON.parse(localStorage.getItem("novaKanban")||"[]");
+
+}
+
+function saveKanbanCards(list){
+
+ localStorage.setItem("novaKanban",JSON.stringify(list));
+
+}
+
+function addKanbanCard(){
+
+ const input=document.getElementById("kanbanCardText");
+
+ if(!input.value.trim())return;
+
+ const list=getKanbanCards();
+
+ list.push({id:makeFSId(),text:input.value.trim(),status:"todo"});
+
+ saveKanbanCards(list);
+
+ input.value="";
+
+ renderKanban();
+
+}
+
+function moveKanbanCard(id,direction){
+
+ const list=getKanbanCards();
+ const card=list.find(c=>c.id===id);
+
+ if(!card)return;
+
+ const order=["todo","doing","done"];
+ const idx=order.indexOf(card.status);
+ const newIdx=idx+direction;
+
+ if(newIdx>=0&&newIdx<order.length)card.status=order[newIdx];
+
+ saveKanbanCards(list);
+
+ renderKanban();
+
+}
+
+function removeKanbanCard(id){
+
+ saveKanbanCards(getKanbanCards().filter(c=>c.id!==id));
+
+ renderKanban();
+
+}
+
+function renderKanban(){
+
+ const list=getKanbanCards();
+
+ const cols={
+  todo:document.getElementById("kanbanTodo"),
+  doing:document.getElementById("kanbanDoing"),
+  done:document.getElementById("kanbanDone")
+ };
+
+ if(!cols.todo)return;
+
+ Object.keys(cols).forEach(key=>{
+
+  if(cols[key])cols[key].innerHTML="";
+
+ });
+
+ list.forEach(card=>{
+
+  const col=cols[card.status];
+
+  if(!col)return;
+
+  const div=document.createElement("div");
+
+  div.className="store-card";
+  div.style.flexDirection="column";
+  div.style.alignItems="flex-start";
+
+  div.innerHTML=
+   '<div style="flex:1">'+escapeHTML(card.text)+'</div>'+
+   '<div style="display:flex;gap:4px;margin-top:6px">'+
+   '<button onclick="moveKanbanCard(\''+card.id+'\',-1)">⬅</button>'+
+   '<button onclick="moveKanbanCard(\''+card.id+'\',1)">➡</button>'+
+   '<button onclick="removeKanbanCard(\''+card.id+'\')">🗑️</button>'+
+   '</div>';
+
+  col.appendChild(div);
+
+ });
+
+}
+
+
+/* CONTACTS */
+
+function getContacts(){
+
+ return JSON.parse(localStorage.getItem("novaContacts")||"[]");
+
+}
+
+function saveContacts(list){
+
+ localStorage.setItem("novaContacts",JSON.stringify(list));
+
+}
+
+function addContact(){
+
+ const nameEl=document.getElementById("contactName");
+ const phoneEl=document.getElementById("contactPhone");
+ const emailEl=document.getElementById("contactEmail");
+
+ if(!nameEl.value.trim())return;
+
+ const list=getContacts();
+
+ list.push({
+  id:makeFSId(),
+  name:nameEl.value.trim(),
+  phone:phoneEl.value.trim(),
+  email:emailEl.value.trim()
+ });
+
+ saveContacts(list);
+
+ nameEl.value="";
+ phoneEl.value="";
+ emailEl.value="";
+
+ renderContacts();
+
+}
+
+function removeContact(id){
+
+ saveContacts(getContacts().filter(c=>c.id!==id));
+
+ renderContacts();
+
+}
+
+function renderContacts(){
+
+ const list=getContacts();
+ const el=document.getElementById("contactList");
+
+ if(!el)return;
+
+ if(list.length===0){
+
+  el.innerHTML="<p style='opacity:.6'>No contacts yet.</p>";
+  return;
+
+ }
+
+ el.innerHTML=list.map(c=>
+  '<div class="store-card"><div class="store-info">'+
+  '<b>'+escapeHTML(c.name)+'</b>'+
+  '<small>'+escapeHTML(c.phone)+(c.phone&&c.email?" • ":"")+escapeHTML(c.email)+'</small>'+
+  '</div><button onclick="removeContact(\''+c.id+'\')">🗑️</button></div>'
+ ).join("");
+
+}
+
+
+/* GROCERY LIST */
+
+function getGroceries(){
+
+ return JSON.parse(localStorage.getItem("novaGroceries")||"[]");
+
+}
+
+function saveGroceries(list){
+
+ localStorage.setItem("novaGroceries",JSON.stringify(list));
+
+}
+
+function addGroceryItem(){
+
+ const input=document.getElementById("groceryItem");
+
+ if(!input.value.trim())return;
+
+ const list=getGroceries();
+
+ list.push({id:makeFSId(),text:input.value.trim(),bought:false});
+
+ saveGroceries(list);
+
+ input.value="";
+
+ renderGroceries();
+
+}
+
+function toggleGroceryBought(id){
+
+ const list=getGroceries();
+ const item=list.find(i=>i.id===id);
+
+ if(item)item.bought=!item.bought;
+
+ saveGroceries(list);
+
+ renderGroceries();
+
+}
+
+function clearBoughtGroceries(){
+
+ saveGroceries(getGroceries().filter(i=>!i.bought));
+
+ renderGroceries();
+
+}
+
+function renderGroceries(){
+
+ const list=getGroceries();
+ const el=document.getElementById("groceryList");
+
+ if(!el)return;
+
+ if(list.length===0){
+
+  el.innerHTML="<p style='opacity:.6'>Your list is empty.</p>";
+  return;
+
+ }
+
+ el.innerHTML=list.map(i=>
+  '<div class="store-card" style="cursor:pointer" onclick="toggleGroceryBought(\''+i.id+'\')">'+
+  '<div class="store-info"><b style="'+(i.bought?"text-decoration:line-through;opacity:.5":"")+'">'+
+  (i.bought?"✅ ":"⬜ ")+escapeHTML(i.text)+'</b></div></div>'
+ ).join("");
+
+}
+
+
+/* MEETING TIME PLANNER */
+
+const MEETING_ZONES={
+ "Melbourne":"Australia/Melbourne",
+ "London":"Europe/London",
+ "New York":"America/New_York",
+ "Tokyo":"Asia/Tokyo",
+ "Los Angeles":"America/Los_Angeles",
+ "Dubai":"Asia/Dubai"
+};
+
+function getUTCOffsetMinutes(timeZone){
+
+ const now=new Date();
+ const utcDate=new Date(now.toLocaleString("en-US",{timeZone:"UTC"}));
+ const tzDate=new Date(now.toLocaleString("en-US",{timeZone}));
+
+ return (tzDate-utcDate)/60000;
+
+}
+
+function calculateMeetingTime(){
+
+ const cityA=document.getElementById("planCityA").value;
+ const cityB=document.getElementById("planCityB").value;
+ const timeVal=document.getElementById("planTimeA").value;
+
+ if(!timeVal)return;
+
+ const parts=timeVal.split(":").map(Number);
+ const h=parts[0];
+ const m=parts[1];
+
+ const offsetA=getUTCOffsetMinutes(MEETING_ZONES[cityA]);
+ const offsetB=getUTCOffsetMinutes(MEETING_ZONES[cityB]);
+
+ const diffMinutes=offsetB-offsetA;
+
+ let totalMinutes=h*60+m+diffMinutes;
+ let dayShift=0;
+
+ while(totalMinutes<0){
+
+  totalMinutes+=1440;
+  dayShift--;
+
+ }
+
+ while(totalMinutes>=1440){
+
+  totalMinutes-=1440;
+  dayShift++;
+
+ }
+
+ const newH=Math.floor(totalMinutes/60);
+ const newM=totalMinutes%60;
+
+ const pad=n=>String(n).padStart(2,"0");
+
+ const dayLabel=
+  dayShift===0?"same day":
+  dayShift>0?(dayShift+" day(s) later"):
+  ((-dayShift)+" day(s) earlier");
+
+ document.getElementById("planResult").textContent=
+  timeVal+" in "+cityA+" = "+pad(newH)+":"+pad(newM)+" in "+cityB+" ("+dayLabel+")";
+
+}
+
+
+/* PASSPHRASE GENERATOR */
+
+const PASSPHRASE_WORDS=["correct","horse","battery","staple","forest","comet","violet","lantern","harbor","meadow","crimson","falcon","glacier","marble","orbit","quartz","ripple","summit","thistle","velvet","whisper","zephyr","canyon","dune","ember","frost","grove","haven","ivory","jungle"];
+
+function generatePassphrase(){
+
+ const count=Number(document.getElementById("passphraseWordCount").value)||4;
+ const words=[];
+
+ for(let i=0;i<count;i++){
+
+  words.push(PASSPHRASE_WORDS[Math.floor(Math.random()*PASSPHRASE_WORDS.length)]);
+
+ }
+
+ const includeNumber=document.getElementById("passphraseIncludeNumber").checked;
+
+ let phrase=words.join("-");
+
+ if(includeNumber)phrase+="-"+Math.floor(Math.random()*90+10);
+
+ document.getElementById("passphraseResult").value=phrase;
+
+}
+
+
+/* DAILY MOTIVATION */
+
+const MOTIVATION_QUOTES=[
+ "Small steps every day add up to big change.",
+ "You don't have to be great to start, but you have to start to be great.",
+ "Progress, not perfection.",
+ "Every expert was once a beginner.",
+ "Focus on what you can control.",
+ "Consistency beats intensity.",
+ "Difficult roads often lead to beautiful destinations.",
+ "Done is better than perfect.",
+ "One page a day is a book a year.",
+ "The best time to start was yesterday. The next best time is now."
+];
+
+function shuffleMotivation(){
+
+ const quote=MOTIVATION_QUOTES[Math.floor(Math.random()*MOTIVATION_QUOTES.length)];
+
+ const el=document.getElementById("motivationQuote");
+
+ if(el)el.textContent=quote;
+
+}
+
+
+/* MEETING COST CALCULATOR */
+
+function calculateMeetingCost(){
+
+ const attendees=Number(document.getElementById("meetingAttendees").value)||0;
+ const rate=Number(document.getElementById("meetingRate").value)||0;
+ const minutes=Number(document.getElementById("meetingMinutes").value)||0;
+
+ const cost=attendees*rate*(minutes/60);
+
+ document.getElementById("meetingCostResult").textContent=
+  "Estimated cost: "+cost.toFixed(2);
+
+}
+
+
+/* RANDOM TEAM PICKER */
+
+function generateTeams(){
+
+ const namesRaw=document.getElementById("teamNamesInput").value;
+ const names=namesRaw.split("\n").map(n=>n.trim()).filter(Boolean);
+ const teamCount=Number(document.getElementById("teamCount").value)||2;
+
+ if(names.length===0){
+
+  notify("Add some names first.");
+  return;
+
+ }
+
+ const shuffled=names.slice().sort(()=>Math.random()-0.5);
+ const teams=Array.from({length:teamCount},()=>[]);
+
+ shuffled.forEach((name,i)=>{
+
+  teams[i%teamCount].push(name);
+
+ });
+
+ const el=document.getElementById("teamResults");
+
+ if(el){
+
+  el.innerHTML=teams.map((team,i)=>
+   '<div class="stat"><b>Team '+(i+1)+'</b><br>'+team.map(escapeHTML).join("<br>")+'</div>'
+  ).join("");
+
+ }
+
+}
+
+
 /* PIXEL STUDIO */
 
 function createPixelGrid(){
@@ -7721,6 +8458,18 @@ function getSharedAudioContext(){
 
 }
 
+let masterVolume=0.7;
+
+function changeMasterVolume(){
+
+ const v=document.getElementById("volume").value;
+
+ masterVolume=v/100;
+
+ saveSetting("volume",v);
+
+}
+
 function beep(freq){
 
  if(!soundsEnabled)return;
@@ -7736,7 +8485,7 @@ function beep(freq){
 
  osc.start();
 
- gain.gain.setValueAtTime(.15,audio.currentTime);
+ gain.gain.setValueAtTime(.15*masterVolume,audio.currentTime);
 
  gain.gain.exponentialRampToValueAtTime(
   .001,
@@ -7764,7 +8513,7 @@ function playClickSound(){
 
  osc.start();
 
- gain.gain.setValueAtTime(.06,audio.currentTime);
+ gain.gain.setValueAtTime(.06*masterVolume,audio.currentTime);
  gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.06);
 
  osc.stop(audio.currentTime+.06);
@@ -8171,13 +8920,23 @@ function updateClock(){
 
  if(showSeconds)options.second="2-digit";
 
- document.getElementById("clock").innerHTML=
-  now.toLocaleTimeString([],options)+"<br>"+
-  now.toLocaleDateString([],{
-   weekday:"short",
-   day:"numeric",
-   month:"short"
-  });
+ const timeStr=now.toLocaleTimeString([],options);
+
+ if(localStorage.getItem("nova_compactClock")==="true"){
+
+  document.getElementById("clock").innerHTML=timeStr;
+
+ }else{
+
+  document.getElementById("clock").innerHTML=
+   timeStr+"<br>"+
+   now.toLocaleDateString([],{
+    weekday:"short",
+    day:"numeric",
+    month:"short"
+   });
+
+ }
 
 }
 
@@ -8997,6 +9756,44 @@ function updateScreenFilter(){
 
 }
 
+function changeTaskbarPosition(){
+
+ const v=document.getElementById("taskbarPosition").value;
+
+ document.body.classList.toggle("taskbar-top",v==="top");
+
+ saveSetting("taskbarPosition",v);
+
+}
+
+function changeTaskbarIconSize(){
+
+ const v=document.getElementById("taskbarIconSize").value;
+
+ const sizes={small:"34px",medium:"42px",large:"52px"};
+
+ document.documentElement.style.setProperty("--tbbtn-size",sizes[v]||"42px");
+
+ saveSetting("taskbarIconSize",v);
+
+}
+
+function singleClickOpenEnabled(){
+
+ return localStorage.getItem("nova_singleClickOpen")==="true";
+
+}
+
+function handleDesktopIconClick(id){
+
+ if(singleClickOpenEnabled()&&!iconDragMoved){
+
+  openApp(id);
+
+ }
+
+}
+
 function changeBrightness(){
 
  screenBrightness=document.getElementById("brightness").value;
@@ -9079,6 +9876,8 @@ function toggleSetting(type){
  if(type==="badges")el=document.getElementById("badgesSwitch");
  if(type==="autohideTaskbar")el=document.getElementById("autohideTaskbarSwitch");
  if(type==="snapGrid")el=document.getElementById("snapGridSwitch");
+ if(type==="singleClickOpen")el=document.getElementById("singleClickOpenSwitch");
+ if(type==="compactClock")el=document.getElementById("compactClockSwitch");
  if(type==="compact")el=document.getElementById("compactSwitch");
  if(type==="dnd")el=document.getElementById("dndSwitch");
  if(type==="history")el=document.getElementById("historySwitch");
@@ -9193,6 +9992,9 @@ function toggleSetting(type){
 
  if(type==="clickSounds")
   clickSoundsEnabled=on;
+
+ if(type==="compactClock")
+  updateClock();
 
  if(type==="reduceMotion")
   document.body.classList.toggle("reduce-motion",on);
@@ -9496,6 +10298,7 @@ function attachIconDrag(icon){
   if(e.button!==0)return;
 
   draggedIcon=icon;
+  iconDragMoved=false;
 
   const r=icon.getBoundingClientRect();
 
@@ -9508,9 +10311,28 @@ function attachIconDrag(icon){
 
 document.querySelectorAll(".icon").forEach(attachIconDrag);
 
+let iconDragMoved=false;
+
+function snapToGridEnabled(){
+
+ return localStorage.getItem("nova_snapGrid")==="true";
+
+}
+
+function snapCoordinate(value){
+
+ const grid=92;
+ const offset=18;
+
+ return Math.max(0,Math.round((value-offset)/grid)*grid+offset);
+
+}
+
 document.addEventListener("mousemove",e=>{
 
  if(!draggedIcon)return;
+
+ iconDragMoved=true;
 
  const desktop=document.getElementById("desktop");
  const r=desktop.getBoundingClientRect();
@@ -9554,6 +10376,7 @@ function renderDesktopIcons(){
   icon.innerHTML=
    '<div class="emoji">'+app.icon+'</div><span>'+escapeHTML(app.name)+'</span>';
 
+  icon.onclick=()=>handleDesktopIconClick(app.id);
   icon.ondblclick=()=>openApp(app.id);
   icon.oncontextmenu=e=>showAppContextMenu(e,app.id);
 
@@ -9566,7 +10389,16 @@ function renderDesktopIcons(){
 }
 
 document.addEventListener("mouseup",()=>{
+
+ if(draggedIcon&&iconDragMoved&&snapToGridEnabled()){
+
+  draggedIcon.style.left=snapCoordinate(parseInt(draggedIcon.style.left,10))+"px";
+  draggedIcon.style.top=snapCoordinate(parseInt(draggedIcon.style.top,10))+"px";
+
+ }
+
  draggedIcon=null;
+
 });
 
 
@@ -9644,6 +10476,12 @@ function loadSettings(){
 
  if(get("snapGrid")==="true")
   toggleSetting("snapGrid");
+
+ if(get("singleClickOpen")==="true")
+  toggleSetting("singleClickOpen");
+
+ if(get("compactClock")==="true")
+  toggleSetting("compactClock");
 
  if(get("compact")==="true")
   toggleSetting("compact");
@@ -9744,8 +10582,12 @@ function loadSettings(){
 
  const volume=get("volume");
 
- if(volume)
+ if(volume){
+
   document.getElementById("volume").value=volume;
+  masterVolume=volume/100;
+
+ }
 
  const notifyPosition=get("notifyPosition");
 
@@ -9761,6 +10603,24 @@ function loadSettings(){
 
  if(sleep)
   document.getElementById("sleepTimer").value=sleep;
+
+ const taskbarPosition=get("taskbarPosition");
+
+ if(taskbarPosition){
+
+  document.getElementById("taskbarPosition").value=taskbarPosition;
+  changeTaskbarPosition();
+
+ }
+
+ const taskbarIconSize=get("taskbarIconSize");
+
+ if(taskbarIconSize){
+
+  document.getElementById("taskbarIconSize").value=taskbarIconSize;
+  changeTaskbarIconSize();
+
+ }
 
  const textSize=get("textSize");
 
