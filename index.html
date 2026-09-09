@@ -1472,12 +1472,12 @@ Type <b>help</b> for commands.<br><br>
 <div id="taskbar">
 <button class="tbbtn" onclick="toggleStart()">⊞</button>
 <div id="taskbarApps" style="display:flex;gap:7px"></div>
+<button class="tbbtn" onclick="lockNovaOS()" title="Lock NovaOS">🔒</button>
+<div id="clock"></div>
 <button class="tbbtn" id="notifBellBtn" onclick="toggleNotificationPanel(event)" style="position:relative">
 🔔
 <span id="notifBadge" style="display:none;position:absolute;top:2px;right:2px;background:#ef4444;color:white;font-size:10px;border-radius:50%;min-width:16px;height:16px;line-height:16px;text-align:center"></span>
 </button>
-<button class="tbbtn" onclick="lockNovaOS()" title="Lock NovaOS">🔒</button>
-<div id="clock"></div>
 </div>
 
 <div id="notifPanel" class="notif-panel"></div>
@@ -1704,7 +1704,36 @@ const novaStoreApps=[
 {id:"novaPassphrase",icon:"🔑",name:"Passphrase Generator",description:"Generate a memorable multi-word passphrase.",type:"app",category:"Utilities"},
 {id:"novaMotivation",icon:"💬",name:"Daily Motivation",description:"Shuffle through short motivational lines.",type:"app",category:"Entertainment"},
 {id:"novaMeetingCost",icon:"💼",name:"Meeting Cost Calculator",description:"Estimate what a meeting costs in real time.",type:"app",category:"Utilities"},
-{id:"novaTeamPicker",icon:"👥",name:"Random Team Picker",description:"Split a list of names into random teams.",type:"app",category:"Entertainment"}
+{id:"novaTeamPicker",icon:"👥",name:"Random Team Picker",description:"Split a list of names into random teams.",type:"app",category:"Entertainment"},
+
+{id:"novaBlackjack",icon:"🃏",name:"Nova Blackjack",description:"Beat the dealer without going over 21.",type:"game",category:"Games"},
+{id:"novaWar",icon:"🎴",name:"Nova War",description:"Classic card game — highest card wins the round.",type:"game",category:"Games"},
+{id:"novaPong",icon:"🏓",name:"Nova Pong",description:"Classic paddle bounce against the computer.",type:"game",category:"Games"},
+{id:"novaWordle",icon:"🟩",name:"Nova Wordle",description:"Guess the 5-letter word in 6 tries.",type:"game",category:"Games"},
+{id:"novaNumberGuess",icon:"🔢",name:"Number Guesser",description:"Guess the number with higher/lower hints.",type:"game",category:"Games"},
+{id:"novaRPS",icon:"✊",name:"Rock Paper Scissors",description:"Best of odds against the computer.",type:"game",category:"Games"},
+{id:"novaAirHockey",icon:"🏒",name:"Nova Air Hockey",description:"Defend your goal against the computer.",type:"game",category:"Games"},
+{id:"novaMatch3",icon:"💎",name:"Nova Match-3",description:"Swap gems to match three or more.",type:"game",category:"Games"},
+
+{id:"novaCheckers",icon:"♟️",name:"Nova Checkers",description:"Classic 2-player checkers with jumps and kings.",type:"game",category:"Games"},
+{id:"novaYahtzee",icon:"🎲",name:"Nova Yahtzee",description:"Roll dice and fill in the scoreboard.",type:"game",category:"Games"},
+{id:"novaFrogger",icon:"🐸",name:"Nova Frogger",description:"Hop across the road without getting squashed.",type:"game",category:"Games"},
+{id:"novaAsteroids",icon:"☄️",name:"Nova Asteroids",description:"Rotate, thrust, and blast asteroids to bits.",type:"game",category:"Games"},
+{id:"novaBowling",icon:"🎳",name:"Nova Bowling",description:"Bowl a real 10-frame game with proper scoring.",type:"game",category:"Games"},
+{id:"novaDarts",icon:"🎯",name:"Nova Darts",description:"Throw darts at the board across 5 rounds.",type:"game",category:"Games"},
+{id:"novaPegSolitaire",icon:"🔴",name:"Nova Peg Solitaire",description:"Jump pegs to clear the board down to one.",type:"game",category:"Games"},
+{id:"novaBubblePop",icon:"🫧",name:"Nova Bubble Pop",description:"Pop connected groups of same-colour bubbles.",type:"game",category:"Games"},
+
+{id:"novaXchat",icon:"💬",name:"Xchat",description:"Open the Xchat web app.",type:"app",category:"Entertainment"},
+
+{id:"novaInvoice",icon:"📃",name:"Invoice Generator",description:"Build a simple line-item invoice with a total.",type:"app",category:"Productivity"},
+{id:"novaResume",icon:"📄",name:"Resume Builder",description:"Fill in a form and preview a simple resume.",type:"app",category:"Productivity"},
+{id:"novaMortgage",icon:"🏠",name:"Mortgage Calculator",description:"Estimate a monthly loan repayment.",type:"app",category:"Utilities"},
+{id:"novaBaseConverter",icon:"🔣",name:"Base Converter",description:"Convert numbers between binary, decimal, and hex.",type:"app",category:"Utilities"},
+{id:"novaMorse",icon:"📡",name:"Morse Code Translator",description:"Translate text to and from Morse code.",type:"app",category:"Utilities"},
+{id:"novaTextCase",icon:"🔠",name:"Text Case Converter",description:"Switch text between upper, lower, and title case.",type:"app",category:"Utilities"},
+{id:"novaLorem",icon:"📰",name:"Lorem Ipsum Generator",description:"Generate placeholder paragraphs for design mockups.",type:"app",category:"Utilities"},
+{id:"novaGPA",icon:"🎓",name:"GPA Calculator",description:"Calculate your GPA from grades and credit hours.",type:"app",category:"Utilities"}
 
 ];
 
@@ -3202,6 +3231,302 @@ function buildStoreApp(app,c){
   <input id="teamCount" type="number" value="2" min="2" max="10">
   <button class="appbtn" onclick="generateTeams()">🔀 Make Teams</button>
   <div id="teamResults" class="statgrid" style="margin-top:15px"></div>`;
+  return;
+ }
+
+ if(app.id==="novaBlackjack"){
+  c.innerHTML=`
+  <h2>🃏 Nova Blackjack</h2>
+  <p id="blackjackDealer">Dealer: </p>
+  <p id="blackjackPlayer">You: </p>
+  <p id="blackjackStatus"></p>
+  <button class="appbtn" onclick="startBlackjack()">🔄 New Hand</button>
+  <button class="appbtn" onclick="blackjackHit()">➕ Hit</button>
+  <button class="appbtn" onclick="blackjackStand()">✋ Stand</button>`;
+  startBlackjack();
+  return;
+ }
+
+ if(app.id==="novaWar"){
+  c.innerHTML=`
+  <h2>🎴 Nova War</h2>
+  <p>Click to flip a card each round. Highest card wins.</p>
+  <div class="statgrid">
+  <div class="stat">🧑 You<b id="warPlayerCard">?</b></div>
+  <div class="stat">🖥️ Computer<b id="warComputerCard">?</b></div>
+  </div>
+  <p id="warResult"></p>
+  <p>Score: You <b id="warPlayerScore">0</b> — Computer <b id="warComputerScore">0</b></p>
+  <button class="appbtn" onclick="playWarRound()">🎴 Flip Cards</button>
+  <button class="appbtn" onclick="resetWar()">🔄 Reset</button>`;
+  resetWar();
+  return;
+ }
+
+ if(app.id==="novaPong"){
+  c.innerHTML=`
+  <h2>🏓 Nova Pong</h2>
+  <p>Move your mouse over the canvas to control your paddle.</p>
+  <canvas id="pongCanvas" width="360" height="240" style="background:#020617;border-radius:8px;display:block;margin:0 auto" onmousemove="pongMove(event)"></canvas>
+  <p style="text-align:center">You: <b id="pongPlayerScore">0</b> — Computer: <b id="pongComputerScore">0</b></p>
+  <button class="appbtn" onclick="startPong()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="novaWordle"){
+  c.innerHTML=`
+  <h2>🟩 Nova Wordle</h2>
+  <div id="wordleGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-width:260px;margin:auto"></div>
+  <br>
+  <input id="wordleInput" maxlength="5" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')submitWordleGuess()">
+  <button class="appbtn" onclick="submitWordleGuess()">Guess</button>
+  <p id="wordleMessage"></p>
+  <button class="appbtn" onclick="startWordle()">🔄 New Word</button>`;
+  startWordle();
+  return;
+ }
+
+ if(app.id==="novaNumberGuess"){
+  c.innerHTML=`
+  <h2>🔢 Number Guesser</h2>
+  <p>I'm thinking of a number between 1 and 100.</p>
+  <input id="numberGuessInput" type="number" onkeydown="if(event.key==='Enter')submitNumberGuess()">
+  <button class="appbtn" onclick="submitNumberGuess()">Guess</button>
+  <p id="numberGuessFeedback"></p>
+  <p>Attempts: <b id="numberGuessAttempts">0</b></p>
+  <button class="appbtn" onclick="startNumberGuess()">🔄 New Game</button>`;
+  startNumberGuess();
+  return;
+ }
+
+ if(app.id==="novaRPS"){
+  c.innerHTML=`
+  <h2>✊ Rock Paper Scissors</h2>
+  <button class="appbtn" onclick="playRPS('rock')">✊ Rock</button>
+  <button class="appbtn" onclick="playRPS('paper')">✋ Paper</button>
+  <button class="appbtn" onclick="playRPS('scissors')">✌️ Scissors</button>
+  <p id="rpsResult"></p>
+  <p>You: <b id="rpsPlayerScore">0</b> — Computer: <b id="rpsComputerScore">0</b></p>`;
+  return;
+ }
+
+ if(app.id==="novaAirHockey"){
+  c.innerHTML=`
+  <h2>🏒 Nova Air Hockey</h2>
+  <p>Move your mouse to control your paddle at the bottom.</p>
+  <canvas id="airHockeyCanvas" width="300" height="400" style="background:#0f172a;border-radius:8px;display:block;margin:0 auto" onmousemove="airHockeyMove(event)"></canvas>
+  <p style="text-align:center">You: <b id="airHockeyPlayerScore">0</b> — Computer: <b id="airHockeyComputerScore">0</b></p>
+  <button class="appbtn" onclick="startAirHockey()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="novaMatch3"){
+  c.innerHTML=`
+  <h2>💎 Nova Match-3</h2>
+  <p>Click two adjacent gems to swap and match 3+.</p>
+  <div id="match3Grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-width:300px;margin:auto"></div>
+  <p style="text-align:center">Score: <b id="match3Score">0</b></p>
+  <button class="appbtn" onclick="startMatch3()">🔄 New Game</button>`;
+  startMatch3();
+  return;
+ }
+
+ if(app.id==="novaCheckers"){
+  c.innerHTML=`
+  <h2>♟️ Nova Checkers</h2>
+  <p id="checkersTurn">⚫ Black's turn</p>
+  <div id="checkersBoard" style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:320px;margin:auto"></div>
+  <button class="appbtn" onclick="startCheckers()">🔄 New Game</button>`;
+  startCheckers();
+  return;
+ }
+
+ if(app.id==="novaYahtzee"){
+  c.innerHTML=`
+  <h2>🎲 Nova Yahtzee</h2>
+  <div id="yahtzeeDice" style="display:flex;gap:8px;justify-content:center"></div>
+  <p style="text-align:center">Rolls left: <b id="yahtzeeRollsLeft">3</b></p>
+  <div style="text-align:center">
+  <button class="appbtn" onclick="rollYahtzeeDice()">🎲 Roll</button>
+  <button class="appbtn" onclick="startYahtzee()">🔄 New Game</button>
+  </div>
+  <h3 style="text-align:center">Total: <span id="yahtzeeTotal">0</span></h3>
+  <div id="yahtzeeScoreboard"></div>`;
+  startYahtzee();
+  return;
+ }
+
+ if(app.id==="novaFrogger"){
+  c.innerHTML=`
+  <h2>🐸 Nova Frogger</h2>
+  <p>Arrow keys to hop. Reach the top without getting hit.</p>
+  <canvas id="froggerCanvas" width="320" height="336" style="background:#166534;border-radius:8px;display:block;margin:0 auto"></canvas>
+  <p style="text-align:center">Crossings: <b id="froggerScore">0</b></p>
+  <button class="appbtn" onclick="startFrogger()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="novaAsteroids"){
+  c.innerHTML=`
+  <h2>☄️ Nova Asteroids</h2>
+  <p>← → rotate, ↑ thrust, Space fire.</p>
+  <canvas id="asteroidsCanvas" width="300" height="300" style="background:#020617;border-radius:8px;display:block;margin:0 auto"></canvas>
+  <p style="text-align:center">Score: <b id="asteroidsScore">0</b></p>
+  <button class="appbtn" onclick="startAsteroids()">▶ Start</button>`;
+  return;
+ }
+
+ if(app.id==="novaBowling"){
+  c.innerHTML=`
+  <h2>🎳 Nova Bowling</h2>
+  <p style="text-align:center">Frame: <b id="bowlingCurrentFrame">1</b>/10 &nbsp; Pins standing: <b id="bowlingPinsStanding">10</b></p>
+  <div style="text-align:center">
+  <button class="appbtn" onclick="bowlingRoll()">🎳 Roll</button>
+  <button class="appbtn" onclick="startBowling()">🔄 New Game</button>
+  </div>
+  <h3 style="text-align:center">Score: <span id="bowlingScore">0</span></h3>
+  <div id="bowlingFrames" class="statgrid" style="grid-template-columns:repeat(5,1fr)"></div>`;
+  startBowling();
+  return;
+ }
+
+ if(app.id==="novaDarts"){
+  c.innerHTML=`
+  <h2>🎯 Nova Darts</h2>
+  <p>Click the board to throw. 3 darts per round, 5 rounds.</p>
+  <canvas id="dartsCanvas" width="260" height="260" style="border-radius:50%;display:block;margin:0 auto;cursor:crosshair" onclick="throwDart(event)"></canvas>
+  <p style="text-align:center">Round: <b id="dartsRound">1</b>/5 &nbsp; Darts left: <b id="dartsThrowsLeft">3</b></p>
+  <h3 style="text-align:center">Score: <span id="dartsScore">0</span></h3>
+  <button class="appbtn" onclick="startDarts()">🔄 New Game</button>`;
+  startDarts();
+  return;
+ }
+
+ if(app.id==="novaPegSolitaire"){
+  c.innerHTML=`
+  <h2>🔴 Nova Peg Solitaire</h2>
+  <p>Jump a peg over another into an empty hole to remove it. Get down to 1 peg!</p>
+  <div id="pegBoard" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-width:280px;margin:auto"></div>
+  <p style="text-align:center">Pegs remaining: <b id="pegCount">32</b></p>
+  <button class="appbtn" onclick="startPegSolitaire()">🔄 New Game</button>`;
+  startPegSolitaire();
+  return;
+ }
+
+ if(app.id==="novaBubblePop"){
+  c.innerHTML=`
+  <h2>🫧 Nova Bubble Pop</h2>
+  <p>Click a group of 2+ same-coloured bubbles to pop them. Bigger groups score more!</p>
+  <div id="bubbleGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-width:280px;margin:auto"></div>
+  <p style="text-align:center">Score: <b id="bubbleScore">0</b></p>
+  <button class="appbtn" onclick="startBubblePop()">🔄 New Game</button>`;
+  startBubblePop();
+  return;
+ }
+
+ if(app.id==="novaXchat"){
+  c.innerHTML=`
+  <h2>💬 Xchat</h2>
+  <iframe src="https://angusa13.github.io/Xchat/" style="width:100%;height:480px;border:0;border-radius:8px;background:white" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" allow="clipboard-write" loading="eager"></iframe>`;
+  return;
+ }
+
+ if(app.id==="novaInvoice"){
+  c.innerHTML=`
+  <h2>📃 Invoice Generator</h2>
+  <input id="invoiceClient" placeholder="Client name">
+  <div id="invoiceItems" style="margin-top:10px"></div>
+  <button class="appbtn" onclick="addInvoiceItem()">➕ Add Line Item</button>
+  <h3>Total: <span id="invoiceTotal">0.00</span></h3>`;
+  invoiceItems=[];
+  addInvoiceItem();
+  return;
+ }
+
+ if(app.id==="novaResume"){
+  c.innerHTML=`
+  <h2>📄 Resume Builder</h2>
+  <input id="resumeName" placeholder="Full name">
+  <input id="resumeTitle" placeholder="Job title">
+  <textarea id="resumeSummary" placeholder="Short summary" style="height:60px"></textarea>
+  <textarea id="resumeExperience" placeholder="Experience (one per line)" style="height:100px"></textarea>
+  <button class="appbtn" onclick="renderResumePreview()">👁️ Preview</button>
+  <div id="resumePreview" style="margin-top:15px;background:white;color:#111827;padding:15px;border-radius:8px"></div>`;
+  return;
+ }
+
+ if(app.id==="novaMortgage"){
+  c.innerHTML=`
+  <h2>🏠 Mortgage Calculator</h2>
+  <input id="mortgageAmount" type="number" placeholder="Loan amount" value="300000">
+  <input id="mortgageRate" type="number" placeholder="Annual interest rate %" value="6">
+  <input id="mortgageYears" type="number" placeholder="Loan term (years)" value="30">
+  <button class="appbtn" onclick="calculateMortgage()">Calculate</button>
+  <p id="mortgageResult"></p>
+  <p style="opacity:.6;font-size:12px">A general estimate only — not financial advice.</p>`;
+  return;
+ }
+
+ if(app.id==="novaBaseConverter"){
+  c.innerHTML=`
+  <h2>🔣 Base Converter</h2>
+  <input id="baseInput" placeholder="Enter a number">
+  <select id="baseFrom">
+  <option value="10">Decimal</option>
+  <option value="2">Binary</option>
+  <option value="16">Hex</option>
+  <option value="8">Octal</option>
+  </select>
+  <button class="appbtn" onclick="convertBase()">Convert</button>
+  <p id="baseResult"></p>`;
+  return;
+ }
+
+ if(app.id==="novaMorse"){
+  c.innerHTML=`
+  <h2>📡 Morse Code Translator</h2>
+  <textarea id="morseInput" placeholder="Type text or Morse code..." style="height:100px" oninput="translateMorse()"></textarea>
+  <div>
+  <button class="appbtn" onclick="setMorseDirection('toMorse')">Text ➡ Morse</button>
+  <button class="appbtn" onclick="setMorseDirection('fromMorse')">Morse ➡ Text</button>
+  </div>
+  <textarea id="morseOutput" readonly style="height:100px"></textarea>`;
+  return;
+ }
+
+ if(app.id==="novaTextCase"){
+  c.innerHTML=`
+  <h2>🔠 Text Case Converter</h2>
+  <textarea id="caseInput" style="height:120px" placeholder="Type or paste text..."></textarea>
+  <div>
+  <button class="appbtn" onclick="convertCase('upper')">UPPERCASE</button>
+  <button class="appbtn" onclick="convertCase('lower')">lowercase</button>
+  <button class="appbtn" onclick="convertCase('title')">Title Case</button>
+  <button class="appbtn" onclick="convertCase('sentence')">Sentence case</button>
+  </div>
+  <textarea id="caseOutput" readonly style="height:120px"></textarea>`;
+  return;
+ }
+
+ if(app.id==="novaLorem"){
+  c.innerHTML=`
+  <h2>📰 Lorem Ipsum Generator</h2>
+  <div>Number of paragraphs</div>
+  <input id="loremCount" type="number" value="3" min="1" max="10">
+  <button class="appbtn" onclick="generateLorem()">Generate</button>
+  <textarea id="loremOutput" readonly style="height:250px"></textarea>`;
+  return;
+ }
+
+ if(app.id==="novaGPA"){
+  c.innerHTML=`
+  <h2>🎓 GPA Calculator</h2>
+  <div id="gpaCourses"></div>
+  <button class="appbtn" onclick="addGPACourse()">➕ Add Course</button>
+  <button class="appbtn" onclick="calculateGPA()">Calculate GPA</button>
+  <h3 id="gpaResult"></h3>`;
+  gpaCourses=[];
+  addGPACourse();
   return;
  }
 
@@ -8080,6 +8405,2536 @@ function generateTeams(){
   ).join("");
 
  }
+
+}
+
+
+/* BLACKJACK */
+
+let blackjackDeck=[];
+let blackjackPlayerHand=[];
+let blackjackDealerHand=[];
+let blackjackActive=false;
+
+function makeBlackjackDeck(){
+
+ const suits=["♠","♥","♦","♣"];
+ const ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+ const deck=[];
+
+ suits.forEach(s=>ranks.forEach(r=>deck.push(r+s)));
+
+ return deck.sort(()=>Math.random()-0.5);
+
+}
+
+function blackjackCardValue(card){
+
+ const rank=card.slice(0,-1);
+
+ if(rank==="A")return 11;
+ if(rank==="J"||rank==="Q"||rank==="K")return 10;
+
+ return Number(rank);
+
+}
+
+function blackjackHandValue(hand){
+
+ let total=hand.reduce((sum,c)=>sum+blackjackCardValue(c),0);
+ let aces=hand.filter(c=>c.charAt(0)==="A").length;
+
+ while(total>21&&aces>0){
+
+  total-=10;
+  aces--;
+
+ }
+
+ return total;
+
+}
+
+function startBlackjack(){
+
+ blackjackDeck=makeBlackjackDeck();
+ blackjackPlayerHand=[blackjackDeck.pop(),blackjackDeck.pop()];
+ blackjackDealerHand=[blackjackDeck.pop(),blackjackDeck.pop()];
+ blackjackActive=true;
+
+ const statusEl=document.getElementById("blackjackStatus");
+
+ if(statusEl)statusEl.textContent="";
+
+ renderBlackjack();
+
+}
+
+function blackjackHit(){
+
+ if(!blackjackActive)return;
+
+ blackjackPlayerHand.push(blackjackDeck.pop());
+
+ if(blackjackHandValue(blackjackPlayerHand)>21){
+
+  blackjackActive=false;
+  renderBlackjack();
+
+  document.getElementById("blackjackStatus").textContent="Bust! You lose.";
+  return;
+
+ }
+
+ renderBlackjack();
+
+}
+
+function blackjackStand(){
+
+ if(!blackjackActive)return;
+
+ while(blackjackHandValue(blackjackDealerHand)<17){
+
+  blackjackDealerHand.push(blackjackDeck.pop());
+
+ }
+
+ blackjackActive=false;
+
+ const playerVal=blackjackHandValue(blackjackPlayerHand);
+ const dealerVal=blackjackHandValue(blackjackDealerHand);
+
+ let result;
+
+ if(dealerVal>21||playerVal>dealerVal)result="🎉 You win!";
+ else if(playerVal===dealerVal)result="It's a tie.";
+ else result="Dealer wins.";
+
+ renderBlackjack();
+
+ document.getElementById("blackjackStatus").textContent=result;
+
+}
+
+function renderBlackjack(){
+
+ const dealerEl=document.getElementById("blackjackDealer");
+ const playerEl=document.getElementById("blackjackPlayer");
+
+ if(!dealerEl)return;
+
+ if(blackjackActive){
+
+  dealerEl.textContent="Dealer: "+blackjackDealerHand[0]+" ?";
+
+ }else{
+
+  dealerEl.textContent="Dealer: "+blackjackDealerHand.join(" ")+" = "+blackjackHandValue(blackjackDealerHand);
+
+ }
+
+ playerEl.textContent="You: "+blackjackPlayerHand.join(" ")+" = "+blackjackHandValue(blackjackPlayerHand);
+
+}
+
+
+/* WAR */
+
+const WAR_RANKS=["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+
+let warPlayerScore=0;
+let warComputerScore=0;
+
+function resetWar(){
+
+ warPlayerScore=0;
+ warComputerScore=0;
+
+ document.getElementById("warPlayerScore").textContent="0";
+ document.getElementById("warComputerScore").textContent="0";
+ document.getElementById("warResult").textContent="";
+ document.getElementById("warPlayerCard").textContent="?";
+ document.getElementById("warComputerCard").textContent="?";
+
+}
+
+function playWarRound(){
+
+ const playerCard=WAR_RANKS[Math.floor(Math.random()*WAR_RANKS.length)];
+ const computerCard=WAR_RANKS[Math.floor(Math.random()*WAR_RANKS.length)];
+
+ document.getElementById("warPlayerCard").textContent=playerCard;
+ document.getElementById("warComputerCard").textContent=computerCard;
+
+ const playerIdx=WAR_RANKS.indexOf(playerCard);
+ const computerIdx=WAR_RANKS.indexOf(computerCard);
+
+ let result;
+
+ if(playerIdx>computerIdx){
+
+  warPlayerScore++;
+  result="You win this round!";
+
+ }else if(computerIdx>playerIdx){
+
+  warComputerScore++;
+  result="Computer wins this round.";
+
+ }else{
+
+  result="Tie round!";
+
+ }
+
+ document.getElementById("warResult").textContent=result;
+ document.getElementById("warPlayerScore").textContent=warPlayerScore;
+ document.getElementById("warComputerScore").textContent=warComputerScore;
+
+}
+
+
+/* PONG */
+
+let pongCanvas,pongCtx;
+let pongActive=false;
+let pongBallX,pongBallY,pongBallVX,pongBallVY;
+let pongPlayerY=100,pongComputerY=100;
+let pongPlayerScore=0,pongComputerScore=0;
+
+function startPong(){
+
+ pongCanvas=document.getElementById("pongCanvas");
+
+ if(!pongCanvas)return;
+
+ pongCtx=pongCanvas.getContext("2d");
+
+ pongBallX=180;
+ pongBallY=120;
+ pongBallVX=3;
+ pongBallVY=2;
+ pongPlayerY=100;
+ pongComputerY=100;
+ pongPlayerScore=0;
+ pongComputerScore=0;
+ pongActive=true;
+
+ document.getElementById("pongPlayerScore").textContent="0";
+ document.getElementById("pongComputerScore").textContent="0";
+
+ pongLoop();
+
+}
+
+function pongMove(e){
+
+ if(!pongCanvas)return;
+
+ const rect=pongCanvas.getBoundingClientRect();
+
+ pongPlayerY=e.clientY-rect.top-30;
+ pongPlayerY=Math.max(0,Math.min(180,pongPlayerY));
+
+}
+
+function pongLoop(){
+
+ if(!pongActive)return;
+
+ pongBallX+=pongBallVX;
+ pongBallY+=pongBallVY;
+
+ if(pongBallY<0||pongBallY>236)pongBallVY*=-1;
+
+ if(pongComputerY+30<pongBallY)pongComputerY+=2.5;
+ else if(pongComputerY+30>pongBallY)pongComputerY-=2.5;
+
+ pongComputerY=Math.max(0,Math.min(180,pongComputerY));
+
+ if(pongBallX<20&&pongBallY>pongPlayerY&&pongBallY<pongPlayerY+60){
+
+  pongBallVX=Math.abs(pongBallVX);
+
+ }
+
+ if(pongBallX>340&&pongBallY>pongComputerY&&pongBallY<pongComputerY+60){
+
+  pongBallVX=-Math.abs(pongBallVX);
+
+ }
+
+ if(pongBallX<0){
+
+  pongComputerScore++;
+  document.getElementById("pongComputerScore").textContent=pongComputerScore;
+  pongBallX=180;
+  pongBallY=120;
+  pongBallVX=3;
+
+ }
+
+ if(pongBallX>360){
+
+  pongPlayerScore++;
+  document.getElementById("pongPlayerScore").textContent=pongPlayerScore;
+  pongBallX=180;
+  pongBallY=120;
+  pongBallVX=-3;
+
+ }
+
+ pongCtx.fillStyle="#020617";
+ pongCtx.fillRect(0,0,360,240);
+
+ pongCtx.fillStyle="#3b82f6";
+ pongCtx.fillRect(6,pongPlayerY,10,60);
+
+ pongCtx.fillStyle="#ef4444";
+ pongCtx.fillRect(344,pongComputerY,10,60);
+
+ pongCtx.fillStyle="#facc15";
+ pongCtx.beginPath();
+ pongCtx.arc(pongBallX,pongBallY,6,0,Math.PI*2);
+ pongCtx.fill();
+
+ requestAnimationFrame(pongLoop);
+
+}
+
+
+/* WORDLE */
+
+const WORDLE_WORDS=["APPLE","BRAVE","CRANE","DELTA","EAGLE","FROST","GRAPE","HOUSE","IVORY","JOLLY","KNEEL","LEMON","MANGO","NOBLE","OCEAN","PIANO","QUIET","RIVER","STONE","TIGER"];
+
+let wordleAnswer="";
+let wordleAttempts=[];
+let wordleActive=false;
+
+function startWordle(){
+
+ wordleAnswer=WORDLE_WORDS[Math.floor(Math.random()*WORDLE_WORDS.length)];
+ wordleAttempts=[];
+ wordleActive=true;
+
+ document.getElementById("wordleMessage").textContent="";
+ document.getElementById("wordleInput").value="";
+
+ renderWordleGrid();
+
+}
+
+function submitWordleGuess(){
+
+ if(!wordleActive)return;
+
+ const input=document.getElementById("wordleInput");
+ const guess=input.value.trim().toUpperCase();
+
+ if(guess.length!==5){
+
+  document.getElementById("wordleMessage").textContent="Enter a 5-letter word.";
+  return;
+
+ }
+
+ wordleAttempts.push(guess);
+ input.value="";
+
+ renderWordleGrid();
+
+ if(guess===wordleAnswer){
+
+  wordleActive=false;
+  document.getElementById("wordleMessage").textContent="🎉 You got it in "+wordleAttempts.length+" tries!";
+
+ }else if(wordleAttempts.length>=6){
+
+  wordleActive=false;
+  document.getElementById("wordleMessage").textContent="Game over — the word was "+wordleAnswer+".";
+
+ }
+
+}
+
+function renderWordleGrid(){
+
+ const grid=document.getElementById("wordleGrid");
+
+ if(!grid)return;
+
+ grid.innerHTML="";
+
+ for(let row=0;row<6;row++){
+
+  const guess=wordleAttempts[row];
+
+  for(let col=0;col<5;col++){
+
+   const cell=document.createElement("div");
+
+   cell.style.cssText="height:44px;display:flex;align-items:center;justify-content:center;font-weight:bold;border-radius:6px;background:#ffffff10;font-size:18px";
+
+   if(guess){
+
+    const letter=guess[col];
+
+    cell.textContent=letter;
+
+    if(wordleAnswer[col]===letter)cell.style.background="#22c55e";
+    else if(wordleAnswer.indexOf(letter)!==-1)cell.style.background="#eab308";
+    else cell.style.background="#334155";
+
+   }
+
+   grid.appendChild(cell);
+
+  }
+
+ }
+
+}
+
+
+/* NUMBER GUESSER */
+
+let numberGuessTarget=0;
+let numberGuessAttempts=0;
+let numberGuessActive=false;
+
+function startNumberGuess(){
+
+ numberGuessTarget=Math.floor(Math.random()*100)+1;
+ numberGuessAttempts=0;
+ numberGuessActive=true;
+
+ document.getElementById("numberGuessFeedback").textContent="";
+ document.getElementById("numberGuessAttempts").textContent="0";
+ document.getElementById("numberGuessInput").value="";
+
+}
+
+function submitNumberGuess(){
+
+ if(!numberGuessActive)return;
+
+ const guess=Number(document.getElementById("numberGuessInput").value);
+
+ if(!guess)return;
+
+ numberGuessAttempts++;
+
+ document.getElementById("numberGuessAttempts").textContent=numberGuessAttempts;
+
+ const feedback=document.getElementById("numberGuessFeedback");
+
+ if(guess===numberGuessTarget){
+
+  feedback.textContent="🎉 Correct! It was "+numberGuessTarget+".";
+  numberGuessActive=false;
+
+ }else if(guess<numberGuessTarget){
+
+  feedback.textContent="Higher!";
+
+ }else{
+
+  feedback.textContent="Lower!";
+
+ }
+
+}
+
+
+/* ROCK PAPER SCISSORS */
+
+let rpsPlayerScore=0;
+let rpsComputerScore=0;
+
+function playRPS(choice){
+
+ const options=["rock","paper","scissors"];
+ const computerChoice=options[Math.floor(Math.random()*3)];
+
+ let result;
+
+ if(choice===computerChoice){
+
+  result="It's a tie!";
+
+ }else if(
+  (choice==="rock"&&computerChoice==="scissors")||
+  (choice==="paper"&&computerChoice==="rock")||
+  (choice==="scissors"&&computerChoice==="paper")
+ ){
+
+  result="🎉 You win! ("+choice+" beats "+computerChoice+")";
+  rpsPlayerScore++;
+
+ }else{
+
+  result="Computer wins. ("+computerChoice+" beats "+choice+")";
+  rpsComputerScore++;
+
+ }
+
+ document.getElementById("rpsResult").textContent=result;
+ document.getElementById("rpsPlayerScore").textContent=rpsPlayerScore;
+ document.getElementById("rpsComputerScore").textContent=rpsComputerScore;
+
+}
+
+
+/* AIR HOCKEY */
+
+let airHockeyCanvas,airHockeyCtx;
+let airHockeyActive=false;
+let airHockeyPuckX,airHockeyPuckY,airHockeyPuckVX,airHockeyPuckVY;
+let airHockeyPlayerX=130,airHockeyComputerX=130;
+let airHockeyPlayerScore=0,airHockeyComputerScore=0;
+
+function startAirHockey(){
+
+ airHockeyCanvas=document.getElementById("airHockeyCanvas");
+
+ if(!airHockeyCanvas)return;
+
+ airHockeyCtx=airHockeyCanvas.getContext("2d");
+
+ airHockeyPuckX=150;
+ airHockeyPuckY=200;
+ airHockeyPuckVX=2;
+ airHockeyPuckVY=3;
+ airHockeyPlayerX=130;
+ airHockeyComputerX=130;
+ airHockeyPlayerScore=0;
+ airHockeyComputerScore=0;
+ airHockeyActive=true;
+
+ document.getElementById("airHockeyPlayerScore").textContent="0";
+ document.getElementById("airHockeyComputerScore").textContent="0";
+
+ airHockeyLoop();
+
+}
+
+function airHockeyMove(e){
+
+ if(!airHockeyCanvas)return;
+
+ const rect=airHockeyCanvas.getBoundingClientRect();
+
+ airHockeyPlayerX=e.clientX-rect.left-30;
+ airHockeyPlayerX=Math.max(0,Math.min(240,airHockeyPlayerX));
+
+}
+
+function airHockeyLoop(){
+
+ if(!airHockeyActive)return;
+
+ airHockeyPuckX+=airHockeyPuckVX;
+ airHockeyPuckY+=airHockeyPuckVY;
+
+ if(airHockeyPuckX<6||airHockeyPuckX>294)airHockeyPuckVX*=-1;
+
+ if(airHockeyComputerX+30<airHockeyPuckX)airHockeyComputerX+=2;
+ else if(airHockeyComputerX+30>airHockeyPuckX)airHockeyComputerX-=2;
+
+ airHockeyComputerX=Math.max(0,Math.min(240,airHockeyComputerX));
+
+ if(airHockeyPuckY>360&&airHockeyPuckX>airHockeyPlayerX&&airHockeyPuckX<airHockeyPlayerX+60){
+
+  airHockeyPuckVY=-Math.abs(airHockeyPuckVY);
+
+ }
+
+ if(airHockeyPuckY<40&&airHockeyPuckX>airHockeyComputerX&&airHockeyPuckX<airHockeyComputerX+60){
+
+  airHockeyPuckVY=Math.abs(airHockeyPuckVY);
+
+ }
+
+ if(airHockeyPuckY<0){
+
+  airHockeyPlayerScore++;
+  document.getElementById("airHockeyPlayerScore").textContent=airHockeyPlayerScore;
+  airHockeyPuckX=150;
+  airHockeyPuckY=200;
+  airHockeyPuckVY=3;
+
+ }
+
+ if(airHockeyPuckY>400){
+
+  airHockeyComputerScore++;
+  document.getElementById("airHockeyComputerScore").textContent=airHockeyComputerScore;
+  airHockeyPuckX=150;
+  airHockeyPuckY=200;
+  airHockeyPuckVY=-3;
+
+ }
+
+ airHockeyCtx.fillStyle="#0f172a";
+ airHockeyCtx.fillRect(0,0,300,400);
+
+ airHockeyCtx.fillStyle="#3b82f6";
+ airHockeyCtx.fillRect(airHockeyPlayerX,370,60,10);
+
+ airHockeyCtx.fillStyle="#ef4444";
+ airHockeyCtx.fillRect(airHockeyComputerX,20,60,10);
+
+ airHockeyCtx.fillStyle="#facc15";
+ airHockeyCtx.beginPath();
+ airHockeyCtx.arc(airHockeyPuckX,airHockeyPuckY,8,0,Math.PI*2);
+ airHockeyCtx.fill();
+
+ requestAnimationFrame(airHockeyLoop);
+
+}
+
+
+/* MATCH-3 */
+
+const MATCH3_GEMS=["💎","🔵","🟢","🟡","🔴","🟣"];
+const MATCH3_SIZE=6;
+
+let match3Board=[];
+let match3Selected=null;
+let match3Score=0;
+
+function startMatch3(){
+
+ match3Board=[];
+
+ for(let r=0;r<MATCH3_SIZE;r++){
+
+  const row=[];
+
+  for(let c=0;c<MATCH3_SIZE;c++){
+
+   row.push(MATCH3_GEMS[Math.floor(Math.random()*MATCH3_GEMS.length)]);
+
+  }
+
+  match3Board.push(row);
+
+ }
+
+ match3Score=0;
+ match3Selected=null;
+
+ document.getElementById("match3Score").textContent="0";
+
+ renderMatch3();
+
+}
+
+function match3Click(r,c){
+
+ if(!match3Selected){
+
+  match3Selected={r,c};
+  renderMatch3();
+  return;
+
+ }
+
+ const dr=Math.abs(match3Selected.r-r);
+ const dc=Math.abs(match3Selected.c-c);
+
+ if((dr===1&&dc===0)||(dr===0&&dc===1)){
+
+  swapMatch3(match3Selected.r,match3Selected.c,r,c);
+
+  const matches=findMatch3Matches();
+
+  if(matches.length>0){
+
+   clearMatch3Matches(matches);
+
+  }else{
+
+   swapMatch3(match3Selected.r,match3Selected.c,r,c);
+
+  }
+
+ }
+
+ match3Selected=null;
+
+ renderMatch3();
+
+}
+
+function swapMatch3(r1,c1,r2,c2){
+
+ const temp=match3Board[r1][c1];
+
+ match3Board[r1][c1]=match3Board[r2][c2];
+ match3Board[r2][c2]=temp;
+
+}
+
+function findMatch3Matches(){
+
+ const matches=[];
+
+ for(let r=0;r<MATCH3_SIZE;r++){
+
+  for(let c=0;c<MATCH3_SIZE-2;c++){
+
+   if(match3Board[r][c]&&match3Board[r][c]===match3Board[r][c+1]&&match3Board[r][c]===match3Board[r][c+2]){
+
+    matches.push([r,c],[r,c+1],[r,c+2]);
+
+   }
+
+  }
+
+ }
+
+ for(let c=0;c<MATCH3_SIZE;c++){
+
+  for(let r=0;r<MATCH3_SIZE-2;r++){
+
+   if(match3Board[r][c]&&match3Board[r][c]===match3Board[r+1][c]&&match3Board[r][c]===match3Board[r+2][c]){
+
+    matches.push([r,c],[r+1,c],[r+2,c]);
+
+   }
+
+  }
+
+ }
+
+ return matches;
+
+}
+
+function clearMatch3Matches(matches){
+
+ matches.forEach(pos=>{
+
+  match3Board[pos[0]][pos[1]]=null;
+
+ });
+
+ match3Score+=matches.length*10;
+
+ document.getElementById("match3Score").textContent=match3Score;
+
+ for(let c=0;c<MATCH3_SIZE;c++){
+
+  const col=[];
+
+  for(let r=0;r<MATCH3_SIZE;r++){
+
+   if(match3Board[r][c])col.push(match3Board[r][c]);
+
+  }
+
+  while(col.length<MATCH3_SIZE){
+
+   col.unshift(MATCH3_GEMS[Math.floor(Math.random()*MATCH3_GEMS.length)]);
+
+  }
+
+  for(let r=0;r<MATCH3_SIZE;r++){
+
+   match3Board[r][c]=col[r];
+
+  }
+
+ }
+
+ renderMatch3();
+
+ const newMatches=findMatch3Matches();
+
+ if(newMatches.length>0){
+
+  setTimeout(()=>clearMatch3Matches(newMatches),300);
+
+ }
+
+}
+
+function renderMatch3(){
+
+ const grid=document.getElementById("match3Grid");
+
+ if(!grid)return;
+
+ grid.innerHTML="";
+
+ for(let r=0;r<MATCH3_SIZE;r++){
+
+  for(let c=0;c<MATCH3_SIZE;c++){
+
+   const cell=document.createElement("button");
+
+   cell.className="gamecard";
+   cell.style.height="42px";
+   cell.style.fontSize="22px";
+
+   if(match3Selected&&match3Selected.r===r&&match3Selected.c===c){
+
+    cell.style.border="2px solid white";
+
+   }
+
+   cell.textContent=match3Board[r][c]||"";
+   cell.onclick=()=>match3Click(r,c);
+
+   grid.appendChild(cell);
+
+  }
+
+ }
+
+}
+
+
+/* CHECKERS */
+
+let checkersBoard=[];
+let checkersTurn="b";
+let checkersSelected=null;
+let checkersActive=false;
+
+function startCheckers(){
+
+ checkersBoard=Array.from({length:8},()=>Array(8).fill(null));
+
+ for(let r=0;r<3;r++){
+
+  for(let c=0;c<8;c++){
+
+   if((r+c)%2===1)checkersBoard[r][c]="b";
+
+  }
+
+ }
+
+ for(let r=5;r<8;r++){
+
+  for(let c=0;c<8;c++){
+
+   if((r+c)%2===1)checkersBoard[r][c]="w";
+
+  }
+
+ }
+
+ checkersTurn="b";
+ checkersSelected=null;
+ checkersActive=true;
+
+ renderCheckers();
+
+}
+
+function isCheckersKing(piece){
+
+ return piece==="bk"||piece==="wk";
+
+}
+
+function checkersOwner(piece){
+
+ if(!piece)return null;
+
+ return piece.charAt(0);
+
+}
+
+function checkersValidMoves(r,c){
+
+ const piece=checkersBoard[r][c];
+
+ if(!piece)return [];
+
+ const owner=checkersOwner(piece);
+ const king=isCheckersKing(piece);
+ const dirs=king?[[-1,-1],[-1,1],[1,-1],[1,1]]:(owner==="b"?[[1,-1],[1,1]]:[[-1,-1],[-1,1]]);
+ const moves=[];
+
+ dirs.forEach(dir=>{
+
+  const dr=dir[0];
+  const dc=dir[1];
+  const nr=r+dr;
+  const nc=c+dc;
+
+  if(nr>=0&&nr<8&&nc>=0&&nc<8&&!checkersBoard[nr][nc]){
+
+   moves.push({to:[nr,nc],capture:null});
+
+  }
+
+  const jr=r+dr*2;
+  const jc=c+dc*2;
+
+  if(jr>=0&&jr<8&&jc>=0&&jc<8&&!checkersBoard[jr][jc]){
+
+   const midPiece=checkersBoard[nr][nc];
+
+   if(midPiece&&checkersOwner(midPiece)!==owner){
+
+    moves.push({to:[jr,jc],capture:[nr,nc]});
+
+   }
+
+  }
+
+ });
+
+ return moves;
+
+}
+
+function checkersClick(r,c){
+
+ if(!checkersActive)return;
+
+ const piece=checkersBoard[r][c];
+
+ if(checkersSelected){
+
+  const moves=checkersValidMoves(checkersSelected[0],checkersSelected[1]);
+  const move=moves.find(m=>m.to[0]===r&&m.to[1]===c);
+
+  if(move){
+
+   checkersBoard[r][c]=checkersBoard[checkersSelected[0]][checkersSelected[1]];
+   checkersBoard[checkersSelected[0]][checkersSelected[1]]=null;
+
+   if(move.capture){
+
+    checkersBoard[move.capture[0]][move.capture[1]]=null;
+
+   }
+
+   if(r===0&&checkersBoard[r][c]==="w")checkersBoard[r][c]="wk";
+   if(r===7&&checkersBoard[r][c]==="b")checkersBoard[r][c]="bk";
+
+   checkersSelected=null;
+   checkersTurn=checkersTurn==="b"?"w":"b";
+
+   checkCheckersWinner();
+
+  }else if(piece&&checkersOwner(piece)===checkersTurn){
+
+   checkersSelected=[r,c];
+
+  }else{
+
+   checkersSelected=null;
+
+  }
+
+ }else if(piece&&checkersOwner(piece)===checkersTurn){
+
+  checkersSelected=[r,c];
+
+ }
+
+ renderCheckers();
+
+}
+
+function checkCheckersWinner(){
+
+ let blackCount=0;
+ let whiteCount=0;
+
+ checkersBoard.forEach(row=>row.forEach(cell=>{
+
+  if(cell&&cell.charAt(0)==="b")blackCount++;
+  if(cell&&cell.charAt(0)==="w")whiteCount++;
+
+ }));
+
+ if(blackCount===0){
+
+  checkersActive=false;
+  notify("⚪ White wins!");
+
+ }else if(whiteCount===0){
+
+  checkersActive=false;
+  notify("⚫ Black wins!");
+
+ }
+
+}
+
+function renderCheckers(){
+
+ const board=document.getElementById("checkersBoard");
+
+ if(!board)return;
+
+ board.innerHTML="";
+
+ for(let r=0;r<8;r++){
+
+  for(let c=0;c<8;c++){
+
+   const cell=document.createElement("button");
+
+   cell.className="gamecard";
+   cell.style.height="34px";
+   cell.style.background=(r+c)%2===1?"#334155":"#1e293b";
+
+   const piece=checkersBoard[r][c];
+
+   if(piece){
+
+    const owner=checkersOwner(piece);
+    const king=isCheckersKing(piece);
+
+    cell.textContent=owner==="b"?(king?"⚫👑":"⚫"):(king?"⚪👑":"⚪");
+
+   }
+
+   if(checkersSelected&&checkersSelected[0]===r&&checkersSelected[1]===c){
+
+    cell.style.border="2px solid #facc15";
+
+   }
+
+   cell.onclick=()=>checkersClick(r,c);
+
+   board.appendChild(cell);
+
+  }
+
+ }
+
+ const turnEl=document.getElementById("checkersTurn");
+
+ if(turnEl)turnEl.textContent=checkersTurn==="b"?"⚫ Black's turn":"⚪ White's turn";
+
+}
+
+
+/* YAHTZEE */
+
+let yahtzeeDice=[1,1,1,1,1];
+let yahtzeeHeld=[false,false,false,false,false];
+let yahtzeeRollsLeft=3;
+let yahtzeeScores={};
+
+const YAHTZEE_CATEGORIES=["ones","twos","threes","fours","fives","sixes","threeKind","fourKind","fullHouse","smallStraight","largeStraight","yahtzee","chance"];
+
+const YAHTZEE_LABELS={
+ ones:"Ones",twos:"Twos",threes:"Threes",fours:"Fours",fives:"Fives",sixes:"Sixes",
+ threeKind:"3 of a Kind",fourKind:"4 of a Kind",fullHouse:"Full House",
+ smallStraight:"Small Straight",largeStraight:"Large Straight",yahtzee:"Yahtzee",chance:"Chance"
+};
+
+function startYahtzee(){
+
+ yahtzeeDice=[1,1,1,1,1];
+ yahtzeeHeld=[false,false,false,false,false];
+ yahtzeeRollsLeft=3;
+ yahtzeeScores={};
+
+ renderYahtzee();
+
+}
+
+function rollYahtzeeDice(){
+
+ if(yahtzeeRollsLeft<=0)return;
+
+ for(let i=0;i<5;i++){
+
+  if(!yahtzeeHeld[i])yahtzeeDice[i]=Math.floor(Math.random()*6)+1;
+
+ }
+
+ yahtzeeRollsLeft--;
+
+ renderYahtzee();
+
+}
+
+function toggleYahtzeeHold(i){
+
+ if(yahtzeeRollsLeft===3)return;
+
+ yahtzeeHeld[i]=!yahtzeeHeld[i];
+
+ renderYahtzee();
+
+}
+
+function yahtzeeCounts(){
+
+ const counts=[0,0,0,0,0,0,0];
+
+ yahtzeeDice.forEach(d=>counts[d]++);
+
+ return counts;
+
+}
+
+function calcYahtzeeScore(category){
+
+ const counts=yahtzeeCounts();
+ const sum=yahtzeeDice.reduce((a,b)=>a+b,0);
+
+ if(category==="ones")return counts[1]*1;
+ if(category==="twos")return counts[2]*2;
+ if(category==="threes")return counts[3]*3;
+ if(category==="fours")return counts[4]*4;
+ if(category==="fives")return counts[5]*5;
+ if(category==="sixes")return counts[6]*6;
+ if(category==="threeKind")return counts.some(cnt=>cnt>=3)?sum:0;
+ if(category==="fourKind")return counts.some(cnt=>cnt>=4)?sum:0;
+ if(category==="fullHouse")return (counts.indexOf(3)!==-1&&counts.indexOf(2)!==-1)?25:0;
+
+ if(category==="smallStraight"){
+
+  const has=n=>counts[n]>0;
+
+  if((has(1)&&has(2)&&has(3)&&has(4))||(has(2)&&has(3)&&has(4)&&has(5))||(has(3)&&has(4)&&has(5)&&has(6)))return 30;
+
+  return 0;
+
+ }
+
+ if(category==="largeStraight"){
+
+  const has=n=>counts[n]>0;
+
+  if((has(1)&&has(2)&&has(3)&&has(4)&&has(5))||(has(2)&&has(3)&&has(4)&&has(5)&&has(6)))return 40;
+
+  return 0;
+
+ }
+
+ if(category==="yahtzee")return counts.some(cnt=>cnt===5)?50:0;
+ if(category==="chance")return sum;
+
+ return 0;
+
+}
+
+function selectYahtzeeCategory(category){
+
+ if(yahtzeeScores[category]!==undefined)return;
+
+ yahtzeeScores[category]=calcYahtzeeScore(category);
+ yahtzeeHeld=[false,false,false,false,false];
+ yahtzeeRollsLeft=3;
+
+ renderYahtzee();
+
+ if(Object.keys(yahtzeeScores).length===YAHTZEE_CATEGORIES.length){
+
+  const total=Object.values(yahtzeeScores).reduce((a,b)=>a+b,0);
+
+  notify("🎉 Game complete! Final score: "+total);
+
+ }
+
+}
+
+function renderYahtzee(){
+
+ const diceEl=document.getElementById("yahtzeeDice");
+
+ if(diceEl){
+
+  const faces=["","⚀","⚁","⚂","⚃","⚄","⚅"];
+
+  diceEl.innerHTML=yahtzeeDice.map((d,i)=>
+   '<button class="gamecard" style="font-size:32px;'+(yahtzeeHeld[i]?"border:2px solid #facc15":"")+'" onclick="toggleYahtzeeHold('+i+')">'+faces[d]+'</button>'
+  ).join("");
+
+ }
+
+ const rollsEl=document.getElementById("yahtzeeRollsLeft");
+
+ if(rollsEl)rollsEl.textContent=yahtzeeRollsLeft;
+
+ const scoreBoard=document.getElementById("yahtzeeScoreboard");
+
+ if(scoreBoard){
+
+  scoreBoard.innerHTML=YAHTZEE_CATEGORIES.map(cat=>{
+
+   const used=yahtzeeScores[cat]!==undefined;
+   const preview=used?yahtzeeScores[cat]:calcYahtzeeScore(cat);
+
+   return '<div class="store-card" style="cursor:'+(used?"default":"pointer")+'" '+(used?"":'onclick="selectYahtzeeCategory(\''+cat+'\')"')+'>'+
+    '<div class="store-info"><b>'+YAHTZEE_LABELS[cat]+'</b></div>'+
+    '<div>'+(used?yahtzeeScores[cat]:preview+" ?")+'</div></div>';
+
+  }).join("");
+
+ }
+
+ const totalEl=document.getElementById("yahtzeeTotal");
+
+ if(totalEl)totalEl.textContent=Object.values(yahtzeeScores).reduce((a,b)=>a+b,0);
+
+}
+
+
+/* FROGGER */
+
+let froggerCanvas,froggerCtx;
+let froggerActive=false;
+let froggerFrogX,froggerFrogY;
+let froggerCars=[];
+let froggerScore=0;
+
+const FROGGER_LANES=5;
+const FROGGER_LANE_HEIGHT=48;
+
+function startFrogger(){
+
+ froggerCanvas=document.getElementById("froggerCanvas");
+
+ if(!froggerCanvas)return;
+
+ froggerCtx=froggerCanvas.getContext("2d");
+
+ froggerFrogX=150;
+ froggerFrogY=300;
+ froggerScore=0;
+ froggerCars=[];
+
+ for(let lane=0;lane<FROGGER_LANES;lane++){
+
+  const dir=lane%2===0?1:-1;
+  const speed=(1.5+lane*0.4)*dir;
+  const cars=[];
+
+  for(let i=0;i<3;i++){
+
+   cars.push({x:i*140+Math.random()*40,speed});
+
+  }
+
+  froggerCars.push(cars);
+
+ }
+
+ froggerActive=true;
+
+ document.getElementById("froggerScore").textContent="0";
+
+ froggerLoop();
+
+}
+
+function froggerLoop(){
+
+ if(!froggerActive)return;
+
+ froggerCars.forEach(laneCars=>{
+
+  laneCars.forEach(car=>{
+
+   car.x+=car.speed;
+
+   if(car.speed>0&&car.x>320)car.x=-40;
+   if(car.speed<0&&car.x<-40)car.x=320;
+
+  });
+
+ });
+
+ if(froggerFrogY<=0){
+
+  froggerScore++;
+
+  document.getElementById("froggerScore").textContent=froggerScore;
+
+  notify("🎉 Made it across!");
+
+  froggerFrogX=150;
+  froggerFrogY=300;
+
+ }else if(froggerFrogY>=48&&froggerFrogY<288){
+
+  const laneIndex=Math.floor((froggerFrogY-48)/FROGGER_LANE_HEIGHT);
+  const laneCars=froggerCars[laneIndex];
+
+  const hit=laneCars&&laneCars.some(car=>Math.abs(car.x+20-froggerFrogX)<24);
+
+  if(hit){
+
+   notify("🚗 Squashed! Try again.");
+
+   froggerFrogX=150;
+   froggerFrogY=300;
+
+  }
+
+ }
+
+ froggerCtx.fillStyle="#166534";
+ froggerCtx.fillRect(0,0,320,FROGGER_LANE_HEIGHT);
+ froggerCtx.fillRect(0,288,320,48);
+
+ froggerCtx.fillStyle="#334155";
+ froggerCtx.fillRect(0,FROGGER_LANE_HEIGHT,320,240);
+
+ froggerCtx.fillStyle="#ef4444";
+
+ froggerCars.forEach((laneCars,i)=>{
+
+  laneCars.forEach(car=>{
+
+   froggerCtx.fillRect(car.x,48+i*FROGGER_LANE_HEIGHT+12,40,24);
+
+  });
+
+ });
+
+ froggerCtx.fillStyle="#22c55e";
+ froggerCtx.beginPath();
+ froggerCtx.arc(froggerFrogX,froggerFrogY+18,14,0,Math.PI*2);
+ froggerCtx.fill();
+
+ requestAnimationFrame(froggerLoop);
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(!froggerActive)return;
+
+ if(e.key==="ArrowUp"){
+
+  e.preventDefault();
+  froggerFrogY=Math.max(0,froggerFrogY-FROGGER_LANE_HEIGHT);
+
+ }
+
+ if(e.key==="ArrowDown"){
+
+  e.preventDefault();
+  froggerFrogY=Math.min(300,froggerFrogY+FROGGER_LANE_HEIGHT);
+
+ }
+
+ if(e.key==="ArrowLeft"){
+
+  e.preventDefault();
+  froggerFrogX=Math.max(14,froggerFrogX-20);
+
+ }
+
+ if(e.key==="ArrowRight"){
+
+  e.preventDefault();
+  froggerFrogX=Math.min(306,froggerFrogX+20);
+
+ }
+
+});
+
+
+/* ASTEROIDS */
+
+let asteroidsCanvas,asteroidsCtx;
+let asteroidsActive=false;
+let asteroidsShip={x:150,y:150,angle:0,vx:0,vy:0};
+let asteroidsBullets=[];
+let asteroidsRocks=[];
+let asteroidsScore=0;
+let asteroidsKeys={};
+
+function startAsteroids(){
+
+ asteroidsCanvas=document.getElementById("asteroidsCanvas");
+
+ if(!asteroidsCanvas)return;
+
+ asteroidsCtx=asteroidsCanvas.getContext("2d");
+
+ asteroidsShip={x:150,y:150,angle:0,vx:0,vy:0};
+ asteroidsBullets=[];
+ asteroidsRocks=[];
+
+ for(let i=0;i<5;i++){
+
+  asteroidsRocks.push({
+   x:Math.random()*300,
+   y:Math.random()*300,
+   vx:(Math.random()-0.5)*2,
+   vy:(Math.random()-0.5)*2,
+   size:20+Math.random()*15
+  });
+
+ }
+
+ asteroidsScore=0;
+ asteroidsActive=true;
+
+ document.getElementById("asteroidsScore").textContent="0";
+
+ asteroidsLoop();
+
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(!asteroidsActive)return;
+
+ asteroidsKeys[e.key]=true;
+
+ if(e.key===" "){
+
+  e.preventDefault();
+  asteroidsFire();
+
+ }
+
+});
+
+document.addEventListener("keyup",e=>{
+
+ asteroidsKeys[e.key]=false;
+
+});
+
+function asteroidsFire(){
+
+ asteroidsBullets.push({
+  x:asteroidsShip.x,
+  y:asteroidsShip.y,
+  vx:Math.cos(asteroidsShip.angle)*6,
+  vy:Math.sin(asteroidsShip.angle)*6,
+  life:60
+ });
+
+}
+
+function asteroidsLoop(){
+
+ if(!asteroidsActive)return;
+
+ if(asteroidsKeys.ArrowLeft)asteroidsShip.angle-=0.08;
+ if(asteroidsKeys.ArrowRight)asteroidsShip.angle+=0.08;
+
+ if(asteroidsKeys.ArrowUp){
+
+  asteroidsShip.vx+=Math.cos(asteroidsShip.angle)*0.15;
+  asteroidsShip.vy+=Math.sin(asteroidsShip.angle)*0.15;
+
+ }
+
+ asteroidsShip.vx*=0.99;
+ asteroidsShip.vy*=0.99;
+ asteroidsShip.x=(asteroidsShip.x+asteroidsShip.vx+300)%300;
+ asteroidsShip.y=(asteroidsShip.y+asteroidsShip.vy+300)%300;
+
+ asteroidsBullets.forEach(b=>{
+
+  b.x=(b.x+b.vx+300)%300;
+  b.y=(b.y+b.vy+300)%300;
+  b.life--;
+
+ });
+
+ asteroidsBullets=asteroidsBullets.filter(b=>b.life>0);
+
+ asteroidsRocks.forEach(r=>{
+
+  r.x=(r.x+r.vx+300)%300;
+  r.y=(r.y+r.vy+300)%300;
+
+ });
+
+ const newRocks=[];
+
+ asteroidsRocks=asteroidsRocks.filter(rock=>{
+
+  const hitBullet=asteroidsBullets.find(b=>Math.hypot(b.x-rock.x,b.y-rock.y)<rock.size);
+
+  if(hitBullet){
+
+   hitBullet.life=0;
+   asteroidsScore+=10;
+
+   document.getElementById("asteroidsScore").textContent=asteroidsScore;
+
+   if(rock.size>12){
+
+    for(let i=0;i<2;i++){
+
+     newRocks.push({
+      x:rock.x,y:rock.y,
+      vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,
+      size:rock.size/2
+     });
+
+    }
+
+   }
+
+   return false;
+
+  }
+
+  return true;
+
+ });
+
+ asteroidsRocks=asteroidsRocks.concat(newRocks);
+ asteroidsBullets=asteroidsBullets.filter(b=>b.life>0);
+
+ const shipHit=asteroidsRocks.some(rock=>Math.hypot(asteroidsShip.x-rock.x,asteroidsShip.y-rock.y)<rock.size+8);
+
+ asteroidsCtx.fillStyle="#020617";
+ asteroidsCtx.fillRect(0,0,300,300);
+
+ asteroidsCtx.strokeStyle="#94a3b8";
+
+ asteroidsRocks.forEach(rock=>{
+
+  asteroidsCtx.beginPath();
+  asteroidsCtx.arc(rock.x,rock.y,rock.size,0,Math.PI*2);
+  asteroidsCtx.stroke();
+
+ });
+
+ asteroidsCtx.fillStyle="#facc15";
+
+ asteroidsBullets.forEach(b=>{
+
+  asteroidsCtx.beginPath();
+  asteroidsCtx.arc(b.x,b.y,2,0,Math.PI*2);
+  asteroidsCtx.fill();
+
+ });
+
+ asteroidsCtx.save();
+ asteroidsCtx.translate(asteroidsShip.x,asteroidsShip.y);
+ asteroidsCtx.rotate(asteroidsShip.angle);
+ asteroidsCtx.strokeStyle="#3b82f6";
+ asteroidsCtx.beginPath();
+ asteroidsCtx.moveTo(10,0);
+ asteroidsCtx.lineTo(-8,-6);
+ asteroidsCtx.lineTo(-8,6);
+ asteroidsCtx.closePath();
+ asteroidsCtx.stroke();
+ asteroidsCtx.restore();
+
+ if(shipHit||asteroidsRocks.length===0){
+
+  asteroidsActive=false;
+
+  notify(asteroidsRocks.length===0?
+   "🎉 All asteroids destroyed! Score: "+asteroidsScore:
+   "💥 Ship destroyed! Score: "+asteroidsScore
+  );
+
+  return;
+
+ }
+
+ requestAnimationFrame(asteroidsLoop);
+
+}
+
+
+/* BOWLING */
+
+let bowlingFrames=[];
+let bowlingCurrentFrame=0;
+let bowlingPinsStanding=10;
+let bowlingActive=false;
+
+function startBowling(){
+
+ bowlingFrames=Array.from({length:10},()=>[]);
+ bowlingCurrentFrame=0;
+ bowlingPinsStanding=10;
+ bowlingActive=true;
+
+ renderBowling();
+
+}
+
+function bowlingRoll(){
+
+ if(!bowlingActive)return;
+
+ const knocked=Math.min(bowlingPinsStanding,Math.floor(Math.random()*(bowlingPinsStanding+1)));
+
+ bowlingFrames[bowlingCurrentFrame].push(knocked);
+ bowlingPinsStanding-=knocked;
+
+ const frame=bowlingFrames[bowlingCurrentFrame];
+ const isTenth=bowlingCurrentFrame===9;
+
+ if(!isTenth){
+
+  if(knocked===10||frame.length===2){
+
+   bowlingCurrentFrame++;
+   bowlingPinsStanding=10;
+
+  }
+
+ }else{
+
+  if(frame.length===1&&knocked===10){
+
+   bowlingPinsStanding=10;
+
+  }else if(frame.length===2){
+
+   const frameSum=frame[0]+frame[1];
+
+   if(frameSum>=10){
+
+    bowlingPinsStanding=10;
+
+   }else{
+
+    bowlingActive=false;
+
+   }
+
+  }else if(frame.length===3){
+
+   bowlingActive=false;
+
+  }
+
+ }
+
+ if(bowlingCurrentFrame>=10)bowlingActive=false;
+
+ renderBowling();
+
+ if(!bowlingActive){
+
+  notify("🎳 Game over! Final score: "+calculateBowlingScore());
+
+ }
+
+}
+
+function calculateBowlingScore(){
+
+ let total=0;
+
+ for(let f=0;f<9;f++){
+
+  const frame=bowlingFrames[f];
+
+  if(!frame||frame.length===0)continue;
+
+  if(frame[0]===10){
+
+   total+=10+bowlingNextRolls(f,2);
+
+  }else if(frame.length>=2&&frame[0]+frame[1]===10){
+
+   total+=10+bowlingNextRolls(f,1);
+
+  }else{
+
+   total+=frame.reduce((a,b)=>a+b,0);
+
+  }
+
+ }
+
+ const tenth=bowlingFrames[9]||[];
+
+ total+=tenth.reduce((a,b)=>a+b,0);
+
+ return total;
+
+}
+
+function bowlingNextRolls(frameIndex,count){
+
+ const rolls=[];
+
+ for(let f=frameIndex+1;f<10&&rolls.length<count;f++){
+
+  const frame=bowlingFrames[f]||[];
+
+  for(let i=0;i<frame.length&&rolls.length<count;i++){
+
+   rolls.push(frame[i]);
+
+  }
+
+ }
+
+ return rolls.reduce((a,b)=>a+b,0);
+
+}
+
+function renderBowling(){
+
+ const el=document.getElementById("bowlingFrames");
+
+ if(el){
+
+  el.innerHTML=bowlingFrames.map((frame,i)=>
+   '<div class="stat"><b>Frame '+(i+1)+'</b><br>'+(frame.length?frame.join(", "):"-")+'</div>'
+  ).join("");
+
+ }
+
+ const pinsEl=document.getElementById("bowlingPinsStanding");
+
+ if(pinsEl)pinsEl.textContent=bowlingPinsStanding;
+
+ const scoreEl=document.getElementById("bowlingScore");
+
+ if(scoreEl)scoreEl.textContent=calculateBowlingScore();
+
+ const frameEl=document.getElementById("bowlingCurrentFrame");
+
+ if(frameEl)frameEl.textContent=Math.min(bowlingCurrentFrame+1,10);
+
+}
+
+
+/* DARTS */
+
+let dartsCanvas,dartsCtx;
+let dartsScore=0;
+let dartsThrowsLeft=3;
+let dartsRound=1;
+
+const DARTS_MAX_ROUNDS=5;
+
+function startDarts(){
+
+ dartsCanvas=document.getElementById("dartsCanvas");
+
+ if(!dartsCanvas)return;
+
+ dartsCtx=dartsCanvas.getContext("2d");
+ dartsScore=0;
+ dartsThrowsLeft=3;
+ dartsRound=1;
+
+ document.getElementById("dartsScore").textContent="0";
+ document.getElementById("dartsThrowsLeft").textContent="3";
+ document.getElementById("dartsRound").textContent="1";
+
+ drawDartboard();
+
+}
+
+function drawDartboard(dartX,dartY){
+
+ dartsCtx.clearRect(0,0,260,260);
+
+ const rings=[
+  {r:120,color:"#1e293b"},
+  {r:100,color:"#334155"},
+  {r:75,color:"#475569"},
+  {r:50,color:"#facc15"},
+  {r:25,color:"#ef4444"}
+ ];
+
+ rings.forEach(ring=>{
+
+  dartsCtx.beginPath();
+  dartsCtx.arc(130,130,ring.r,0,Math.PI*2);
+  dartsCtx.fillStyle=ring.color;
+  dartsCtx.fill();
+
+ });
+
+ if(dartX!==undefined){
+
+  dartsCtx.fillStyle="white";
+  dartsCtx.beginPath();
+  dartsCtx.arc(dartX,dartY,4,0,Math.PI*2);
+  dartsCtx.fill();
+
+ }
+
+}
+
+function throwDart(e){
+
+ if(dartsThrowsLeft<=0)return;
+
+ const rect=dartsCanvas.getBoundingClientRect();
+ const clickX=e.clientX-rect.left;
+ const clickY=e.clientY-rect.top;
+
+ const dartX=clickX+(Math.random()-0.5)*20;
+ const dartY=clickY+(Math.random()-0.5)*20;
+
+ const dist=Math.hypot(dartX-130,dartY-130);
+
+ let points=0;
+
+ if(dist<25)points=50;
+ else if(dist<50)points=25;
+ else if(dist<75)points=10;
+ else if(dist<100)points=5;
+
+ dartsScore+=points;
+ dartsThrowsLeft--;
+
+ document.getElementById("dartsScore").textContent=dartsScore;
+ document.getElementById("dartsThrowsLeft").textContent=dartsThrowsLeft;
+
+ drawDartboard(dartX,dartY);
+
+ notify(points>0?"🎯 "+points+" points!":"Missed the board!");
+
+ if(dartsThrowsLeft<=0){
+
+  if(dartsRound>=DARTS_MAX_ROUNDS){
+
+   notify("🏆 Game over! Final score: "+dartsScore);
+
+  }else{
+
+   setTimeout(()=>{
+
+    dartsRound++;
+    dartsThrowsLeft=3;
+
+    document.getElementById("dartsRound").textContent=dartsRound;
+    document.getElementById("dartsThrowsLeft").textContent="3";
+
+    drawDartboard();
+
+   },1200);
+
+  }
+
+ }
+
+}
+
+
+/* PEG SOLITAIRE */
+
+const PEG_INVALID=[
+ [0,0],[0,1],[1,0],[1,1],[0,5],[0,6],[1,5],[1,6],
+ [5,0],[5,1],[6,0],[6,1],[5,5],[5,6],[6,5],[6,6]
+];
+
+let pegBoard=[];
+let pegSelected=null;
+
+function isPegInvalid(r,c){
+
+ return PEG_INVALID.some(pos=>pos[0]===r&&pos[1]===c);
+
+}
+
+function startPegSolitaire(){
+
+ pegBoard=Array.from({length:7},()=>Array(7).fill(null));
+
+ for(let r=0;r<7;r++){
+
+  for(let c=0;c<7;c++){
+
+   if(!isPegInvalid(r,c))pegBoard[r][c]="peg";
+
+  }
+
+ }
+
+ pegBoard[3][3]=null;
+ pegSelected=null;
+
+ renderPegSolitaire();
+
+}
+
+function pegHasValidMoves(){
+
+ const dirs=[[0,1],[0,-1],[1,0],[-1,0]];
+
+ for(let r=0;r<7;r++){
+
+  for(let c=0;c<7;c++){
+
+   if(pegBoard[r][c]==="peg"){
+
+    for(let i=0;i<dirs.length;i++){
+
+     const dr=dirs[i][0];
+     const dc=dirs[i][1];
+     const mr=r+dr;
+     const mc=c+dc;
+     const jr=r+dr*2;
+     const jc=c+dc*2;
+
+     if(jr>=0&&jr<7&&jc>=0&&jc<7&&!isPegInvalid(jr,jc)&&
+      pegBoard[mr]&&pegBoard[mr][mc]==="peg"&&pegBoard[jr][jc]===null){
+
+      return true;
+
+     }
+
+    }
+
+   }
+
+  }
+
+ }
+
+ return false;
+
+}
+
+function pegClick(r,c){
+
+ if(isPegInvalid(r,c))return;
+
+ if(pegSelected){
+
+  const dr=r-pegSelected[0];
+  const dc=c-pegSelected[1];
+
+  if((Math.abs(dr)===2&&dc===0)||(Math.abs(dc)===2&&dr===0)){
+
+   const mr=pegSelected[0]+dr/2;
+   const mc=pegSelected[1]+dc/2;
+
+   if(pegBoard[mr][mc]==="peg"&&pegBoard[r][c]===null&&pegBoard[pegSelected[0]][pegSelected[1]]==="peg"){
+
+    pegBoard[pegSelected[0]][pegSelected[1]]=null;
+    pegBoard[mr][mc]=null;
+    pegBoard[r][c]="peg";
+    pegSelected=null;
+
+    renderPegSolitaire();
+    checkPegWin();
+
+    return;
+
+   }
+
+  }
+
+  pegSelected=null;
+
+ }
+
+ if(pegBoard[r][c]==="peg"){
+
+  pegSelected=[r,c];
+
+ }
+
+ renderPegSolitaire();
+
+}
+
+function checkPegWin(){
+
+ let count=0;
+
+ pegBoard.forEach(row=>row.forEach(cell=>{
+
+  if(cell==="peg")count++;
+
+ }));
+
+ if(count===1){
+
+  notify("🎉 You solved it — down to the last peg!");
+
+ }else if(!pegHasValidMoves()){
+
+  notify("No more moves — "+count+" pegs remaining.");
+
+ }
+
+}
+
+function renderPegSolitaire(){
+
+ const board=document.getElementById("pegBoard");
+
+ if(!board)return;
+
+ board.innerHTML="";
+
+ let count=0;
+
+ for(let r=0;r<7;r++){
+
+  for(let c=0;c<7;c++){
+
+   const cell=document.createElement("button");
+
+   cell.className="gamecard";
+   cell.style.height="32px";
+
+   if(isPegInvalid(r,c)){
+
+    cell.style.visibility="hidden";
+
+   }else{
+
+    cell.style.borderRadius="50%";
+    cell.style.background=pegBoard[r][c]==="peg"?"#f97316":"#1e293b";
+
+    if(pegBoard[r][c]==="peg")count++;
+
+    if(pegSelected&&pegSelected[0]===r&&pegSelected[1]===c){
+
+     cell.style.border="2px solid white";
+
+    }
+
+    cell.onclick=()=>pegClick(r,c);
+
+   }
+
+   board.appendChild(cell);
+
+  }
+
+ }
+
+ const countEl=document.getElementById("pegCount");
+
+ if(countEl)countEl.textContent=count;
+
+}
+
+
+/* BUBBLE POP */
+
+const BUBBLE_COLORS=["🔵","🔴","🟢","🟡","🟣"];
+const BUBBLE_SIZE=8;
+
+let bubbleBoard=[];
+let bubbleScore=0;
+
+function startBubblePop(){
+
+ bubbleBoard=[];
+
+ for(let r=0;r<BUBBLE_SIZE;r++){
+
+  const row=[];
+
+  for(let c=0;c<BUBBLE_SIZE;c++){
+
+   row.push(BUBBLE_COLORS[Math.floor(Math.random()*BUBBLE_COLORS.length)]);
+
+  }
+
+  bubbleBoard.push(row);
+
+ }
+
+ bubbleScore=0;
+
+ document.getElementById("bubbleScore").textContent="0";
+
+ renderBubblePop();
+
+}
+
+function findBubbleGroup(r,c,color,visited){
+
+ const key=r+","+c;
+
+ if(visited.has(key))return [];
+ if(r<0||r>=BUBBLE_SIZE||c<0||c>=BUBBLE_SIZE)return [];
+ if(bubbleBoard[r][c]!==color)return [];
+
+ visited.add(key);
+
+ let group=[[r,c]];
+
+ group=group.concat(findBubbleGroup(r+1,c,color,visited));
+ group=group.concat(findBubbleGroup(r-1,c,color,visited));
+ group=group.concat(findBubbleGroup(r,c+1,color,visited));
+ group=group.concat(findBubbleGroup(r,c-1,color,visited));
+
+ return group;
+
+}
+
+function bubbleClick(r,c){
+
+ const color=bubbleBoard[r][c];
+
+ if(!color)return;
+
+ const group=findBubbleGroup(r,c,color,new Set());
+
+ if(group.length<2){
+
+  notify("Need at least 2 connected bubbles to pop.");
+  return;
+
+ }
+
+ group.forEach(pos=>{
+
+  bubbleBoard[pos[0]][pos[1]]=null;
+
+ });
+
+ bubbleScore+=group.length*group.length;
+
+ document.getElementById("bubbleScore").textContent=bubbleScore;
+
+ applyBubbleGravity();
+ renderBubblePop();
+ checkBubbleGameOver();
+
+}
+
+function applyBubbleGravity(){
+
+ for(let c=0;c<BUBBLE_SIZE;c++){
+
+  const col=[];
+
+  for(let r=0;r<BUBBLE_SIZE;r++){
+
+   if(bubbleBoard[r][c])col.push(bubbleBoard[r][c]);
+
+  }
+
+  while(col.length<BUBBLE_SIZE)col.unshift(null);
+
+  for(let r=0;r<BUBBLE_SIZE;r++){
+
+   bubbleBoard[r][c]=col[r];
+
+  }
+
+ }
+
+ const nonEmptyCols=[];
+
+ for(let c=0;c<BUBBLE_SIZE;c++){
+
+  let hasAny=false;
+
+  for(let r=0;r<BUBBLE_SIZE;r++){
+
+   if(bubbleBoard[r][c])hasAny=true;
+
+  }
+
+  if(hasAny)nonEmptyCols.push(c);
+
+ }
+
+ const newBoard=Array.from({length:BUBBLE_SIZE},()=>Array(BUBBLE_SIZE).fill(null));
+
+ nonEmptyCols.forEach((oldC,newC)=>{
+
+  for(let r=0;r<BUBBLE_SIZE;r++){
+
+   newBoard[r][newC]=bubbleBoard[r][oldC];
+
+  }
+
+ });
+
+ bubbleBoard=newBoard;
+
+}
+
+function checkBubbleGameOver(){
+
+ for(let r=0;r<BUBBLE_SIZE;r++){
+
+  for(let c=0;c<BUBBLE_SIZE;c++){
+
+   if(bubbleBoard[r][c]){
+
+    const group=findBubbleGroup(r,c,bubbleBoard[r][c],new Set());
+
+    if(group.length>=2)return;
+
+   }
+
+  }
+
+ }
+
+ notify("No more moves! Final score: "+bubbleScore);
+
+}
+
+function renderBubblePop(){
+
+ const grid=document.getElementById("bubbleGrid");
+
+ if(!grid)return;
+
+ grid.innerHTML="";
+
+ for(let r=0;r<BUBBLE_SIZE;r++){
+
+  for(let c=0;c<BUBBLE_SIZE;c++){
+
+   const cell=document.createElement("button");
+
+   cell.className="gamecard";
+   cell.style.height="32px";
+   cell.style.fontSize="18px";
+   cell.textContent=bubbleBoard[r][c]||"";
+   cell.onclick=()=>bubbleClick(r,c);
+
+   grid.appendChild(cell);
+
+  }
+
+ }
+
+}
+
+
+/* INVOICE GENERATOR */
+
+let invoiceItems=[];
+
+function addInvoiceItem(){
+
+ invoiceItems.push({id:makeFSId(),desc:"",amount:0});
+
+ renderInvoiceItems();
+
+}
+
+function updateInvoiceItem(id,field,value){
+
+ const item=invoiceItems.find(i=>i.id===id);
+
+ if(!item)return;
+
+ if(field==="desc")item.desc=value;
+ else item.amount=Number(value)||0;
+
+ updateInvoiceTotal();
+
+}
+
+function removeInvoiceItem(id){
+
+ invoiceItems=invoiceItems.filter(i=>i.id!==id);
+
+ renderInvoiceItems();
+
+}
+
+function renderInvoiceItems(){
+
+ const el=document.getElementById("invoiceItems");
+
+ if(!el)return;
+
+ el.innerHTML=invoiceItems.map(item=>
+  '<div style="display:flex;gap:8px;margin-bottom:6px">'+
+  '<input placeholder="Description" value="'+escapeHTML(item.desc)+'" oninput="updateInvoiceItem(\''+item.id+'\',\'desc\',this.value)" style="flex:2">'+
+  '<input type="number" placeholder="Amount" value="'+item.amount+'" oninput="updateInvoiceItem(\''+item.id+'\',\'amount\',this.value)" style="flex:1">'+
+  '<button onclick="removeInvoiceItem(\''+item.id+'\')">🗑️</button>'+
+  '</div>'
+ ).join("");
+
+ updateInvoiceTotal();
+
+}
+
+function updateInvoiceTotal(){
+
+ const total=invoiceItems.reduce((sum,i)=>sum+i.amount,0);
+ const el=document.getElementById("invoiceTotal");
+
+ if(el)el.textContent=total.toFixed(2);
+
+}
+
+
+/* RESUME BUILDER */
+
+function renderResumePreview(){
+
+ const name=document.getElementById("resumeName").value.trim();
+ const title=document.getElementById("resumeTitle").value.trim();
+ const summary=document.getElementById("resumeSummary").value.trim();
+ const experience=document.getElementById("resumeExperience").value.split("\n").filter(Boolean);
+
+ const el=document.getElementById("resumePreview");
+
+ if(!el)return;
+
+ el.innerHTML=
+  "<h2 style='margin:0'>"+escapeHTML(name||"Your Name")+"</h2>"+
+  "<p style='opacity:.7'>"+escapeHTML(title||"Job Title")+"</p>"+
+  "<p>"+escapeHTML(summary)+"</p>"+
+  "<h3>Experience</h3>"+
+  "<ul>"+experience.map(e=>"<li>"+escapeHTML(e)+"</li>").join("")+"</ul>";
+
+}
+
+
+/* MORTGAGE CALCULATOR */
+
+function calculateMortgage(){
+
+ const amount=Number(document.getElementById("mortgageAmount").value)||0;
+ const rate=Number(document.getElementById("mortgageRate").value)||0;
+ const years=Number(document.getElementById("mortgageYears").value)||0;
+
+ const monthlyRate=rate/100/12;
+ const months=years*12;
+
+ let payment;
+
+ if(monthlyRate===0)payment=months>0?amount/months:0;
+ else payment=amount*(monthlyRate*Math.pow(1+monthlyRate,months))/(Math.pow(1+monthlyRate,months)-1);
+
+ const totalPaid=payment*months;
+ const totalInterest=totalPaid-amount;
+
+ document.getElementById("mortgageResult").innerHTML=
+  "Monthly payment: <b>"+payment.toFixed(2)+"</b><br>"+
+  "Total paid: "+totalPaid.toFixed(2)+"<br>"+
+  "Total interest: "+totalInterest.toFixed(2);
+
+}
+
+
+/* BASE CONVERTER */
+
+function convertBase(){
+
+ const input=document.getElementById("baseInput").value.trim();
+ const fromBase=Number(document.getElementById("baseFrom").value);
+ const decimalValue=parseInt(input,fromBase);
+
+ if(isNaN(decimalValue)){
+
+  document.getElementById("baseResult").textContent="Invalid number for that base.";
+  return;
+
+ }
+
+ document.getElementById("baseResult").innerHTML=
+  "Binary: "+decimalValue.toString(2)+"<br>"+
+  "Decimal: "+decimalValue.toString(10)+"<br>"+
+  "Octal: "+decimalValue.toString(8)+"<br>"+
+  "Hex: "+decimalValue.toString(16).toUpperCase();
+
+}
+
+
+/* MORSE CODE TRANSLATOR */
+
+const MORSE_CODE_MAP={
+ A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",
+ J:".---",K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",
+ S:"...",T:"-",U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",
+ "0":"-----","1":".----","2":"..---","3":"...--","4":"....-","5":".....",
+ "6":"-....","7":"--...","8":"---..","9":"----."," ":"/"
+};
+
+const MORSE_CODE_REVERSE={};
+
+Object.keys(MORSE_CODE_MAP).forEach(key=>{
+
+ MORSE_CODE_REVERSE[MORSE_CODE_MAP[key]]=key;
+
+});
+
+let morseDirection="toMorse";
+
+function setMorseDirection(dir){
+
+ morseDirection=dir;
+
+ translateMorse();
+
+}
+
+function translateMorse(){
+
+ const input=document.getElementById("morseInput").value;
+ const output=document.getElementById("morseOutput");
+
+ if(!output)return;
+
+ if(morseDirection==="toMorse"){
+
+  output.value=input.toUpperCase().split("").map(ch=>
+   MORSE_CODE_MAP[ch]!==undefined?MORSE_CODE_MAP[ch]:ch
+  ).join(" ");
+
+ }else{
+
+  output.value=input.split(" ").map(code=>
+   MORSE_CODE_REVERSE[code]!==undefined?MORSE_CODE_REVERSE[code]:code
+  ).join("");
+
+ }
+
+}
+
+
+/* TEXT CASE CONVERTER */
+
+function convertCase(mode){
+
+ const input=document.getElementById("caseInput").value;
+
+ let result;
+
+ if(mode==="upper")result=input.toUpperCase();
+ else if(mode==="lower")result=input.toLowerCase();
+ else if(mode==="title"){
+
+  result=input.replace(/\w\S*/g,txt=>
+   txt.charAt(0).toUpperCase()+txt.substr(1).toLowerCase()
+  );
+
+ }else if(mode==="sentence"){
+
+  result=input.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g,c=>c.toUpperCase());
+
+ }
+
+ document.getElementById("caseOutput").value=result;
+
+}
+
+
+/* LOREM IPSUM GENERATOR */
+
+const LOREM_WORDS=["lorem","ipsum","dolor","sit","amet","consectetur","adipiscing","elit","sed","do","eiusmod","tempor","incididunt","ut","labore","et","dolore","magna","aliqua","enim","ad","minim","veniam","quis","nostrud","exercitation","ullamco","laboris","nisi","aliquip","ex","ea","commodo","consequat"];
+
+function generateLorem(){
+
+ const count=Number(document.getElementById("loremCount").value)||3;
+ const paragraphs=[];
+
+ for(let p=0;p<count;p++){
+
+  const sentenceCount=4+Math.floor(Math.random()*3);
+  const sentences=[];
+
+  for(let s=0;s<sentenceCount;s++){
+
+   const wordCount=8+Math.floor(Math.random()*8);
+   const words=[];
+
+   for(let w=0;w<wordCount;w++){
+
+    words.push(LOREM_WORDS[Math.floor(Math.random()*LOREM_WORDS.length)]);
+
+   }
+
+   let sentence=words.join(" ");
+
+   sentence=sentence.charAt(0).toUpperCase()+sentence.slice(1)+".";
+
+   sentences.push(sentence);
+
+  }
+
+  paragraphs.push(sentences.join(" "));
+
+ }
+
+ document.getElementById("loremOutput").value=paragraphs.join("\n\n");
+
+}
+
+
+/* GPA CALCULATOR */
+
+let gpaCourses=[];
+
+const GPA_POINTS={A:4,"A-":3.7,"B+":3.3,B:3,"B-":2.7,"C+":2.3,C:2,"C-":1.7,D:1,F:0};
+
+function addGPACourse(){
+
+ gpaCourses.push({id:makeFSId(),grade:"A",credits:3});
+
+ renderGPACourses();
+
+}
+
+function updateGPACourse(id,field,value){
+
+ const course=gpaCourses.find(c=>c.id===id);
+
+ if(!course)return;
+
+ if(field==="grade")course.grade=value;
+ else course.credits=Number(value)||0;
+
+}
+
+function removeGPACourse(id){
+
+ gpaCourses=gpaCourses.filter(c=>c.id!==id);
+
+ renderGPACourses();
+
+}
+
+function renderGPACourses(){
+
+ const el=document.getElementById("gpaCourses");
+
+ if(!el)return;
+
+ el.innerHTML=gpaCourses.map(course=>
+  '<div style="display:flex;gap:8px;margin-bottom:6px">'+
+  '<select onchange="updateGPACourse(\''+course.id+'\',\'grade\',this.value)" style="flex:1">'+
+  Object.keys(GPA_POINTS).map(g=>
+   '<option value="'+g+'"'+(g===course.grade?" selected":"")+'>'+g+'</option>'
+  ).join("")+
+  '</select>'+
+  '<input type="number" value="'+course.credits+'" oninput="updateGPACourse(\''+course.id+'\',\'credits\',this.value)" placeholder="Credits" style="flex:1">'+
+  '<button onclick="removeGPACourse(\''+course.id+'\')">🗑️</button>'+
+  '</div>'
+ ).join("");
+
+}
+
+function calculateGPA(){
+
+ let totalPoints=0;
+ let totalCredits=0;
+
+ gpaCourses.forEach(c=>{
+
+  totalPoints+=(GPA_POINTS[c.grade]||0)*c.credits;
+  totalCredits+=c.credits;
+
+ });
+
+ const gpa=totalCredits>0?(totalPoints/totalCredits):0;
+
+ document.getElementById("gpaResult").textContent="GPA: "+gpa.toFixed(2);
 
 }
 
