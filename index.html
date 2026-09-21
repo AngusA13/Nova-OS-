@@ -316,6 +316,8 @@ body.light .contextmenu button:hover{
  user-select:none;
  line-height:19px;
  font-size:13px;
+ font-family:Consolas,'Courier New',monospace;
+ white-space:pre;
  overflow:hidden;
  flex-shrink:0;
 }
@@ -2198,7 +2200,13 @@ const novaStoreApps=[
 {id:"novaMorse",icon:"📡",name:"Morse Code Translator",description:"Translate text to and from Morse code.",type:"app",category:"Utilities"},
 {id:"novaTextCase",icon:"🔠",name:"Text Case Converter",description:"Switch text between upper, lower, and title case.",type:"app",category:"Utilities"},
 {id:"novaLorem",icon:"📰",name:"Lorem Ipsum Generator",description:"Generate placeholder paragraphs for design mockups.",type:"app",category:"Utilities"},
-{id:"novaGPA",icon:"🎓",name:"GPA Calculator",description:"Calculate your GPA from grades and credit hours.",type:"app",category:"Utilities"}
+{id:"novaGPA",icon:"🎓",name:"GPA Calculator",description:"Calculate your GPA from grades and credit hours.",type:"app",category:"Utilities"},
+
+{id:"novaSolitaire",icon:"🃏",name:"Nova Solitaire",description:"Classic Klondike — clear the tableau onto the foundations.",type:"game",category:"Games"},
+{id:"novaWordSearch",icon:"🔍",name:"Nova Word Search",description:"Drag across the grid to find every hidden word.",type:"game",category:"Games"},
+{id:"novaVideoPoker",icon:"🂡",name:"Nova Video Poker",description:"Jacks-or-better draw poker against the deck.",type:"game",category:"Games"},
+{id:"novaCrossword",icon:"✏️",name:"Nova Mini Crossword",description:"Solve a small interlocking crossword from the clues.",type:"game",category:"Games"},
+{id:"novaPinball",icon:"🎱",name:"Nova Pinball",description:"Flip, bounce, and rack up points across 3 balls.",type:"game",category:"Games"}
 
 ];
 
@@ -4400,14 +4408,11 @@ function buildStoreApp(app,c){
 
      <div class="vsc-panel">
       <div class="vsc-panel-tabs">
-       <span class="vsc-panel-tab active" id="vscTabOutput" onclick="vscShowPanel('output')">Output</span>
-       <span class="vsc-panel-tab" id="vscTabPreview" onclick="vscShowPanel('preview')">Preview</span>
+       <span class="vsc-panel-tab active" id="vscTabOutput">Output</span>
        <button class="vsc-run" onclick="vscRun()">▶ Run</button>
        <button class="vsc-run" style="margin-left:6px;background:#5a1d1d" onclick="vscClearOutput()">🗑 Clear</button>
       </div>
-      <div class="vsc-output" id="vscOutput">Ready. Open a .js or .html file and press Run.</div>
-      <iframe id="vscPreview" style="display:none;flex:1;border:0;background:white"
-       sandbox="allow-scripts allow-modals"></iframe>
+      <div class="vsc-output" id="vscOutput">Ready. Open a .js file and press Run, or open an .html file to run it in a new browser tab.</div>
      </div>
 
     </div>
@@ -4537,6 +4542,1039 @@ function buildStoreApp(app,c){
   gpaCourses=[];
   addGPACourse();
   return;
+ }
+
+ if(app.id==="novaSolitaire"){
+  c.innerHTML=`
+  <h2>🃏 Nova Solitaire</h2>
+  <p style="font-size:12px;opacity:.7">Click a card to select it, then click where you want to move it. Click the deck to draw a card.</p>
+  <div id="solitaireBoard"></div>
+  <p id="solitaireMessage" style="text-align:center;font-weight:bold"></p>
+  <button class="appbtn" onclick="startSolitaire()">🔄 New Game</button>`;
+  startSolitaire();
+  return;
+ }
+
+ if(app.id==="novaWordSearch"){
+  c.innerHTML=`
+  <h2>🔍 Nova Word Search</h2>
+  <p style="font-size:12px;opacity:.7">Click and drag across letters to find each word in the list.</p>
+  <div id="wordSearchGrid" onmouseleave="wordSearch.selecting=false"></div>
+  <div id="wordSearchList" style="text-align:center;margin-top:8px"></div>
+  <div style="text-align:center;margin-top:10px">
+  <button class="appbtn" onclick="startWordSearch()">🔄 New Puzzle</button>
+  </div>`;
+  startWordSearch();
+  return;
+ }
+
+ if(app.id==="novaVideoPoker"){
+  c.innerHTML=`
+  <h2>🂡 Nova Video Poker</h2>
+  <p style="font-size:12px;opacity:.7">Jacks or better pays. Click cards to hold them, then draw.</p>
+  <p style="text-align:center">Credits: <b id="vpCredits">100</b> · Bet: 5</p>
+  <div id="vpHand" style="display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap"></div>
+  <p id="vpMessage" style="text-align:center;font-weight:bold"></p>
+  <div style="text-align:center">
+  <button class="appbtn" id="vpDrawBtn" onclick="vpDrawOrDeal()">Draw</button>
+  <button class="appbtn" onclick="resetVideoPokerCredits()">🔄 Reset Credits</button>
+  </div>`;
+  startVideoPoker();
+  return;
+ }
+
+ if(app.id==="novaCrossword"){
+  c.innerHTML=`
+  <h2>✏️ Nova Mini Crossword</h2>
+  <div id="crosswordGrid" style="text-align:center"></div>
+  <p style="font-size:13px"><b>Across</b><br>1. Program instructions (4)<br>2. Where you write or work (4)</p>
+  <p style="font-size:13px"><b>Down</b><br>1. Encrypt or write a program (4)</p>
+  <p id="crosswordMessage" style="text-align:center;font-weight:bold"></p>
+  <div style="text-align:center">
+  <button class="appbtn" onclick="checkCrossword()">✓ Check Answers</button>
+  <button class="appbtn" onclick="startCrossword()">🔄 Clear</button>
+  </div>`;
+  startCrossword();
+  return;
+ }
+
+ if(app.id==="novaPinball"){
+  c.innerHTML=`
+  <h2>🎱 Nova Pinball</h2>
+  <p style="font-size:12px;opacity:.7">← / → to flip, Space to launch — or use the buttons below. Click the table first.</p>
+  <canvas id="pinballCanvas" width="300" height="500" tabindex="0" style="background:#0f172a;border-radius:8px;display:block;margin:0 auto;outline:none"
+   onkeydown="pinballKeyDown(event)" onkeyup="pinballKeyUp(event)"></canvas>
+  <p style="text-align:center">Score: <b id="pinballScore">0</b> · Balls left: <b id="pinballLives">3</b></p>
+  ${highScoreBar("pinball")}
+  <p id="pinballMessage" style="text-align:center;font-weight:bold"></p>
+  <div style="text-align:center">
+  <button class="appbtn" onmousedown="pinball.leftUp=true" onmouseup="pinball.leftUp=false" onmouseleave="pinball.leftUp=false">◀ Left Flip</button>
+  <button class="appbtn" onclick="pinballLaunch()">🚀 Launch</button>
+  <button class="appbtn" onmousedown="pinball.rightUp=true" onmouseup="pinball.rightUp=false" onmouseleave="pinball.rightUp=false">Right Flip ▶</button>
+  </div>
+  <div style="text-align:center;margin-top:6px">
+  <button class="appbtn" onclick="startPinball()">🔄 New Game</button>
+  </div>`;
+  startPinball();
+  setTimeout(()=>{const cv=document.getElementById("pinballCanvas");if(cv)cv.focus();},50);
+  return;
+ }
+
+}
+
+
+/* NOVA SOLITAIRE */
+
+const SOLITAIRE_SUITS=[{s:"♠",color:"black"},{s:"♥",color:"red"},{s:"♦",color:"red"},{s:"♣",color:"black"}];
+const SOLITAIRE_RANKS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+
+let solitaire={tableau:[],foundations:[[],[],[],[]],stock:[],waste:[],selected:null};
+
+function makeSolitaireDeck(){
+
+ const deck=[];
+
+ for(let s=0;s<4;s++)for(let r=1;r<=13;r++)deck.push({suit:s,rank:r,faceUp:false});
+
+ for(let i=deck.length-1;i>0;i--){
+
+  const j=Math.floor(Math.random()*(i+1));
+
+  [deck[i],deck[j]]=[deck[j],deck[i]];
+
+ }
+
+ return deck;
+
+}
+
+function startSolitaire(){
+
+ const deck=makeSolitaireDeck();
+
+ solitaire={tableau:[],foundations:[[],[],[],[]],stock:[],waste:[],selected:null};
+
+ for(let i=0;i<7;i++){
+
+  const pile=[];
+
+  for(let j=0;j<=i;j++){
+
+   const card=deck.pop();
+
+   card.faceUp=(j===i);
+   pile.push(card);
+
+  }
+
+  solitaire.tableau.push(pile);
+
+ }
+
+ solitaire.stock=deck;
+
+ const msg=document.getElementById("solitaireMessage");
+ if(msg)msg.textContent="";
+
+ renderSolitaire();
+
+}
+
+function solitaireCardLabel(card){
+
+ return SOLITAIRE_RANKS[card.rank-1]+SOLITAIRE_SUITS[card.suit].s;
+
+}
+
+function solitaireIsRed(card){
+
+ return SOLITAIRE_SUITS[card.suit].color==="red";
+
+}
+
+function solitaireCardColor(card){
+
+ return solitaireIsRed(card)?"#dc2626":"#0f172a";
+
+}
+
+function solitaireGetTopCard(pileType,index){
+
+ if(pileType==="waste")return solitaire.waste[solitaire.waste.length-1];
+ if(pileType==="foundation")return solitaire.foundations[index][solitaire.foundations[index].length-1];
+ if(pileType==="tableau")return solitaire.tableau[index][solitaire.tableau[index].length-1];
+
+ return null;
+
+}
+
+function solitaireRemoveTop(loc){
+
+ if(loc.pileType==="waste")return solitaire.waste.pop();
+ if(loc.pileType==="foundation")return solitaire.foundations[loc.index].pop();
+ if(loc.pileType==="tableau")return solitaire.tableau[loc.index].pop();
+
+}
+
+function solitaireFlipNewTop(loc){
+
+ if(loc.pileType==="tableau"){
+
+  const pile=solitaire.tableau[loc.index];
+
+  if(pile.length>0)pile[pile.length-1].faceUp=true;
+
+ }
+
+}
+
+function solitairePileClick(pileType,index){
+
+ if(pileType==="stock"){
+
+  solitaireDrawStock();
+  return;
+
+ }
+
+ if(solitaire.selected){
+
+  const from=solitaire.selected;
+  solitaire.selected=null;
+
+  const moved=solitaireTryMove(from,{pileType,index});
+
+  if(!moved)solitaireTrySelect(pileType,index);
+
+  renderSolitaire();
+  solitaireCheckWin();
+  return;
+
+ }
+
+ solitaireTrySelect(pileType,index);
+ renderSolitaire();
+
+}
+
+function solitaireTrySelect(pileType,index){
+
+ const card=solitaireGetTopCard(pileType,index);
+
+ if(card&&card.faceUp)solitaire.selected={pileType,index};
+
+}
+
+function solitaireTryMove(from,to){
+
+ if(from.pileType===to.pileType&&from.index===to.index)return false;
+
+ const fromCard=solitaireGetTopCard(from.pileType,from.index);
+
+ if(!fromCard)return false;
+
+ if(to.pileType==="foundation"){
+
+  const f=solitaire.foundations[to.index];
+  const topF=f[f.length-1];
+
+  if(f.length===0){
+
+   if(fromCard.rank!==1)return false;
+
+  }else{
+
+   if(topF.suit!==fromCard.suit||fromCard.rank!==topF.rank+1)return false;
+
+  }
+
+  solitaireRemoveTop(from);
+  f.push(fromCard);
+  solitaireFlipNewTop(from);
+
+  return true;
+
+ }
+
+ if(to.pileType==="tableau"){
+
+  const pile=solitaire.tableau[to.index];
+  const topT=pile[pile.length-1];
+
+  if(pile.length===0){
+
+   if(fromCard.rank!==13)return false;
+
+  }else{
+
+   if(!topT.faceUp)return false;
+   if(solitaireIsRed(topT)===solitaireIsRed(fromCard))return false;
+   if(fromCard.rank!==topT.rank-1)return false;
+
+  }
+
+  solitaireRemoveTop(from);
+  pile.push(fromCard);
+  solitaireFlipNewTop(from);
+
+  return true;
+
+ }
+
+ return false;
+
+}
+
+function solitaireDrawStock(){
+
+ if(solitaire.stock.length===0){
+
+  solitaire.stock=solitaire.waste.reverse();
+  solitaire.stock.forEach(c=>c.faceUp=false);
+  solitaire.waste=[];
+
+ }else{
+
+  const card=solitaire.stock.pop();
+
+  card.faceUp=true;
+  solitaire.waste.push(card);
+
+ }
+
+ solitaire.selected=null;
+
+ renderSolitaire();
+
+}
+
+function solitaireCheckWin(){
+
+ const total=solitaire.foundations.reduce((s,f)=>s+f.length,0);
+
+ if(total===52){
+
+  const msg=document.getElementById("solitaireMessage");
+
+  if(msg)msg.textContent="🎉 You won! All 52 cards are home.";
+
+  notify("🎉 Solitaire solved!");
+
+ }
+
+}
+
+function solitaireRenderFoundation(f){
+
+ const card=solitaire.foundations[f][solitaire.foundations[f].length-1];
+ const selected=solitaire.selected&&solitaire.selected.pileType==="foundation"&&solitaire.selected.index===f;
+
+ if(!card){
+
+  return `<div onclick="solitairePileClick('foundation',${f})" style="width:40px;height:56px;border-radius:5px;border:2px dashed #475569;cursor:pointer"></div>`;
+
+ }
+
+ return `<div onclick="solitairePileClick('foundation',${f})" style="width:40px;height:56px;border-radius:5px;background:#fff;border:2px solid ${selected?"#22c55e":"#94a3b8"};display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;color:${solitaireCardColor(card)};cursor:pointer">${solitaireCardLabel(card)}</div>`;
+
+}
+
+function solitaireRenderWaste(){
+
+ const card=solitaire.waste[solitaire.waste.length-1];
+ const selected=solitaire.selected&&solitaire.selected.pileType==="waste";
+
+ if(!card)return `<div style="width:40px;height:56px;border-radius:5px;border:2px dashed #334155"></div>`;
+
+ return `<div onclick="solitairePileClick('waste',0)" style="width:40px;height:56px;border-radius:5px;background:#fff;border:2px solid ${selected?"#22c55e":"#94a3b8"};display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;color:${solitaireCardColor(card)};cursor:pointer">${solitaireCardLabel(card)}</div>`;
+
+}
+
+function solitaireRenderTableau(t){
+
+ const pile=solitaire.tableau[t];
+
+ let html=`<div onclick="solitairePileClick('tableau',${t})" style="position:relative;width:40px;min-height:${60+pile.length*18}px;cursor:pointer">`;
+
+ if(pile.length===0){
+
+  html+=`<div style="position:absolute;top:0;left:0;width:40px;height:56px;border-radius:5px;border:2px dashed #334155"></div>`;
+
+ }
+
+ pile.forEach((card,i)=>{
+
+  const top=i*18;
+  const isTop=i===pile.length-1;
+  const selected=isTop&&solitaire.selected&&solitaire.selected.pileType==="tableau"&&solitaire.selected.index===t;
+
+  html+=`<div style="position:absolute;top:${top}px;left:0;width:40px;height:56px;border-radius:5px;background:${card.faceUp?"#fff":"#1d4ed8"};border:2px solid ${selected?"#22c55e":(card.faceUp?"#94a3b8":"#1e3a8a")};display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;color:${card.faceUp?solitaireCardColor(card):"transparent"};box-shadow:0 1px 2px rgba(0,0,0,.4)">${card.faceUp?solitaireCardLabel(card):""}</div>`;
+
+ });
+
+ html+="</div>";
+
+ return html;
+
+}
+
+function renderSolitaire(){
+
+ const el=document.getElementById("solitaireBoard");
+
+ if(!el)return;
+
+ let top=`<div style="display:flex;gap:8px;margin-bottom:16px;align-items:flex-start">`;
+
+ top+=`<div onclick="solitairePileClick('stock',0)" style="width:40px;height:56px;border-radius:5px;background:${solitaire.stock.length?"#1d4ed8":"#1e293b"};border:2px solid #475569;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:#cbd5e1">${solitaire.stock.length?"":"↻"}</div>`;
+ top+=solitaireRenderWaste();
+ top+=`<div style="flex:1"></div>`;
+
+ for(let f=0;f<4;f++)top+=solitaireRenderFoundation(f);
+
+ top+="</div>";
+
+ let bottom=`<div style="display:flex;gap:8px">`;
+
+ for(let t=0;t<7;t++)bottom+=solitaireRenderTableau(t);
+
+ bottom+="</div>";
+
+ el.innerHTML=top+bottom;
+
+}
+
+
+/* NOVA WORD SEARCH */
+
+const WORD_SEARCH_BANK=["NOVA","CLICK","BROWSER","CODE","PIXEL","GAME","DESKTOP","WINDOW","FOLDER","LAUNCH","MEMORY","SCREEN"];
+
+let wordSearch={grid:[],size:10,words:[],found:[],foundCells:[],selecting:false,selStart:null,selection:[]};
+
+function startWordSearch(){
+
+ const size=10;
+ const grid=Array.from({length:size},()=>Array(size).fill(""));
+ const words=[...WORD_SEARCH_BANK].sort(()=>Math.random()-0.5).slice(0,6);
+ const dirs=[[0,1],[1,0],[1,1],[0,-1],[-1,0],[-1,-1],[1,-1],[-1,1]];
+
+ words.forEach(word=>{
+
+  let placed=false;
+  let attempts=0;
+
+  while(!placed&&attempts<300){
+
+   attempts++;
+
+   const dir=dirs[Math.floor(Math.random()*dirs.length)];
+   const row=Math.floor(Math.random()*size);
+   const col=Math.floor(Math.random()*size);
+   const endRow=row+dir[0]*(word.length-1);
+   const endCol=col+dir[1]*(word.length-1);
+
+   if(endRow<0||endRow>=size||endCol<0||endCol>=size)continue;
+
+   let fits=true;
+
+   for(let i=0;i<word.length;i++){
+
+    const r=row+dir[0]*i,cc=col+dir[1]*i;
+
+    if(grid[r][cc]!==""&&grid[r][cc]!==word[i]){fits=false;break;}
+
+   }
+
+   if(!fits)continue;
+
+   for(let i=0;i<word.length;i++){
+
+    const r=row+dir[0]*i,cc=col+dir[1]*i;
+
+    grid[r][cc]=word[i];
+
+   }
+
+   placed=true;
+
+  }
+
+ });
+
+ const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+ for(let r=0;r<size;r++)for(let cc=0;cc<size;cc++)if(!grid[r][cc])grid[r][cc]=letters[Math.floor(Math.random()*26)];
+
+ wordSearch={grid,size,words,found:[],foundCells:[],selecting:false,selStart:null,selection:[]};
+
+ renderWordSearch();
+
+}
+
+function renderWordSearch(){
+
+ const boardEl=document.getElementById("wordSearchGrid");
+ const listEl=document.getElementById("wordSearchList");
+
+ if(!boardEl)return;
+
+ let html="";
+
+ for(let r=0;r<wordSearch.size;r++){
+
+  for(let cc=0;cc<wordSearch.size;cc++){
+
+   const inSel=wordSearch.selection.some(p=>p[0]===r&&p[1]===cc);
+   const found=wordSearch.foundCells.some(p=>p[0]===r&&p[1]===cc);
+
+   html+=`<div onmousedown="wsStart(${r},${cc})" onmouseenter="wsDrag(${r},${cc})" onmouseup="wsEnd()" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;cursor:pointer;user-select:none;background:${found?"#166534":(inSel?"#334155":"#1e293b")};color:${found?"#bbf7d0":"#e2e8f0"};border-radius:3px">${wordSearch.grid[r][cc]}</div>`;
+
+  }
+
+ }
+
+ boardEl.style.display="grid";
+ boardEl.style.gridTemplateColumns=`repeat(${wordSearch.size},1fr)`;
+ boardEl.style.gap="2px";
+ boardEl.style.maxWidth="280px";
+ boardEl.style.margin="10px auto";
+ boardEl.innerHTML=html;
+
+ if(listEl){
+
+  listEl.innerHTML=wordSearch.words.map(w=>
+
+   `<span style="display:inline-block;margin:2px 6px;padding:2px 8px;border-radius:12px;font-size:12px;background:${wordSearch.found.includes(w)?"#166534":"#334155"};color:${wordSearch.found.includes(w)?"#bbf7d0":"#e2e8f0"};text-decoration:${wordSearch.found.includes(w)?"line-through":"none"}">${w}</span>`
+
+  ).join("");
+
+ }
+
+}
+
+function wsStart(r,c){
+
+ wordSearch.selecting=true;
+ wordSearch.selStart=[r,c];
+ wordSearch.selection=[[r,c]];
+
+ renderWordSearch();
+
+}
+
+function wsDrag(r,c){
+
+ if(!wordSearch.selecting)return;
+
+ const [sr,sc]=wordSearch.selStart;
+ const dr=r-sr,dc=c-sc;
+
+ if(dr!==0&&dc!==0&&Math.abs(dr)!==Math.abs(dc))return;
+
+ const steps=Math.max(Math.abs(dr),Math.abs(dc));
+ const stepR=steps===0?0:Math.sign(dr);
+ const stepC=steps===0?0:Math.sign(dc);
+ const sel=[];
+
+ for(let i=0;i<=steps;i++)sel.push([sr+stepR*i,sc+stepC*i]);
+
+ wordSearch.selection=sel;
+
+ renderWordSearch();
+
+}
+
+function wsEnd(){
+
+ if(!wordSearch.selecting)return;
+
+ wordSearch.selecting=false;
+
+ const letters=wordSearch.selection.map(([r,c])=>wordSearch.grid[r][c]).join("");
+ const reversed=letters.split("").reverse().join("");
+ const match=wordSearch.words.find(w=>(w===letters||w===reversed)&&!wordSearch.found.includes(w));
+
+ if(match){
+
+  wordSearch.found.push(match);
+  wordSearch.foundCells=wordSearch.foundCells.concat(wordSearch.selection);
+
+  notify("Found "+match+"!");
+
+  if(wordSearch.found.length===wordSearch.words.length){
+
+   setTimeout(()=>notify("🎉 All words found!"),300);
+
+  }
+
+ }
+
+ wordSearch.selection=[];
+
+ renderWordSearch();
+
+}
+
+
+/* NOVA VIDEO POKER */
+
+const VP_RANKS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+const VP_SUITS=["♠","♥","♦","♣"];
+
+let videoPoker={hand:[],held:[false,false,false,false,false],deck:[],credits:100,bet:5,stage:"hold"};
+
+function makeVPDeck(){
+
+ const deck=[];
+
+ for(let s=0;s<4;s++)for(let r=0;r<13;r++)deck.push({rank:r,suit:s});
+
+ for(let i=deck.length-1;i>0;i--){
+
+  const j=Math.floor(Math.random()*(i+1));
+
+  [deck[i],deck[j]]=[deck[j],deck[i]];
+
+ }
+
+ return deck;
+
+}
+
+function startVideoPoker(){
+
+ videoPoker.credits=videoPoker.credits||100;
+ videoPoker.deck=makeVPDeck();
+ videoPoker.hand=videoPoker.deck.splice(0,5);
+ videoPoker.held=[false,false,false,false,false];
+ videoPoker.stage="hold";
+
+ renderVideoPoker("Hold the cards you want to keep, then draw.");
+
+}
+
+function resetVideoPokerCredits(){
+
+ videoPoker.credits=100;
+
+ startVideoPoker();
+
+}
+
+function toggleVPHold(i){
+
+ if(videoPoker.stage!=="hold")return;
+
+ videoPoker.held[i]=!videoPoker.held[i];
+
+ renderVideoPoker();
+
+}
+
+function evaluateVPHand(hand){
+
+ const ranks=hand.map(c=>c.rank).slice().sort((a,b)=>a-b);
+ const suits=hand.map(c=>c.suit);
+ const flush=suits.every(s=>s===suits[0]);
+ const counts={};
+
+ ranks.forEach(r=>counts[r]=(counts[r]||0)+1);
+
+ const countVals=Object.values(counts).sort((a,b)=>b-a);
+ const uniqueRanks=[...new Set(ranks)];
+
+ let straight=false;
+
+ if(uniqueRanks.length===5){
+
+  if(uniqueRanks[4]-uniqueRanks[0]===4)straight=true;
+  if(JSON.stringify(uniqueRanks)===JSON.stringify([0,9,10,11,12]))straight=true;
+
+ }
+
+ const hasHighPair=Object.entries(counts).some(([r,cnt])=>cnt===2&&(Number(r)>=10||Number(r)===0));
+
+ if(straight&&flush)return{name:"Straight Flush",payout:50};
+ if(countVals[0]===4)return{name:"Four of a Kind",payout:25};
+ if(countVals[0]===3&&countVals[1]===2)return{name:"Full House",payout:9};
+ if(flush)return{name:"Flush",payout:6};
+ if(straight)return{name:"Straight",payout:4};
+ if(countVals[0]===3)return{name:"Three of a Kind",payout:3};
+ if(countVals[0]===2&&countVals[1]===2)return{name:"Two Pair",payout:2};
+ if(hasHighPair)return{name:"Jacks or Better",payout:1};
+
+ return{name:"No Win",payout:0};
+
+}
+
+function drawVideoPoker(){
+
+ if(videoPoker.stage!=="hold")return;
+
+ for(let i=0;i<5;i++)if(!videoPoker.held[i])videoPoker.hand[i]=videoPoker.deck.pop();
+
+ const result=evaluateVPHand(videoPoker.hand);
+
+ videoPoker.credits-=videoPoker.bet;
+
+ const payout=result.payout*videoPoker.bet;
+
+ videoPoker.credits+=payout;
+ videoPoker.stage="result";
+
+ renderVideoPoker(payout>0?result.name+"! You win "+payout+" credits.":"No win — "+result.name+".");
+
+}
+
+function vpDrawOrDeal(){
+
+ if(videoPoker.stage==="hold")drawVideoPoker();
+ else startVideoPoker();
+
+}
+
+function renderVideoPoker(message){
+
+ const el=document.getElementById("vpHand");
+
+ if(!el)return;
+
+ el.innerHTML=videoPoker.hand.map((c,i)=>
+
+  `<div onclick="toggleVPHold(${i})" style="width:52px;height:74px;border-radius:6px;background:#fff;border:3px solid ${videoPoker.held[i]?"#22c55e":"#94a3b8"};display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;color:${(c.suit===1||c.suit===2)?"#dc2626":"#0f172a"}"><div style="font-size:16px">${VP_RANKS[c.rank]}</div><div style="font-size:18px">${VP_SUITS[c.suit]}</div>${videoPoker.held[i]?'<div style="font-size:9px;color:#22c55e">HELD</div>':""}</div>`
+
+ ).join("");
+
+ const creditsEl=document.getElementById("vpCredits");
+ if(creditsEl)creditsEl.textContent=videoPoker.credits;
+
+ const msgEl=document.getElementById("vpMessage");
+ if(msgEl&&message)msgEl.textContent=message;
+
+ const drawBtn=document.getElementById("vpDrawBtn");
+ if(drawBtn)drawBtn.textContent=videoPoker.stage==="hold"?"Draw":"Deal Next Hand";
+
+}
+
+
+/* NOVA MINI CROSSWORD */
+
+const CROSSWORD_GRID=[
+ ["C","O","D","E"],
+ ["O","#","#","#"],
+ ["D","E","S","K"],
+ ["E","#","#","#"]
+];
+
+let crosswordAnswers={};
+
+function computeCrosswordNumbers(grid){
+
+ const rows=grid.length,cols=grid[0].length;
+ const numbers={};
+
+ let n=1;
+
+ for(let r=0;r<rows;r++){
+
+  for(let c=0;c<cols;c++){
+
+   if(grid[r][c]==="#")continue;
+
+   const startsAcross=(c===0||grid[r][c-1]==="#")&&(c+1<cols&&grid[r][c+1]!=="#");
+   const startsDown=(r===0||grid[r-1][c]==="#")&&(r+1<rows&&grid[r+1][c]!=="#");
+
+   if(startsAcross||startsDown){
+
+    numbers[r+","+c]=n;
+    n++;
+
+   }
+
+  }
+
+ }
+
+ return numbers;
+
+}
+
+function startCrossword(){
+
+ crosswordAnswers={};
+
+ const msg=document.getElementById("crosswordMessage");
+ if(msg)msg.textContent="";
+
+ renderCrossword();
+
+}
+
+function renderCrossword(){
+
+ const grid=CROSSWORD_GRID;
+ const numbers=computeCrosswordNumbers(grid);
+
+ let html=`<div style="display:inline-grid;grid-template-columns:repeat(${grid[0].length},40px);gap:2px;margin:10px auto">`;
+
+ for(let r=0;r<grid.length;r++){
+
+  for(let c=0;c<grid[0].length;c++){
+
+   if(grid[r][c]==="#"){
+
+    html+=`<div style="width:40px;height:40px;background:#0f172a;border-radius:3px"></div>`;
+
+   }else{
+
+    const num=numbers[r+","+c];
+
+    html+=`<div style="position:relative;width:40px;height:40px;background:#fff;border-radius:3px">${num?`<span style="position:absolute;top:1px;left:2px;font-size:8px;color:#475569">${num}</span>`:""}<input maxlength="1" data-r="${r}" data-c="${c}" oninput="crosswordInput(this)" style="width:100%;height:100%;border:0;text-align:center;font-weight:bold;font-size:16px;text-transform:uppercase;background:transparent"></div>`;
+
+   }
+
+  }
+
+ }
+
+ html+="</div>";
+
+ const el=document.getElementById("crosswordGrid");
+ if(el)el.innerHTML=html;
+
+}
+
+function crosswordInput(el){
+
+ const r=el.dataset.r,c=el.dataset.c;
+
+ el.value=el.value.toUpperCase();
+ crosswordAnswers[r+","+c]=el.value;
+
+}
+
+function checkCrossword(){
+
+ const grid=CROSSWORD_GRID;
+
+ let correct=true;
+
+ for(let r=0;r<grid.length;r++){
+
+  for(let c=0;c<grid[0].length;c++){
+
+   if(grid[r][c]==="#")continue;
+   if((crosswordAnswers[r+","+c]||"")!==grid[r][c])correct=false;
+
+  }
+
+ }
+
+ const msg=document.getElementById("crosswordMessage");
+
+ if(msg)msg.textContent=correct?"🎉 Correct — solved!":"Not quite right yet, keep going.";
+
+}
+
+
+/* NOVA PINBALL */
+
+let pinball={canvas:null,ctx:null,active:false,launched:false,ballX:270,ballY:460,vx:0,vy:0,lives:3,score:0,leftUp:false,rightUp:false,bumpers:[]};
+
+function startPinball(){
+
+ pinball.canvas=document.getElementById("pinballCanvas");
+
+ if(!pinball.canvas)return;
+
+ pinball.ctx=pinball.canvas.getContext("2d");
+ pinball.lives=3;
+ pinball.score=0;
+ pinball.leftUp=false;
+ pinball.rightUp=false;
+
+ pinball.bumpers=[
+  {x:80,y:140,r:16,hit:0},
+  {x:220,y:140,r:16,hit:0},
+  {x:150,y:210,r:16,hit:0}
+ ];
+
+ pinballResetBall();
+
+ pinball.active=true;
+
+ const scoreEl=document.getElementById("pinballScore");
+ const livesEl=document.getElementById("pinballLives");
+ const msgEl=document.getElementById("pinballMessage");
+
+ if(scoreEl)scoreEl.textContent="0";
+ if(livesEl)livesEl.textContent="3";
+ if(msgEl)msgEl.textContent="";
+
+ pinballLoop();
+
+}
+
+function pinballResetBall(){
+
+ pinball.ballX=270;
+ pinball.ballY=460;
+ pinball.vx=0;
+ pinball.vy=0;
+ pinball.launched=false;
+
+}
+
+function pinballLaunch(){
+
+ if(pinball.launched||!pinball.active)return;
+
+ pinball.launched=true;
+ pinball.vy=-9;
+ pinball.vx=-1;
+
+}
+
+function pinballKeyDown(e){
+
+ if(e.key==="ArrowLeft"){pinball.leftUp=true;e.preventDefault();}
+ if(e.key==="ArrowRight"){pinball.rightUp=true;e.preventDefault();}
+ if(e.key===" "){pinballLaunch();e.preventDefault();}
+
+}
+
+function pinballKeyUp(e){
+
+ if(e.key==="ArrowLeft")pinball.leftUp=false;
+ if(e.key==="ArrowRight")pinball.rightUp=false;
+
+}
+
+function pinballLoop(){
+
+ if(!pinball.active)return;
+
+ const ctx=pinball.ctx;
+
+ if(pinball.launched){
+
+  pinball.vy+=0.22;
+  pinball.ballX+=pinball.vx;
+  pinball.ballY+=pinball.vy;
+
+  if(pinball.ballX<10){pinball.ballX=10;pinball.vx*=-0.8;}
+  if(pinball.ballX>290){pinball.ballX=290;pinball.vx*=-0.8;}
+  if(pinball.ballY<10){pinball.ballY=10;pinball.vy*=-0.8;}
+
+  pinball.bumpers.forEach(b=>{
+
+   const dx=pinball.ballX-b.x,dy=pinball.ballY-b.y;
+   const dist=Math.sqrt(dx*dx+dy*dy);
+
+   if(dist<b.r+7){
+
+    const angle=Math.atan2(dy,dx);
+
+    pinball.vx=Math.cos(angle)*6;
+    pinball.vy=Math.sin(angle)*6;
+    pinball.score+=10;
+
+    const scoreEl=document.getElementById("pinballScore");
+    if(scoreEl)scoreEl.textContent=pinball.score;
+
+    b.hit=8;
+
+   }
+
+   if(b.hit>0)b.hit--;
+
+  });
+
+  if(pinball.leftUp&&pinball.ballY>420&&pinball.ballY<450&&pinball.ballX>50&&pinball.ballX<150){
+
+   pinball.vy=-8;
+   pinball.vx-=1.5;
+
+  }
+
+  if(pinball.rightUp&&pinball.ballY>420&&pinball.ballY<450&&pinball.ballX>150&&pinball.ballX<250){
+
+   pinball.vy=-8;
+   pinball.vx+=1.5;
+
+  }
+
+  if(pinball.ballY>500){
+
+   pinball.lives--;
+
+   const livesEl=document.getElementById("pinballLives");
+   if(livesEl)livesEl.textContent=pinball.lives;
+
+   if(pinball.lives<=0){
+
+    pinball.active=false;
+
+    submitHighScore("pinball",pinball.score);
+
+    const msgEl=document.getElementById("pinballMessage");
+    if(msgEl)msgEl.textContent="Game over — final score "+pinball.score+".";
+
+    pinballDraw();
+
+    return;
+
+   }else{
+
+    pinballResetBall();
+
+   }
+
+  }
+
+ }
+
+ pinballDraw();
+
+ requestAnimationFrame(pinballLoop);
+
+}
+
+function pinballDraw(){
+
+ const ctx=pinball.ctx;
+
+ if(!ctx)return;
+
+ ctx.fillStyle="#0f172a";
+ ctx.fillRect(0,0,300,500);
+
+ pinball.bumpers.forEach(b=>{
+
+  ctx.fillStyle=b.hit>0?"#facc15":"#f97316";
+  ctx.beginPath();
+  ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+  ctx.fill();
+
+ });
+
+ ctx.fillStyle=pinball.leftUp?"#22c55e":"#3b82f6";
+ ctx.fillRect(60,440,80,10);
+
+ ctx.fillStyle=pinball.rightUp?"#22c55e":"#3b82f6";
+ ctx.fillRect(160,440,80,10);
+
+ ctx.fillStyle="#e2e8f0";
+ ctx.beginPath();
+ ctx.arc(pinball.ballX,pinball.ballY,7,0,Math.PI*2);
+ ctx.fill();
+
+ if(!pinball.launched&&pinball.active){
+
+  ctx.fillStyle="#94a3b8";
+  ctx.font="12px sans-serif";
+  ctx.fillText("Press Space or Launch to start",38,250);
+
  }
 
 }
@@ -13035,30 +14073,31 @@ function vscDeleteFile(name,e){
 
 }
 
+function vscRunInNovaBrowser(file){
+
+ const url="nova-code://"+file.name;
+ const tab={id:makeFSId(),history:[url],historyIndex:0,title:file.name,srcdocMap:{}};
+
+ tab.srcdocMap[url]=file.content;
+
+ browserTabs.push(tab);
+ activeBrowserTabId=tab.id;
+
+ openApp("browser");
+ renderBrowserTabs();
+ navigateBrowser(url,false);
+
+}
+
 function vscShowPanel(mode){
 
- vscPanelMode=mode;
+ vscPanelMode="output";
 
  const output=document.getElementById("vscOutput");
- const preview=document.getElementById("vscPreview");
  const tabOut=document.getElementById("vscTabOutput");
- const tabPrev=document.getElementById("vscTabPreview");
 
- if(mode==="output"){
-
-  output.style.display="block";
-  preview.style.display="none";
-  tabOut.classList.add("active");
-  tabPrev.classList.remove("active");
-
- }else{
-
-  output.style.display="none";
-  preview.style.display="block";
-  tabPrev.classList.add("active");
-  tabOut.classList.remove("active");
-
- }
+ if(output)output.style.display="block";
+ if(tabOut)tabOut.classList.add("active");
 
 }
 
@@ -13119,13 +14158,11 @@ function vscRun(){
 
  if(file.name.endsWith(".html")){
 
-  vscShowPanel("preview");
+  vscShowPanel("output");
 
-  const preview=document.getElementById("vscPreview");
+  vscRunInNovaBrowser(file);
 
-  preview.srcdoc=file.content;
-
-  vscPrint("▶ Rendered "+file.name+" in the Preview tab.","#4ec9b0");
+  vscPrint("▶ Opened "+file.name+" in Nova Browser.","#4ec9b0");
 
   return;
 
@@ -17717,12 +18754,32 @@ function navigateBrowser(raw,addHistory){
 
  }
 
- document.getElementById("browserInput").value=raw;
+ const isLocalRun=tab.srcdocMap&&Object.prototype.hasOwnProperty.call(tab.srcdocMap,raw);
 
- tab.title=raw.length>22?raw.slice(0,22)+"…":raw;
+ document.getElementById("browserInput").value=isLocalRun?tab.title:raw;
+
+ if(!isLocalRun)tab.title=raw.length>22?raw.slice(0,22)+"…":raw;
 
  renderBrowserTabs();
  updateBrowserNavButtons();
+
+ if(isLocalRun){
+
+  p.style.padding="0";
+  p.innerHTML=
+   `<iframe id="browserRunFrame" style="width:100%;height:480px;border:0;border-radius:8px 8px 0 0;background:white" `+
+   `sandbox="allow-scripts allow-modals allow-forms allow-popups"></iframe>`+
+   `<div style="padding:10px;font-size:12px;color:#475569;text-align:center;background:#f1f5f9;border-radius:0 0 8px 8px">`+
+   `Running <b>${escapeHTML(tab.title||"file")}</b> from Nova Code.`+
+   `</div>`;
+
+  const frame=document.getElementById("browserRunFrame");
+
+  if(frame)frame.srcdoc=tab.srcdocMap[raw];
+
+  return;
+
+ }
 
  if(v==="nova://home"){
 
